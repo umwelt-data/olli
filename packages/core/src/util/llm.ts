@@ -16,7 +16,13 @@ const openai = new OpenAI({
 });
 
 type LLMResponse = {
-  groups: OlliPredicateNode[];
+  groups: TextualScaffold[];
+};
+
+type TextualScaffold = {
+  name: string;
+  explanation: string;
+  predicate: LogicalComposition<FieldPredicate>;
 };
 
 export async function getDataHighlights(data: OlliDataset, fields: OlliFieldDef[]): Promise<OlliPredicateNode[]> {

@@ -56,6 +56,26 @@
       }
     ]
   },
+
+  "scatterplot-cars": {
+    "title": "Scatterplot",
+    "img": "/img/scatterplot.JPG",
+    "url": "/gallery/scatterplot-cars.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/scatterplot-cars-vl.html"
+      },
+      {
+        "name": "Vega",
+        "code": "/examples/scatterplot-v.html"
+      },
+      {
+        "name": "ObservablePlot",
+        "code": "/examples/scatterplot-op.html"
+      }
+    ]
+  },
   "multi_series_line_chart": {
     "title": "Multi-Series Line Chart",
     "img": "/img/multiSeriesLineChart.JPG",

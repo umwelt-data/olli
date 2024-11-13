@@ -107,7 +107,7 @@ export function nodeToDescription(
         return `${guideType} titled ${label}`;
       case 'filteredData':
         if ('name' in node && 'explanation' in node) {
-          return `${node.name}. ${node.explanation}${node.explanation.endsWith('.') ? '' : '.'}`;
+          return `<strong>${node.name}.</strong> ${node.explanation}${node.explanation.endsWith('.') ? '' : '.'}`;
         }
         return '';
       case 'annotations':

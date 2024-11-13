@@ -1,0 +1,28 @@
+<script type="module">
+let spec = {
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {
+    "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/cars.json"
+  },
+  "mark": "point",
+  "encoding": {
+    "x": {"field": "Horsepower", "type": "quantitative"},
+    "y": {"field": "Miles_per_Gallon", "type": "quantitative"},
+    "color": {"field": "Origin"}
+  }
+}
+
+let vegaSpec = vegaLite.compile(spec).spec
+const runtime = vega.parse(vegaSpec);
+const vegaRender = document.getElementById('Visualization-Vega-Lite');
+let view = new vega.View(runtime)
+  .logLevel(vega.Warn)
+  .initialize(vegaRender)
+  .renderer('svg')
+  .hover()
+  .run();
+
+OlliAdapters.VegaLiteAdapter(spec).then(olliVisSpec => {
+  document.getElementById("AccessibilityTree-Vega-Lite").append(olli(olliVisSpec))
+})
+</script>
