@@ -107,7 +107,7 @@ export function nodeToDescription(
         return `${guideType} titled ${label}`;
       case 'filteredData':
         if ('name' in node && 'reasoning' in node) {
-          return `${node.name}. ${node.reasoning}.`;
+          return `<strong>${node.name}.</strong> ${node.reasoning}.`;
         }
         return '';
       default:

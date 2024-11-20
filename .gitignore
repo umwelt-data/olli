@@ -10,3 +10,4 @@ docs/.ruby-version
 docs/olli/*-dev.js
 build-testing/
 dist/
+secrets/

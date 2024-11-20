@@ -37,11 +37,11 @@ export function olli(olliSpec: OlliSpec, config?: OlliConfigOptions): HTMLElemen
 
 function addDataHighlights(olliSpec: OlliSpec): OlliSpec {
   ((olliSpec as UnitOlliSpec).structure as OlliNode[]).unshift({
-    annotations: highlights.bins.map((bin) => {
+    annotations: highlights.map((bin) => {
       return {
-        predicate: bin.pred as LogicalComposition<FieldPredicate>,
-        name: bin.bin_name,
-        reasoning: bin.reasoning,
+        predicate: bin.predicate as LogicalComposition<FieldPredicate>,
+        name: bin.name,
+        reasoning: bin.explanation,
       };
     }),
   });
@@ -50,67 +50,90 @@ function addDataHighlights(olliSpec: OlliSpec): OlliSpec {
 
 // function addSemanticBins(olliSpec: OlliSpec): OlliSpec {}
 
-const highlights = {
-  bins: [
-    {
-      bin_name: 'Efficient Foragers',
-      reasoning:
-        'This group combines mid-sized flipper lengths with a healthy body mass, indicating penguins that have adapted well to a range of environments, being able to swiftly navigate open waters while also capable of agility, a combination suited for efficient foraging',
-      pred: {
-        and: [
-          {
-            field: 'Flipper Length (mm)',
-            range: [191, 210],
-          },
-          {
-            field: 'Body Mass (g)',
-            range: [3301, 4300],
-          },
-        ],
-      },
+const highlights = [
+  {
+    name: 'High Horsepower American Cars',
+    explanation:
+      'This group includes cars with high horsepower, indicating performance and possibly sportiness, which are often associated with American automotive culture.',
+    predicate: {
+      and: [
+        {
+          field: 'Horsepower',
+          gt: 200,
+        },
+        {
+          field: 'Origin',
+          equal: 'USA',
+        },
+      ],
     },
-    {
-      bin_name: 'Agile Hunters',
-      reasoning:
-        'Penguins with shorter flipper lengths and robust body mass likely excel in agility and strength, ideal for dense environments and prey-rich waters, both attributes suggesting a successful adaptation for hunting in such locations',
-      pred: {
-        and: [
-          {
-            field: 'Flipper Length (mm)',
-            range: [170, 190],
-          },
-          {
-            field: 'Body Mass (g)',
-            range: [4301, 6400],
-          },
-        ],
-      },
+  },
+  {
+    name: 'Fuel Efficient Japanese Cars',
+    explanation:
+      'This group represents cars from Japan that are known for their fuel efficiency, reflecting Japanese automotive engineering and consumer trends towards sustainable driving.',
+    predicate: {
+      and: [
+        {
+          field: 'Miles_per_Gallon',
+          gte: 25,
+        },
+        {
+          field: 'Origin',
+          equal: 'Japan',
+        },
+      ],
     },
-    {
-      bin_name: 'Antarctic Marathoners',
-      reasoning:
-        'Long flipper lengths paired with a robust or athletic body mass may indicate penguins that are specialized for endurance swimming in Antarctic conditions, capable of long-distance hunting in open waters',
-      pred: {
-        and: [
-          {
-            field: 'Flipper Length (mm)',
-            range: [211, 235],
-          },
-          {
-            field: 'Body Mass (g)',
-            range: [4301, 6400],
-          },
-        ],
-      },
+  },
+  {
+    name: 'Low Horsepower European Cars',
+    explanation:
+      'This group highlights cars from Europe with lower horsepower, often focusing on economy, practicality, and urban commuting.',
+    predicate: {
+      and: [
+        {
+          field: 'Horsepower',
+          lte: 70,
+        },
+        {
+          field: 'Origin',
+          equal: 'Europe',
+        },
+      ],
     },
-    {
-      bin_name: 'Generalist Survivors',
-      reasoning:
-        'Encompassing all ranges of flipper and body mass but exclusive of athletic body mass, this group may include a wide variety of species showing high adaptability without specializing towards any extreme of body morphology, representing a broad survival strategy',
-      pred: {
-        field: 'Body Mass (g)',
-        range: [2600, 5000],
-      },
+  },
+  {
+    name: 'Performance versus Fuel Economy',
+    explanation:
+      'This group contrasts cars focusing on high performance (higher horsepower) against those prioritized for fuel economy (higher MPG), indicative of consumer choices based on economic conditions and environmental awareness.',
+    predicate: {
+      and: [
+        {
+          field: 'Horsepower',
+          gt: 150,
+        },
+        {
+          field: 'Miles_per_Gallon',
+          lte: 20,
+        },
+      ],
     },
-  ],
-};
+  },
+  {
+    name: 'Trends in American Car Efficiency',
+    explanation:
+      'This group focuses on American cars that have a wide range of fuel efficiency, reflecting changing trends in designs toward more eco-friendly options without compromising performance.',
+    predicate: {
+      and: [
+        {
+          field: 'Origin',
+          equal: 'USA',
+        },
+        {
+          field: 'Miles_per_Gallon',
+          range: [15, 30],
+        },
+      ],
+    },
+  },
+];
