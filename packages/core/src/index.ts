@@ -1,5 +1,5 @@
 import { OlliSpec, UnitOlliSpec } from './Types';
-import { ElaboratedOlliNode, OlliNode } from './Structure/Types';
+import { ElaboratedOlliNode, OlliGroupNode, OlliNode } from './Structure/Types';
 import { OlliRuntime, RuntimeCallbacks } from './Runtime/OlliRuntime';
 import { updateGlobalStateOnInitialRender } from './util/globalState';
 import { elaborateSpec } from './util/elaborate';
@@ -36,7 +36,9 @@ export function olli(olliSpec: OlliSpec, config?: OlliConfigOptions): HTMLElemen
 }
 
 function addDataHighlights(olliSpec: OlliSpec): OlliSpec {
-  ((olliSpec as UnitOlliSpec).structure as OlliNode[]).unshift({
+  const structure = (olliSpec as UnitOlliSpec).structure;
+  const list = Array.isArray(structure) ? structure : [structure];
+  list.unshift({
     annotations: highlights.map((bin) => {
       return {
         predicate: bin.predicate as LogicalComposition<FieldPredicate>,
@@ -45,6 +47,7 @@ function addDataHighlights(olliSpec: OlliSpec): OlliSpec {
       };
     }),
   });
+  (olliSpec as UnitOlliSpec).structure = list;
   return olliSpec;
 }
 
@@ -52,86 +55,75 @@ function addDataHighlights(olliSpec: OlliSpec): OlliSpec {
 
 const highlights = [
   {
-    name: 'High Horsepower American Cars',
+    name: 'High Yield Varieties in 1931',
     explanation:
-      'This group includes cars with high horsepower, indicating performance and possibly sportiness, which are often associated with American automotive culture.',
+      'This group identifies the highest yielding crop varieties in 1931, a crucial year for agricultural research and productivity advancements.',
     predicate: {
       and: [
         {
-          field: 'Horsepower',
-          gt: 200,
+          field: 'year',
+          equal: 1931,
         },
         {
-          field: 'Origin',
-          equal: 'USA',
+          field: 'yield',
+          gt: 55,
         },
       ],
     },
   },
   {
-    name: 'Fuel Efficient Japanese Cars',
+    name: 'Declining Yields Over Years',
     explanation:
-      'This group represents cars from Japan that are known for their fuel efficiency, reflecting Japanese automotive engineering and consumer trends towards sustainable driving.',
+      'This group examines varieties that showed a decline in yield from 1931 to 1932, possibly indicating varietal loss or changing soil health/farming practices.',
     predicate: {
-      and: [
+      field: 'variety',
+      oneOf: [
+        'Manchuria',
+        'Glabron',
+        'Velvet',
+        'Trebi',
+        'No. 457',
+        'No. 462',
+        'Peatland',
+        'No. 475',
+        'Wisconsin No. 38',
+      ],
+    },
+  },
+  {
+    name: 'Top Performing Sites',
+    explanation:
+      'This group identifies sites that consistently recorded high yields across multiple varieties in 1931, emphasizing their role in agricultural research.',
+    predicate: {
+      or: [
         {
-          field: 'Miles_per_Gallon',
-          gte: 25,
+          field: 'site',
+          oneOf: ['Waseca', 'University Farm', 'Crookston'],
         },
         {
-          field: 'Origin',
-          equal: 'Japan',
+          field: 'yield',
+          gt: 40,
         },
       ],
     },
   },
   {
-    name: 'Low Horsepower European Cars',
+    name: 'Emerging Varieties in 1932',
     explanation:
-      'This group highlights cars from Europe with lower horsepower, often focusing on economy, practicality, and urban commuting.',
+      'This group focuses on new or lesser-known varieties that achieved noteworthy yields in 1932 compared to previous year, reflecting innovation in crop breeding.',
     predicate: {
       and: [
         {
-          field: 'Horsepower',
-          lte: 70,
+          field: 'year',
+          equal: 1932,
         },
         {
-          field: 'Origin',
-          equal: 'Europe',
-        },
-      ],
-    },
-  },
-  {
-    name: 'Performance versus Fuel Economy',
-    explanation:
-      'This group contrasts cars focusing on high performance (higher horsepower) against those prioritized for fuel economy (higher MPG), indicative of consumer choices based on economic conditions and environmental awareness.',
-    predicate: {
-      and: [
-        {
-          field: 'Horsepower',
-          gt: 150,
+          field: 'yield',
+          gte: 40,
         },
         {
-          field: 'Miles_per_Gallon',
-          lte: 20,
-        },
-      ],
-    },
-  },
-  {
-    name: 'Trends in American Car Efficiency',
-    explanation:
-      'This group focuses on American cars that have a wide range of fuel efficiency, reflecting changing trends in designs toward more eco-friendly options without compromising performance.',
-    predicate: {
-      and: [
-        {
-          field: 'Origin',
-          equal: 'USA',
-        },
-        {
-          field: 'Miles_per_Gallon',
-          range: [15, 30],
+          field: 'variety',
+          oneOf: ['Trebi', 'No. 462', 'Wisconsin No. 38'],
         },
       ],
     },
