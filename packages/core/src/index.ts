@@ -55,75 +55,106 @@ function addDataHighlights(olliSpec: OlliSpec): OlliSpec {
 
 const highlights = [
   {
-    name: 'High Yield Varieties in 1931',
+    name: 'MSFT Price Decline in Early 2000s',
     explanation:
-      'This group identifies the highest yielding crop varieties in 1931, a crucial year for agricultural research and productivity advancements.',
+      "This group includes data points showing a significant decrease in Microsoft's stock price during the early 2000s, especially from 2000 to 2001. This period corresponds with the dot-com bubble burst and economic slowdown.",
     predicate: {
       and: [
         {
-          field: 'year',
-          equal: 1931,
+          field: 'symbol',
+          equal: 'MSFT',
         },
         {
-          field: 'yield',
-          gt: 55,
+          field: 'price',
+          lte: 30,
+        },
+        {
+          field: 'date',
+          range: [946684800000, 1093756800000],
         },
       ],
     },
   },
   {
-    name: 'Declining Yields Over Years',
+    name: 'AMZN Growth Post-2008 Financial Crisis',
     explanation:
-      'This group examines varieties that showed a decline in yield from 1931 to 1932, possibly indicating varietal loss or changing soil health/farming practices.',
-    predicate: {
-      field: 'variety',
-      oneOf: [
-        'Manchuria',
-        'Glabron',
-        'Velvet',
-        'Trebi',
-        'No. 457',
-        'No. 462',
-        'Peatland',
-        'No. 475',
-        'Wisconsin No. 38',
-      ],
-    },
-  },
-  {
-    name: 'Top Performing Sites',
-    explanation:
-      'This group identifies sites that consistently recorded high yields across multiple varieties in 1931, emphasizing their role in agricultural research.',
-    predicate: {
-      or: [
-        {
-          field: 'site',
-          oneOf: ['Waseca', 'University Farm', 'Crookston'],
-        },
-        {
-          field: 'yield',
-          gt: 40,
-        },
-      ],
-    },
-  },
-  {
-    name: 'Emerging Varieties in 1932',
-    explanation:
-      'This group focuses on new or lesser-known varieties that achieved noteworthy yields in 1932 compared to previous year, reflecting innovation in crop breeding.',
+      "This group captures Amazon's stock price trajectory showing consistent growth after the 2008 financial crisis, correlating with the rise of e-commerce during and after that economic downturn.",
     predicate: {
       and: [
         {
-          field: 'year',
-          equal: 1932,
+          field: 'symbol',
+          equal: 'AMZN',
         },
         {
-          field: 'yield',
-          gte: 40,
+          field: 'price',
+          gte: 100,
         },
         {
-          field: 'variety',
-          oneOf: ['Trebi', 'No. 462', 'Wisconsin No. 38'],
+          field: 'date',
+          gte: 1220227200000,
+        },
+      ],
+    },
+  },
+  {
+    name: 'IBM Stock Resilience Post-2000 Dot-com Bubble',
+    explanation:
+      'This group involves price data for IBM, reflecting relative stability in its stock price amidst the volatility of the early 2000s, aligned with its transition towards services and cloud computing.',
+    predicate: {
+      and: [
+        {
+          field: 'symbol',
+          equal: 'IBM',
+        },
+        {
+          field: 'price',
+          gte: 80,
+        },
+        {
+          field: 'date',
+          range: [946684800000, 1104537600000],
+        },
+      ],
+    },
+  },
+  {
+    name: 'AAPL Price Surge During the Tech Boom',
+    explanation:
+      'This group focuses on Apple’s stock price during the late 2000s and early 2010s, highlighting its rise in value matched with the smartphone revolution and innovation of products like the iPhone.',
+    predicate: {
+      and: [
+        {
+          field: 'symbol',
+          equal: 'AAPL',
+        },
+        {
+          field: 'price',
+          gte: 150,
+        },
+        {
+          field: 'date',
+          range: [1220227200000, 1356998400000],
+        },
+      ],
+    },
+  },
+  {
+    name: 'GOOG Price Volatility in 2008-2009',
+    explanation:
+      "This group tracks Google's stock price fluctuations during the 2008 financial crisis, showcasing the company's ability to recover quickly compared to other tech stocks, indicating its strong market position.",
+    predicate: {
+      and: [
+        {
+          field: 'symbol',
+          equal: 'GOOG',
+        },
+        {
+          field: 'price',
+          range: [300, 600],
+        },
+        {
+          field: 'date',
+          range: [1199145600000, 1262304000000],
         },
       ],
     },
