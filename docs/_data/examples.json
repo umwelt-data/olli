@@ -37,6 +37,17 @@
       }
     ]
   },
+  "line_chart_wheat": {
+    "title": "Line Chart",
+    "img": "/img/lineChart.JPG",
+    "url": "/gallery/lineChart-wheat.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/lineChart-wheat-vl.html"
+      },
+    ]
+  },
   "scatterplot": {
     "title": "Scatterplot",
     "img": "/img/scatterplot.JPG",
@@ -74,6 +85,18 @@
         "name": "ObservablePlot",
         "code": "/examples/scatterplot-op.html"
       }
+    ]
+  },
+
+  "scatterplot-gapminder": {
+    "title": "Scatterplot",
+    "img": "/img/scatterplot.JPG",
+    "url": "/gallery/scatterplot-gapminder.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/scatterplot-gapminder-vl.html"
+      },
     ]
   },
   "multi_series_line_chart": {
@@ -244,6 +267,16 @@
       {
         "name": "Vega-Lite",
         "code": "/examples/stripPlot-vl.html"
+      }
+    ]
+  },
+  "strip_plot_temp": {
+    "title": "Strip Plot",
+    "url": "/gallery/stripPlot-globaltemp.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/stripPlot-globaltemp-vl.html"
       }
     ]
   },

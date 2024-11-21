@@ -16,10 +16,10 @@ const openai = new OpenAI({
 });
 
 type LLMResponse = {
-  groups: TextualScaffold[];
+  groups: SemanticScaffold[];
 };
 
-type TextualScaffold = {
+type SemanticScaffold = {
   name: string;
   explanation: string;
   predicate: LogicalComposition<FieldPredicate>;
@@ -149,17 +149,27 @@ Please return the groups in the format:
   "predicate": LogicalComposition<FieldPredicate>
 }
 Where "predicate" is a Vega-Lite predicate that selects the data points in the group.
+A predicate is of the format:
+{ "field": [fieldName], [operator]: [value] }.
+
+The valid operators are:
+"gt", "gte", "lt", "lte", "equal", "oneOf", "range".
+
 Examples of valid field predicates include:
 { "field": "age", "gt": 18 }
 { "field": "miles", "lte": 27 }
 { "field": "Species", "equal": "Gentoo" }
-{ "field": "Horsepower", "range": [100, 150] }
+{ "field": "Horsepower", "range": [100, 150], "inclusive": true }
+{ "field": "category", "oneOf": ["a", "b", "c"] }
+
+A logical composition predicate is a JSON object that combines multiple field predicates with "and" or "or" operators.
 
 Here is an example of a logical composition predicate:
 {
   "and": [
-    { "field": "age", "gt": 18 },
-    { "field": "weight", "lte": 150 }
+    { "field": "dob", "range": [1995, 2005], "inclusive": true },
+    { "field": "weight", "lt": 150 },
+    { "field": "height", "gte": 100 }
   ]
 }`;
 

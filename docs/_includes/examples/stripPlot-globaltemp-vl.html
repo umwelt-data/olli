@@ -1,0 +1,25 @@
+<script type="module">
+let spec = {
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": { "url": "https://raw.githubusercontent.com/vega/vega-datasets/refs/heads/main/data/global-temp.csv" },
+  "mark": "tick",
+  "encoding": {
+    "x": {"field": "year", "type": "quantitative"},
+    "color": {"field": "temp", "type": "quantitative"}
+  }
+}
+
+let vegaSpec = vegaLite.compile(spec).spec
+const runtime = vega.parse(vegaSpec);
+const vegaRender = document.getElementById('Visualization-Vega-Lite');
+let view = new vega.View(runtime)
+  .logLevel(vega.Warn)
+  .initialize(vegaRender)
+  .renderer('svg')
+  .hover()
+  .run();
+
+OlliAdapters.VegaLiteAdapter(spec).then(olliVisSpec => {
+  document.getElementById("AccessibilityTree-Vega-Lite").append(olli(olliVisSpec))
+})
+</script>

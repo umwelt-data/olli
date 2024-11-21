@@ -1,0 +1,29 @@
+<script type="module">
+let spec = {
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {
+    "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/gapminder.json"
+  },
+  "mark": "point",
+  "encoding": {
+    "x": {"field": "fertility", "type": "quantitative"},
+    "y": {"field": "life_expect", "type": "quantitative"},
+    "color": {"field": "country"},
+    "facet": {"field": "year", "type": "ordinal"},
+  }
+}
+
+let vegaSpec = vegaLite.compile(spec).spec
+const runtime = vega.parse(vegaSpec);
+const vegaRender = document.getElementById('Visualization-Vega-Lite');
+let view = new vega.View(runtime)
+  .logLevel(vega.Warn)
+  .initialize(vegaRender)
+  .renderer('svg')
+  .hover()
+  .run();
+
+OlliAdapters.VegaLiteAdapter(spec).then(olliVisSpec => {
+  document.getElementById("AccessibilityTree-Vega-Lite").append(olli(olliVisSpec))
+})
+</script>
