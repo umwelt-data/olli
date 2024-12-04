@@ -63,9 +63,6 @@ export async function getSemanticBins(
   field: string
 ): Promise<OlliPredicateNode[]> {
   const fieldDef = getFieldDef(field, fields);
-  if (fieldDef.type === 'nominal') {
-    return [];
-  }
 
   const dataWithActiveFields = data.map((row) => {
     const newRow = {};
@@ -83,7 +80,7 @@ export async function getSemanticBins(
     return JSON.parse(cache);
   } else {
     const domain = getDomain(fieldDef, data);
-    const prompt = semanticBinPrompt(csvData, field, domain);
+    const prompt = semanticBinPrompt(csvData, fieldDef, domain);
     console.log(prompt);
     const llmResponse = await queryLLM(prompt);
     console.log('llmResponse', llmResponse.groups);
@@ -198,21 +195,24 @@ const dataHighlightPrompt = (csvData: string): ChatCompletionMessageParam[] => {
   ];
 };
 
-const semanticBinPrompt = (csvData: string, field: string, domain: any[]): ChatCompletionMessageParam[] => {
-  return [
-    {
-      role: 'system',
-      content: `You are an expert data analyst. When I provide a dataset and a field name, return JSON that bins the field in a semantically meaningful way.`,
-    },
-    {
-      role: 'user',
-      content: `Here is the dataset we are analyzing: ${csvData}`,
-    },
-    {
-      role: 'user',
-      content: `Consider all the fields in the data.
+const semanticBinPrompt = (csvData: string, fieldDef: OlliFieldDef, domain: any[]): ChatCompletionMessageParam[] => {
+  if (fieldDef.type === 'quantitative' || fieldDef.type === 'temporal') {
+    return [
+      {
+        role: 'system',
+        content: `You are an expert data analyst. When I provide a dataset and a field name, return JSON that bins the field in a semantically meaningful way.`,
+      },
+      {
+        role: 'user',
+        content: `Here is the dataset we are analyzing: ${csvData}`,
+      },
+      {
+        role: 'user',
+        content: `Consider all the fields in the data.
 
-      You will use knowledge of external information relevant to the data, social and political context, and history or current events to identify a semantically meaningful binning of the ${field} field.
+      You will use knowledge of external information relevant to the data, social and political context, and history or current events to identify a semantically meaningful binning of the ${
+        fieldDef.field
+      } field.
 
       A binning is a way to group data points into categories. For example, you might bin ages into "child", "adult", and "senior".
 
@@ -227,7 +227,7 @@ const semanticBinPrompt = (csvData: string, field: string, domain: any[]): ChatC
         "name": string,
         "explanation": string,
         "predicate": {
-          field: "${field}",
+          field: "${fieldDef.field}",
           range: [lower, upper],
           inclusive: true
         }
@@ -238,6 +238,48 @@ const semanticBinPrompt = (csvData: string, field: string, domain: any[]): ChatC
       Prioritize bins that require contextual knowledge outside of the dataset to understand.
 
       Convert all dates to utc time numeric format. Respond in JSON and return nothing but valid JSON.`,
-    },
-  ];
+      },
+    ];
+  } else {
+    return [
+      {
+        role: 'system',
+        content: `You are an expert data analyst. When I provide a dataset and a field name, return JSON that bins the field in a semantically meaningful way.`,
+      },
+      {
+        role: 'user',
+        content: `Here is the dataset we are analyzing: ${csvData}`,
+      },
+      {
+        role: 'user',
+        content: `Consider all the fields in the data.
+
+      You will use knowledge of external information relevant to the data, social and political context, and history or current events to identify a semantically meaningful binning of the ${
+        fieldDef.field
+      } field.
+
+      A binning is a way to group data values into categories. For example, you might bin colors into "primary" and "composite"
+
+      Bins must include every value in the field (i.e. ${domain.toString()}) and be mutually exclusive.
+
+      Please return the bin in the format:
+      {
+        "groups": [...]
+      }
+        where each bin is in the format:
+      {
+        "name": string,
+        "explanation": string,
+        "predicate": {
+          field: "${fieldDef.field}",
+          oneOf: [categoryA, categoryB, ...]
+        }
+      }
+
+      Prioritize bins that require contextual knowledge outside of the dataset to understand.
+
+      Convert all dates to utc time numeric format. Respond in JSON and return nothing but valid JSON.`,
+      },
+    ];
+  }
 };
