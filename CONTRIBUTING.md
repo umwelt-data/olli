@@ -1,6 +1,6 @@
 # Contributing to Olli
 
-If you find a bug in the code or a mistake on the [documentation site](https://mitvis.github.io/olli/), or if you would like to request a new feature, please [file an issue on GitHub](https://github.com/mitvis/olli/issues), or even better, submit a pull request.
+If you find a bug in the code or a mistake on the [documentation site](https://umwelt-data.github.io/olli/), or if you would like to request a new feature, please [file an issue on GitHub](https://github.com/umwelt-data/olli/issues), or even better, submit a pull request.
 
 For small fixes, please feel free to submit a pull request directly: don't worry about creating an issue first. For major changes, please discuss with us first. To ensure the discussion is visible and open for comments, please submit a new issue that we can tag with the discussion label.
 
@@ -12,7 +12,7 @@ The Olli website and documentation is in the `docs/` folder of this repository. 
 
 # Development Setup
 
-To setup a development environment follow the [Development Instructions in README.md](https://github.com/mitvis/olli/blob/main/README.md#development-instructions).
+To setup a development environment follow the [Development Instructions in README.md](https://github.com/umwelt-data/olli/blob/main/README.md#development-instructions).
 
 For an overview of all packages, see the [`/packages` folder](/packages).
 
@@ -20,9 +20,9 @@ For an overview of all packages, see the [`/packages` folder](/packages).
 
 Olli's adapter pattern allows developers to extend Olli support to additional visualization toolkits while re-using our accessible renderer.
 
-Please refer to `VegaLiteAdapter` in [`adapters/src/VegaLiteAdapter.ts`](https://github.com/mitvis/olli/blob/main/packages/adapters/src/VegaLiteAdapter.ts) for a reference implementation.
+Please refer to `VegaLiteAdapter` in [`adapters/src/VegaLiteAdapter.ts`](https://github.com/umwelt-data/olli/blob/main/packages/adapters/src/VegaLiteAdapter.ts) for a reference implementation.
 
-The `VisAdapter` type is defined in [`core/src/Types.ts`](https://github.com/mitvis/olli/blob/main/packages/core/src/Types.ts).
+The `VisAdapter` type is defined in [`core/src/Types.ts`](https://github.com/umwelt-data/olli/blob/main/packages/core/src/Types.ts).
 
 ```typescript
 export type VisAdapter<T> = (spec: T) => Promise<OlliVisSpec>;
@@ -40,7 +40,7 @@ export const VegaAdapter: VisAdapter<Spec> = async (vSpec: Spec): Promise<OlliVi
 }
 ```
 
-The purpose of the adapter function is to provide information to Olli as an `OlliVisSpec`, which is also defined in [`core/src/Types.ts`](https://github.com/mitvis/olli/blob/main/packages/core/src/Types.ts).
+The purpose of the adapter function is to provide information to Olli as an `OlliVisSpec`, which is also defined in [`core/src/Types.ts`](https://github.com/umwelt-data/olli/blob/main/packages/core/src/Types.ts).
 
 ```typescript
  /**
@@ -76,7 +76,7 @@ The purpose of the adapter function is to provide information to Olli as an `Oll
  
  The `OlliVisSpec` includes the dataset, and can be either a `Chart` (for a single-view visualization) or a `FacetedChart` (for a faceted chart). (Support for other kinds of multi-view charts is forthcoming.)
  
-For each `Chart`, the adapter must provide definitions for `axes` and `legends`. The definition for the `Axis` and `Legend` types are also found in [`core/src/Types.ts`](https://github.com/mitvis/olli/blob/main/packages/core/src/Types.ts).
+For each `Chart`, the adapter must provide definitions for `axes` and `legends`. The definition for the `Axis` and `Legend` types are also found in [`core/src/Types.ts`](https://github.com/umwelt-data/olli/blob/main/packages/core/src/Types.ts).
 
 
 ```typescript

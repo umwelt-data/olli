@@ -19,14 +19,12 @@
 # in the templates via {{ site.myvariable }}.
 
 title: Olli
-email: mattmblanco@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
   A JavaScript library that converts visualizations into a keyboard-navigable structure accessible to screen readers to make visualizations more accessible for blind and low vision users.
-domain: "mitvis.github.io"
+domain: "umwelt-data.github.io"
 baseurl: "/olli" # the subpath of your site, e.g. /blog
-url: "https://mitvis.github.io" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: mitvis
-github_username:  mitvis
+url: "https://umwelt-data.github.io" # the base hostname & protocol for your site, e.g. http://example.com
+github_username:  umwelt-data
 
 # Build settings
 # theme: minima

@@ -4,11 +4,11 @@ Olli is an open-source library for converting data visualizations into accessibl
 
 ## Using Olli
 
-For a [user tutorial](https://mitvis.github.io/olli/tutorial), [quickstart guide](https://mitvis.github.io/olli/quickstart), and [examples](https://mitvis.github.io/olli/examples), see the [Olli website](https://mitvis.github.io/olli/).
+For a [user tutorial](https://umwelt-data.github.io/olli/tutorial), [quickstart guide](https://umwelt-data.github.io/olli/quickstart), and [examples](https://umwelt-data.github.io/olli/examples), see the [Olli website](https://umwelt-data.github.io/olli/).
 
 ## Development instructions
 
-- Fork and clone the `mitvis/olli` repository.
+- Fork and clone the `umwelt-data/olli` repository.
 - In the `olli` directory, run `npm install` to install dependencies for all packages. We use [npm workspaces](https://docs.npmjs.com/cli/v8/using-npm/workspaces) to manage the two packages in this repo.
 - In the `core` or `adapters` package directories, run `npm run start` to start the webpack bundler in development mode with file watching.
     - Note: `olli` must be built before `olli-adapters` the first time you run the build scripts.
@@ -41,10 +41,10 @@ For a [user tutorial](https://mitvis.github.io/olli/tutorial), [quickstart guide
 
 ## Reporting an Issue
 
-If you encounter issues when using Olli, please [file an issue on GitHub](https://github.com/mitvis/olli/issues). Please include enough information to reproduce the issue. For example, if the issue is a bug with a chart that Olli should support with one of its adapters, please include the spec and dataset for the chart. For accessibility issues, please share what browser and screen reader you are using.
+If you encounter issues when using Olli, please [file an issue on GitHub](https://github.com/umwelt-data/olli/issues). Please include enough information to reproduce the issue. For example, if the issue is a bug with a chart that Olli should support with one of its adapters, please include the spec and dataset for the chart. For accessibility issues, please share what browser and screen reader you are using.
 
 ## Contributions, Development, and Support
 
-Interested in contributing to Olli? Please see our [contribution and development guidelines](https://github.com/mitvis/olli/blob/main/CONTRIBUTING.md), and our [code of conduct](https://vega.github.io/vega/about/code-of-conduct/).
+Interested in contributing to Olli? Please see our [contribution and development guidelines](https://github.com/umwelt-data/olli/blob/main/CONTRIBUTING.md), and our [code of conduct](https://vega.github.io/vega/about/code-of-conduct/).
 
 Olli was originally created by [Matt Blanco](https://mattblanco.me/) and the library is maintained by the [MIT Visualization Group](http://vis.csail.mit.edu/).

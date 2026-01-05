@@ -2,7 +2,7 @@
 
 Olli is an open-source library for converting data visualizations into accessible text structures for screen reader users. Starting with an existing visualization specification created with a supported toolkit, Olli produces a keyboard-navigable tree view with descriptions at varying levels of detail. Users can explore these structures both to get an initial overview, and to dive into the data in more detail.
 
-For more information about Olli, see the main project repo at https://github.com/mitvis/olli.
+For more information about Olli, see the main project repo at https://github.com/umwelt-data/olli.
 
 This is Olli's core package, published on `npm` as `olli`.
 
@@ -38,7 +38,7 @@ to be read by a screen reader. For example, a node representing an x-
 axis might have a text description reading, “X-Axis for a quantitative
 scale with values from 14.43 to 34.7”.
 
-The `AccessibilityTreeNode` type is defined here: https://github.com/mitvis/olli/blob/main/packages/core/src/Structure/Types.ts
+The `AccessibilityTreeNode` type is defined here: https://github.com/umwelt-data/olli/blob/main/packages/core/src/Structure/Types.ts
 
 ## Render
 

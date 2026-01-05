@@ -13,7 +13,7 @@
   "files": ["dist"],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mitvis/olli.git"
+    "url": "git+https://github.com/umwelt-data/olli.git"
   },
   "keywords": [
     "visualization",
@@ -30,9 +30,9 @@
     }],
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/mitvis/olli/issues"
+    "url": "https://github.com/umwelt-data/olli/issues"
   },
-  "homepage": "https://mitvis.github.io/olli/",
+  "homepage": "https://umwelt-data.github.io/olli/",
   "peerDependencies": {
     "olli": "^2.0.2"
   }
