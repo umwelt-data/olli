@@ -13,7 +13,38 @@ export function removeFinalPeriod(s: string) {
   return s;
 }
 
+export function getChoroplethRegionField(olliSpec: UnitOlliSpec) {
+  const topLevelNode = Array.isArray(olliSpec.structure) ? olliSpec.structure[0] : olliSpec.structure;
+  if (topLevelNode && 'groupby' in topLevelNode) {
+    return topLevelNode.groupby;
+  }
+
+  return olliSpec.fields.find((field) => field.type === 'nominal' || field.type === 'ordinal')?.field;
+}
+
+export function getChoroplethValueField(olliSpec: UnitOlliSpec) {
+  const colorLegend = olliSpec.legends?.find((legend) => legend.channel === 'color');
+  if (!colorLegend) {
+    return undefined;
+  }
+
+  const fieldDef = getFieldDef(colorLegend.field, olliSpec.fields);
+  if (!fieldDef || fieldDef.type !== 'quantitative') {
+    return undefined;
+  }
+
+  return colorLegend.field;
+}
+
+export function isChoroplethMap(olliSpec: UnitOlliSpec) {
+  return olliSpec.mark === 'geoshape' && !!getChoroplethRegionField(olliSpec) && !!getChoroplethValueField(olliSpec);
+}
+
 export function getChartType(olliSpec: UnitOlliSpec) {
+  if (isChoroplethMap(olliSpec)) {
+    return 'choropleth map';
+  }
+
   if (olliSpec.mark) {
     if (olliSpec.mark === 'point' && olliSpec.axes?.length === 2) {
       if (olliSpec.axes.every((a) => getFieldDef(a.field, olliSpec.fields).type === 'quantitative')) {
@@ -35,6 +66,9 @@ export function getChartType(olliSpec: UnitOlliSpec) {
         }
       }
     }
+    if (olliSpec.mark === 'geoshape') {
+      return 'map';
+    }
     return `${olliSpec.mark} chart`;
   } else {
     return 'dataset';
@@ -42,6 +76,9 @@ export function getChartType(olliSpec: UnitOlliSpec) {
 }
 export const chartTypePrefix = (node: ElaboratedOlliNode, olliSpec: UnitOlliSpec): string => {
   if (node && 'groupby' in node && node.nodeType === 'root') {
+    if (isChoroplethMap(olliSpec)) {
+      return '';
+    }
     if (olliSpec.mark === 'line') {
       return 'multi-series ';
     } else {

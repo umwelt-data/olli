@@ -1,0 +1,117 @@
+<script type="module">
+let scores = [
+  { "id": "01", "state": "Alabama", "rate": 44 },
+  { "id": "02", "state": "Alaska", "rate": 63 },
+  { "id": "04", "state": "Arizona", "rate": 57 },
+  { "id": "05", "state": "Arkansas", "rate": 41 },
+  { "id": "06", "state": "California", "rate": 72 },
+  { "id": "08", "state": "Colorado", "rate": 76 },
+  { "id": "09", "state": "Connecticut", "rate": 68 },
+  { "id": "10", "state": "Delaware", "rate": 61 },
+  { "id": "12", "state": "Florida", "rate": 55 },
+  { "id": "13", "state": "Georgia", "rate": 52 },
+  { "id": "15", "state": "Hawaii", "rate": 70 },
+  { "id": "16", "state": "Idaho", "rate": 59 },
+  { "id": "17", "state": "Illinois", "rate": 64 },
+  { "id": "18", "state": "Indiana", "rate": 51 },
+  { "id": "19", "state": "Iowa", "rate": 66 },
+  { "id": "20", "state": "Kansas", "rate": 58 },
+  { "id": "21", "state": "Kentucky", "rate": 46 },
+  { "id": "22", "state": "Louisiana", "rate": 42 },
+  { "id": "23", "state": "Maine", "rate": 65 },
+  { "id": "24", "state": "Maryland", "rate": 69 },
+  { "id": "25", "state": "Massachusetts", "rate": 74 },
+  { "id": "26", "state": "Michigan", "rate": 60 },
+  { "id": "27", "state": "Minnesota", "rate": 78 },
+  { "id": "28", "state": "Mississippi", "rate": 39 },
+  { "id": "29", "state": "Missouri", "rate": 53 },
+  { "id": "30", "state": "Montana", "rate": 62 },
+  { "id": "31", "state": "Nebraska", "rate": 67 },
+  { "id": "32", "state": "Nevada", "rate": 49 },
+  { "id": "33", "state": "New Hampshire", "rate": 71 },
+  { "id": "34", "state": "New Jersey", "rate": 73 },
+  { "id": "35", "state": "New Mexico", "rate": 47 },
+  { "id": "36", "state": "New York", "rate": 75 },
+  { "id": "37", "state": "North Carolina", "rate": 54 },
+  { "id": "38", "state": "North Dakota", "rate": 64 },
+  { "id": "39", "state": "Ohio", "rate": 56 },
+  { "id": "40", "state": "Oklahoma", "rate": 45 },
+  { "id": "41", "state": "Oregon", "rate": 68 },
+  { "id": "42", "state": "Pennsylvania", "rate": 62 },
+  { "id": "44", "state": "Rhode Island", "rate": 66 },
+  { "id": "45", "state": "South Carolina", "rate": 48 },
+  { "id": "46", "state": "South Dakota", "rate": 63 },
+  { "id": "47", "state": "Tennessee", "rate": 50 },
+  { "id": "48", "state": "Texas", "rate": 58 },
+  { "id": "49", "state": "Utah", "rate": 77 },
+  { "id": "50", "state": "Vermont", "rate": 72 },
+  { "id": "51", "state": "Virginia", "rate": 67 },
+  { "id": "53", "state": "Washington", "rate": 74 },
+  { "id": "54", "state": "West Virginia", "rate": 40 },
+  { "id": "55", "state": "Wisconsin", "rate": 69 },
+  { "id": "56", "state": "Wyoming", "rate": 61 }
+];
+
+let spec = {
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": "USA Choropleth Progress",
+  "width": 900,
+  "height": 540,
+  "projection": {
+    "type": "albersUsa"
+  },
+  "data": {
+    "url": "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json",
+    "format": {
+      "type": "topojson",
+      "feature": "states"
+    }
+  },
+  "transform": [
+    {
+      "lookup": "id",
+      "from": {
+        "data": {
+          "values": scores
+        },
+        "key": "id",
+        "fields": ["state", "rate"]
+      }
+    }
+  ],
+  "mark": {
+    "type": "geoshape",
+    "stroke": "white",
+    "strokeWidth": 1
+  },
+  "encoding": {
+    "color": {
+      "field": "rate",
+      "type": "quantitative",
+      "title": "Accessibility score",
+      "scale": {
+        "domain": [35, 80],
+        "scheme": "blues"
+      }
+    },
+    "tooltip": [
+      { "field": "state", "type": "nominal", "title": "State" },
+      { "field": "rate", "type": "quantitative", "title": "Accessibility score" }
+    ]
+  }
+};
+
+let vegaSpec = vegaLite.compile(spec).spec;
+const runtime = vega.parse(vegaSpec);
+const vegaRender = document.getElementById('Visualization-Vega-Lite');
+let view = new vega.View(runtime)
+  .logLevel(vega.Warn)
+  .initialize(vegaRender)
+  .renderer('svg')
+  .hover()
+  .run();
+
+OlliAdapters.VegaLiteAdapter(spec).then((olliVisSpec) => {
+  document.getElementById("AccessibilityTree-Vega-Lite").append(olli(olliVisSpec));
+});
+</script>

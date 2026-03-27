@@ -13,6 +13,8 @@ import {
   chartTypePrefix,
   averageValue,
   ordinal_suffix_of,
+  getChoroplethValueField,
+  isChoroplethMap,
 } from '../util/description';
 import { FieldPredicate } from 'vega-lite/src/predicate';
 import { LogicalComposition } from 'vega-lite/src/logical';
@@ -68,6 +70,13 @@ export function nodeToDescription(
       return a.title || fieldDef.label || a.field;
     })
     .join(' and ');
+  const choroplethValueField = getChoroplethValueField(olliSpec);
+  const choroplethValueLegend = choroplethValueField
+    ? olliSpec.legends?.find((legend) => legend.field === choroplethValueField)
+    : undefined;
+  const choroplethValueFieldDef = choroplethValueField ? getFieldDef(choroplethValueField, olliSpec.fields) : undefined;
+  const choroplethValueLabel =
+    choroplethValueLegend?.title || choroplethValueFieldDef?.label || choroplethValueFieldDef?.field;
 
   function name(node: ElaboratedOlliNode): string {
     switch (node.nodeType) {
@@ -81,6 +90,9 @@ export function nodeToDescription(
         return '';
       case 'view':
         if ('predicate' in node && 'equal' in node.predicate) {
+          if (isChoroplethMap(olliSpec)) {
+            return `for ${fmtValue(node.predicate.equal as any, getFieldDef(node.predicate.field, olliSpec.fields))}`;
+          }
           return `titled ${fmtValue(node.predicate.equal as any, getFieldDef(node.predicate.field, olliSpec.fields))}`;
         }
         return '';
@@ -148,6 +160,9 @@ export function nodeToDescription(
         }
         return 'a dataset';
       case 'view':
+        if (isChoroplethMap(olliSpec)) {
+          return 'a region';
+        }
         const viewName =
           olliSpec.mark === 'line' ? 'line' : olliSpec.mark ? chartType : node.viewType ? node.viewType : 'view';
         return `a ${viewName}`;
@@ -184,6 +199,9 @@ export function nodeToDescription(
   function children(node: ElaboratedOlliNode): string {
     switch (node.nodeType) {
       case 'root':
+        if (isChoroplethMap(olliSpec)) {
+          return choroplethValueLabel ? `colored by ${choroplethValueLabel}` : '';
+        }
         if ('groupby' in node || (olliSpec.mark && olliSpec.axes?.length)) {
           return `with ${olliSpec.axes.length > 1 ? 'axes' : 'axis'} ${axes}`;
         }
@@ -249,6 +267,9 @@ export function nodeToDescription(
     switch (node.nodeType) {
       case 'root':
         if ('groupby' in node) {
+          if (isChoroplethMap(olliSpec)) {
+            return `with ${node.children.length} regions`;
+          }
           return `with ${node.children.length} views for ${node.groupby}`;
         }
         if ((olliSpec.mark && olliSpec.axes?.length) || olliSpec.mark) {
@@ -307,7 +328,30 @@ export function nodeToDescription(
       case 'yAxis':
       case 'legend':
         axisType = node.nodeType === 'xAxis' ? 'x' : 'y';
+      case 'view':
+        if (isChoroplethMap(olliSpec) && choroplethValueField && choroplethValueFieldDef) {
+          const selection = selectionTest(dataset, node.fullPredicate);
+          if (selection.length === 0) {
+            return '';
+          }
+          if (selection.length === 1) {
+            return `the ${choroplethValueLabel} is ${fmtValue(selection[0][choroplethValueField], choroplethValueFieldDef)}`;
+          }
+          const average = averageValue(selection, choroplethValueField);
+          return `the average ${choroplethValueLabel} is ${fmtValue(average, choroplethValueFieldDef)}`;
+        }
       case 'filteredData':
+        if (isChoroplethMap(olliSpec) && choroplethValueField && choroplethValueFieldDef) {
+          const selection = selectionTest(dataset, node.fullPredicate);
+          if (selection.length === 0) {
+            return '';
+          }
+          if (selection.length === 1) {
+            return `the ${choroplethValueLabel} is ${fmtValue(selection[0][choroplethValueField], choroplethValueFieldDef)}`;
+          }
+          const average = averageValue(selection, choroplethValueField);
+          return `the average ${choroplethValueLabel} is ${fmtValue(average, choroplethValueFieldDef)}`;
+        }
         if (!axisType) axisType = node.parent.nodeType === 'xAxis' ? 'x' : 'y';
 
         // TODO this should use key semantics
@@ -399,7 +443,7 @@ export function nodeToDescription(
 
   const nodeTypeToTokens = new Map<OlliNodeType, string[]>([
     ['root', ['name', 'type', 'size', 'children', 'level']],
-    ['view', ['index', 'type', 'name', 'children', 'level']],
+    ['view', ['index', 'type', 'name', 'children', 'aggregate', 'level']],
     ['xAxis', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
     ['yAxis', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],
     ['legend', ['name', 'type', 'data', 'parent', 'aggregate', 'level']],

@@ -1,0 +1,94 @@
+<script type="module">
+let spec = {
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": "Simple Choropleth MVP",
+  "width": 320,
+  "height": 220,
+  "projection": {
+    "type": "identity",
+    "reflectY": true
+  },
+  "data": {
+    "values": [
+      {
+        "region": "Northwest",
+        "rate": 12,
+        "shape": {
+          "type": "Feature",
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [[[10,10],[150,10],[150,90],[10,90],[10,10]]]
+          }
+        }
+      },
+      {
+        "region": "Northeast",
+        "rate": 28,
+        "shape": {
+          "type": "Feature",
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [[[170,10],[310,10],[310,90],[170,90],[170,10]]]
+          }
+        }
+      },
+      {
+        "region": "Southwest",
+        "rate": 44,
+        "shape": {
+          "type": "Feature",
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [[[10,110],[150,110],[150,190],[10,190],[10,110]]]
+          }
+        }
+      },
+      {
+        "region": "Southeast",
+        "rate": 60,
+        "shape": {
+          "type": "Feature",
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [[[170,110],[310,110],[310,190],[170,190],[170,110]]]
+          }
+        }
+      }
+    ]
+  },
+  "mark": {
+    "type": "geoshape",
+    "stroke": "white",
+    "strokeWidth": 2
+  },
+  "encoding": {
+    "shape": {
+      "field": "shape",
+      "type": "geojson"
+    },
+    "color": {
+      "field": "rate",
+      "type": "quantitative",
+      "title": "Accessibility score"
+    },
+    "tooltip": [
+      { "field": "region", "type": "nominal" },
+      { "field": "rate", "type": "quantitative" }
+    ]
+  }
+};
+
+let vegaSpec = vegaLite.compile(spec).spec;
+const runtime = vega.parse(vegaSpec);
+const vegaRender = document.getElementById('Visualization-Vega-Lite');
+let view = new vega.View(runtime)
+  .logLevel(vega.Warn)
+  .initialize(vegaRender)
+  .renderer('svg')
+  .hover()
+  .run();
+
+OlliAdapters.VegaLiteAdapter(spec).then((olliVisSpec) => {
+  document.getElementById("AccessibilityTree-Vega-Lite").append(olli(olliVisSpec));
+});
+</script>
