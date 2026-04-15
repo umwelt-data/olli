@@ -1,0 +1,19 @@
+{
+  "name": "olli-demo-solid",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Solid JS demo dashboard for browsing Olli Vega-Lite examples.",
+  "scripts": {
+    "build": "webpack --config webpack.prod.js",
+    "build:dev": "webpack --config webpack.dev.js",
+    "serve": "node server.js",
+    "start": "npm run build:dev && npm run serve"
+  },
+  "dependencies": {
+    "olli": "^2.0.2",
+    "olli-adapters": "^2.0.2",
+    "solid-js": "^1.9.9",
+    "vega": "^5.23.0",
+    "vega-lite": "^5.9.3"
+  }
+}
