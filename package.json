@@ -6,11 +6,11 @@
   "dependencies": {
     "d3-scale": "^4.0.2",
     "dayjs": "^1.11.7",
-    "vega-lite": "^5.9.3",
+    "vega-lite": "^6.4.2",
     "vega-statistics": "^1.9.0",
     "versioned-storage": "^2.0.49",
     "@observablehq/plot": "^0.5.2",
-    "vega": "^5.23.0"
+    "vega": "^6.2.0"
   },
   "devDependencies": {
     "webpack": "^5.94.0",
