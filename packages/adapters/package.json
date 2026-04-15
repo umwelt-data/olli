@@ -7,8 +7,14 @@
   "scripts": {
     "start": "webpack --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js",
+    "test": "TZ=UTC vitest run",
+    "test:watch": "TZ=UTC vitest",
     "prettier:check": "npx prettier --check .",
     "prettier:write": "npx prettier --write ."
+  },
+  "devDependencies": {
+    "vitest": "^1.6.0",
+    "jsdom": "^24.0.0"
   },
   "files": ["dist"],
   "repository": {

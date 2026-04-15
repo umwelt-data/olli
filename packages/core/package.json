@@ -7,8 +7,8 @@
   "scripts": {
     "start": "webpack --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "TZ=UTC vitest run",
+    "test:watch": "TZ=UTC vitest",
     "gen-fixtures": "TZ=UTC vite-node --config vitest.config.ts scripts/gen-fixtures.ts",
     "prettier:check": "npx prettier --check .",
     "prettier:write": "npx prettier --write ."
