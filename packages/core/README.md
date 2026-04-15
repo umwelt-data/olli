@@ -40,6 +40,43 @@ scale with values from 14.43 to 34.7”.
 
 The `AccessibilityTreeNode` type is defined here: https://github.com/umwelt-data/olli/blob/main/packages/core/src/Structure/Types.ts
 
+## Testing
+
+Tests run via [Vitest](https://vitest.dev) under jsdom:
+
+```bash
+npm test           # one-shot
+npm run test:watch # rerun on change
+```
+
+The suite has four tiers:
+
+- `test/util/` — unit tests for individual helpers (e.g. `typeInference`).
+- `test/structure/` — hand-written `OlliSpec` inputs feed `olliSpecToTree`; assertions are made against the resulting tree shape.
+- `test/render/` — `olli()` is invoked under jsdom and the rendered DOM is checked for ARIA roles, levels, and non-empty labels.
+- `test/corpus/` — every committed fixture under `test/fixtures/olli-specs/` is round-tripped through `olliSpecToTree`. Each fixture produces a normalized tree-shape snapshot (under `test/corpus/__snapshots__/`) plus a non-empty-description assertion at every node. Description *wording* is not snapshotted, so copy tweaks don't churn the baseline.
+
+### Fixtures
+
+The corpus fixtures are generated from `examples/vl-specs/*.json` (the canonical Vega-Lite specs at the repo root, which the docs site also reads via `site.data.vl_specs`). Regenerate them when adapter behavior changes intentionally:
+
+```bash
+npm run gen-fixtures
+```
+
+This compiles each VL spec through `VegaLiteAdapter` and writes the resulting `OlliSpec` JSON to `test/fixtures/olli-specs/`. `TZ=UTC` is pinned so the temporal `Date` values are reproducible across machines. To exclude an example from the corpus (e.g., because Olli doesn't yet support it), add its name to `test/fixtures/excluded.ts`.
+
+The corpus runner enforces coverage: a cross-check fails if any non-excluded VL spec lacks a committed fixture, so new examples can't silently skip testing.
+
+### Determinism
+
+`test/setup.ts` pins a few non-deterministic globals so snapshots are stable:
+
+- `Math.random` is replaced with a seeded LCG (reset in `beforeEach`), so id namespaces in `olliSpecToTree` are reproducible.
+- `localStorage` is cleared between tests so the `versioned-storage` settings used by `getCustomizedDescription` start fresh.
+- jsdom 24's `innerText` setter is a no-op (it relies on layout), so it's polyfilled to write `textContent`. Without this, `renderTree` produces empty `<span>` labels.
+- `HTMLCanvasElement.getContext` is stubbed to silence the jsdom warning emitted when `vega-scenegraph` loads.
+
 ## Render
 
 The `src/Render` folder includes screen-reader-friendly renderers for a tree view and a table.

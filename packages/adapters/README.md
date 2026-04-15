@@ -49,3 +49,19 @@ extents for continuous guides and categories for discrete guides),
 and a reference to the underlying data.
 
 The `OlliVisSpec` type is defined here: https://github.com/umwelt-data/olli/blob/main/packages/core/src/Types.ts
+
+## Testing
+
+```bash
+npm test
+```
+
+The adapter package has a single corpus regression test. For every Vega-Lite spec in `examples/vl-specs/` (the canonical specs at the repo root), the test runs `VegaLiteAdapter` and compares the serialized `OlliSpec` against the fixture committed at `packages/core/test/fixtures/olli-specs/<name>.json`. This is the contract boundary between the adapter and the core test suite: if both pass, the adapter is producing the `OlliSpec` shape that core's tests assume.
+
+When you intentionally change adapter behavior, regenerate the fixtures from the core package and commit the diff:
+
+```bash
+cd ../core && npm run gen-fixtures
+```
+
+The runner enforces coverage via a cross-check: a new example in `examples/vl-specs/` that isn't listed in `packages/core/test/fixtures/excluded.ts` and doesn't have a committed fixture will fail the test. `TZ=UTC` is pinned so temporal `Date` values match across machines.
