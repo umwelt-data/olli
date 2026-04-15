@@ -1,0 +1,480 @@
+{
+  "data": [
+    {
+      "variety": "Manchuria",
+      "site": "University Farm",
+      "sum_yield": 53.9,
+      "sum_yield_start": 241.33334000000002,
+      "sum_yield_end": 295.23334
+    },
+    {
+      "variety": "Manchuria",
+      "site": "Waseca",
+      "sum_yield": 82.33333999999999,
+      "sum_yield_start": 295.23334,
+      "sum_yield_end": 377.56668
+    },
+    {
+      "variety": "Manchuria",
+      "site": "Morris",
+      "sum_yield": 61.800000000000004,
+      "sum_yield_start": 179.53334,
+      "sum_yield_end": 241.33334000000002
+    },
+    {
+      "variety": "Manchuria",
+      "site": "Crookston",
+      "sum_yield": 72.9,
+      "sum_yield_start": 0,
+      "sum_yield_end": 72.9
+    },
+    {
+      "variety": "Manchuria",
+      "site": "Grand Rapids",
+      "sum_yield": 55.1,
+      "sum_yield_start": 124.43334,
+      "sum_yield_end": 179.53334
+    },
+    {
+      "variety": "Manchuria",
+      "site": "Duluth",
+      "sum_yield": 51.533339999999995,
+      "sum_yield_start": 72.9,
+      "sum_yield_end": 124.43334
+    },
+    {
+      "variety": "Glabron",
+      "site": "University Farm",
+      "sum_yield": 79.86666,
+      "sum_yield_start": 227.29999999999998,
+      "sum_yield_end": 307.16666
+    },
+    {
+      "variety": "Glabron",
+      "site": "Waseca",
+      "sum_yield": 92.93333000000001,
+      "sum_yield_start": 307.16666,
+      "sum_yield_end": 400.09999
+    },
+    {
+      "variety": "Glabron",
+      "site": "Morris",
+      "sum_yield": 63.900000000000006,
+      "sum_yield_start": 163.39999999999998,
+      "sum_yield_end": 227.29999999999998
+    },
+    {
+      "variety": "Glabron",
+      "site": "Crookston",
+      "sum_yield": 64.3,
+      "sum_yield_start": 0,
+      "sum_yield_end": 64.3
+    },
+    {
+      "variety": "Glabron",
+      "site": "Grand Rapids",
+      "sum_yield": 43.56666,
+      "sum_yield_start": 119.83333999999999,
+      "sum_yield_end": 163.39999999999998
+    },
+    {
+      "variety": "Glabron",
+      "site": "Duluth",
+      "sum_yield": 55.533339999999995,
+      "sum_yield_start": 64.3,
+      "sum_yield_end": 119.83333999999999
+    },
+    {
+      "variety": "Svansota",
+      "site": "University Farm",
+      "sum_yield": 62.56667,
+      "sum_yield_start": 216.13333,
+      "sum_yield_end": 278.7
+    },
+    {
+      "variety": "Svansota",
+      "site": "Waseca",
+      "sum_yield": 85.83332999999999,
+      "sum_yield_start": 278.7,
+      "sum_yield_end": 364.53333
+    },
+    {
+      "variety": "Svansota",
+      "site": "Morris",
+      "sum_yield": 60.8,
+      "sum_yield_start": 155.33333,
+      "sum_yield_end": 216.13333
+    },
+    {
+      "variety": "Svansota",
+      "site": "Crookston",
+      "sum_yield": 61.1,
+      "sum_yield_start": 0,
+      "sum_yield_end": 61.1
+    },
+    {
+      "variety": "Svansota",
+      "site": "Grand Rapids",
+      "sum_yield": 46.3,
+      "sum_yield_start": 109.03333,
+      "sum_yield_end": 155.33333
+    },
+    {
+      "variety": "Svansota",
+      "site": "Duluth",
+      "sum_yield": 47.93333,
+      "sum_yield_start": 61.1,
+      "sum_yield_end": 109.03333
+    },
+    {
+      "variety": "Velvet",
+      "site": "University Farm",
+      "sum_yield": 66.7,
+      "sum_yield_start": 242.39998,
+      "sum_yield_end": 309.09998
+    },
+    {
+      "variety": "Velvet",
+      "site": "Waseca",
+      "sum_yield": 87.63333,
+      "sum_yield_start": 309.09998,
+      "sum_yield_end": 396.73331
+    },
+    {
+      "variety": "Velvet",
+      "site": "Morris",
+      "sum_yield": 64.96665999999999,
+      "sum_yield_start": 177.43332,
+      "sum_yield_end": 242.39998
+    },
+    {
+      "variety": "Velvet",
+      "site": "Crookston",
+      "sum_yield": 73.39999,
+      "sum_yield_start": 0,
+      "sum_yield_end": 73.39999
+    },
+    {
+      "variety": "Velvet",
+      "site": "Grand Rapids",
+      "sum_yield": 55.26666,
+      "sum_yield_start": 122.16666000000001,
+      "sum_yield_end": 177.43332
+    },
+    {
+      "variety": "Velvet",
+      "site": "Duluth",
+      "sum_yield": 48.766670000000005,
+      "sum_yield_start": 73.39999,
+      "sum_yield_end": 122.16666000000001
+    },
+    {
+      "variety": "Trebi",
+      "site": "University Farm",
+      "sum_yield": 65.63333,
+      "sum_yield_start": 294.09999000000005,
+      "sum_yield_end": 359.73332000000005
+    },
+    {
+      "variety": "Trebi",
+      "site": "Waseca",
+      "sum_yield": 113.0666,
+      "sum_yield_start": 359.73332000000005,
+      "sum_yield_end": 472.79992000000004
+    },
+    {
+      "variety": "Trebi",
+      "site": "Morris",
+      "sum_yield": 90.4,
+      "sum_yield_start": 203.69999,
+      "sum_yield_end": 294.09999000000005
+    },
+    {
+      "variety": "Trebi",
+      "site": "Crookston",
+      "sum_yield": 88.76666,
+      "sum_yield_start": 0,
+      "sum_yield_end": 88.76666
+    },
+    {
+      "variety": "Trebi",
+      "site": "Grand Rapids",
+      "sum_yield": 50.400000000000006,
+      "sum_yield_start": 153.29999,
+      "sum_yield_end": 203.69999
+    },
+    {
+      "variety": "Trebi",
+      "site": "Duluth",
+      "sum_yield": 64.53333,
+      "sum_yield_start": 88.76666,
+      "sum_yield_end": 153.29999
+    },
+    {
+      "variety": "No. 457",
+      "site": "University Farm",
+      "sum_yield": 69.70000999999999,
+      "sum_yield_start": 260.16668000000004,
+      "sum_yield_end": 329.86669000000006
+    },
+    {
+      "variety": "No. 457",
+      "site": "Waseca",
+      "sum_yield": 100.30000000000001,
+      "sum_yield_start": 329.86669000000006,
+      "sum_yield_end": 430.1666900000001
+    },
+    {
+      "variety": "No. 457",
+      "site": "Morris",
+      "sum_yield": 72.23334,
+      "sum_yield_start": 187.93334000000002,
+      "sum_yield_end": 260.16668000000004
+    },
+    {
+      "variety": "No. 457",
+      "site": "Crookston",
+      "sum_yield": 80,
+      "sum_yield_start": 0,
+      "sum_yield_end": 80
+    },
+    {
+      "variety": "No. 457",
+      "site": "Grand Rapids",
+      "sum_yield": 51.633340000000004,
+      "sum_yield_start": 136.3,
+      "sum_yield_end": 187.93334000000002
+    },
+    {
+      "variety": "No. 457",
+      "site": "Duluth",
+      "sum_yield": 56.3,
+      "sum_yield_start": 80,
+      "sum_yield_end": 136.3
+    },
+    {
+      "variety": "No. 462",
+      "site": "University Farm",
+      "sum_yield": 62.166669999999996,
+      "sum_yield_start": 251.89999999999998,
+      "sum_yield_end": 314.06667
+    },
+    {
+      "variety": "No. 462",
+      "site": "Waseca",
+      "sum_yield": 110.4667,
+      "sum_yield_start": 314.06667,
+      "sum_yield_end": 424.53337
+    },
+    {
+      "variety": "No. 462",
+      "site": "Morris",
+      "sum_yield": 77.36667,
+      "sum_yield_start": 174.53332999999998,
+      "sum_yield_end": 251.89999999999998
+    },
+    {
+      "variety": "No. 462",
+      "site": "Crookston",
+      "sum_yield": 79.09998999999999,
+      "sum_yield_start": 0,
+      "sum_yield_end": 79.09998999999999
+    },
+    {
+      "variety": "No. 462",
+      "site": "Grand Rapids",
+      "sum_yield": 44.83334,
+      "sum_yield_start": 129.69998999999999,
+      "sum_yield_end": 174.53332999999998
+    },
+    {
+      "variety": "No. 462",
+      "site": "Duluth",
+      "sum_yield": 50.6,
+      "sum_yield_start": 79.09998999999999,
+      "sum_yield_end": 129.69998999999999
+    },
+    {
+      "variety": "Peatland",
+      "site": "University Farm",
+      "sum_yield": 60.83333999999999,
+      "sum_yield_start": 264.73334,
+      "sum_yield_end": 325.56668
+    },
+    {
+      "variety": "Peatland",
+      "site": "Waseca",
+      "sum_yield": 84.59998999999999,
+      "sum_yield_start": 325.56668,
+      "sum_yield_end": 410.16667
+    },
+    {
+      "variety": "Peatland",
+      "site": "Morris",
+      "sum_yield": 73.06667,
+      "sum_yield_start": 191.66667,
+      "sum_yield_end": 264.73334
+    },
+    {
+      "variety": "Peatland",
+      "site": "Crookston",
+      "sum_yield": 66.83333,
+      "sum_yield_start": 0,
+      "sum_yield_end": 66.83333
+    },
+    {
+      "variety": "Peatland",
+      "site": "Grand Rapids",
+      "sum_yield": 61.46667000000001,
+      "sum_yield_start": 130.2,
+      "sum_yield_end": 191.66667
+    },
+    {
+      "variety": "Peatland",
+      "site": "Duluth",
+      "sum_yield": 63.36667,
+      "sum_yield_start": 66.83333,
+      "sum_yield_end": 130.2
+    },
+    {
+      "variety": "No. 475",
+      "site": "University Farm",
+      "sum_yield": 54.666669999999996,
+      "sum_yield_start": 238.43331999999998,
+      "sum_yield_end": 293.09999
+    },
+    {
+      "variety": "No. 475",
+      "site": "Waseca",
+      "sum_yield": 88.03334,
+      "sum_yield_start": 293.09999,
+      "sum_yield_end": 381.13333
+    },
+    {
+      "variety": "No. 475",
+      "site": "Morris",
+      "sum_yield": 66.83333,
+      "sum_yield_start": 171.59999,
+      "sum_yield_end": 238.43331999999998
+    },
+    {
+      "variety": "No. 475",
+      "site": "Crookston",
+      "sum_yield": 76.23333,
+      "sum_yield_start": 0,
+      "sum_yield_end": 76.23333
+    },
+    {
+      "variety": "No. 475",
+      "site": "Grand Rapids",
+      "sum_yield": 34.93333,
+      "sum_yield_start": 136.66665999999998,
+      "sum_yield_end": 171.59999
+    },
+    {
+      "variety": "No. 475",
+      "site": "Duluth",
+      "sum_yield": 60.43333,
+      "sum_yield_start": 76.23333,
+      "sum_yield_end": 136.66665999999998
+    },
+    {
+      "variety": "Wisconsin No. 38",
+      "site": "University Farm",
+      "sum_yield": 77.3,
+      "sum_yield_start": 278.46668,
+      "sum_yield_end": 355.76668
+    },
+    {
+      "variety": "Wisconsin No. 38",
+      "site": "Waseca",
+      "sum_yield": 116.96667,
+      "sum_yield_start": 355.76668,
+      "sum_yield_end": 472.73335
+    },
+    {
+      "variety": "Wisconsin No. 38",
+      "site": "Morris",
+      "sum_yield": 76.63334,
+      "sum_yield_start": 201.83334,
+      "sum_yield_end": 278.46668
+    },
+    {
+      "variety": "Wisconsin No. 38",
+      "site": "Crookston",
+      "sum_yield": 85.76667,
+      "sum_yield_start": 0,
+      "sum_yield_end": 85.76667
+    },
+    {
+      "variety": "Wisconsin No. 38",
+      "site": "Grand Rapids",
+      "sum_yield": 55.133340000000004,
+      "sum_yield_start": 146.7,
+      "sum_yield_end": 201.83334
+    },
+    {
+      "variety": "Wisconsin No. 38",
+      "site": "Duluth",
+      "sum_yield": 60.93333,
+      "sum_yield_start": 85.76667,
+      "sum_yield_end": 146.7
+    }
+  ],
+  "fields": [
+    {
+      "aggregate": "sum",
+      "field": "sum_yield",
+      "label": "sum yield",
+      "type": "quantitative"
+    },
+    {
+      "field": "variety",
+      "label": "variety",
+      "type": "nominal"
+    },
+    {
+      "field": "site",
+      "label": "site",
+      "type": "nominal"
+    }
+  ],
+  "axes": [
+    {
+      "axisType": "x",
+      "field": "sum_yield",
+      "ticks": [
+        0,
+        100,
+        200,
+        300,
+        400,
+        500
+      ]
+    },
+    {
+      "axisType": "y",
+      "field": "variety",
+      "ticks": [
+        "Glabron",
+        "Manchuria",
+        "No. 457",
+        "No. 462",
+        "No. 475",
+        "Peatland",
+        "Svansota",
+        "Trebi",
+        "Velvet",
+        "Wisconsin No. 38"
+      ]
+    }
+  ],
+  "legends": [
+    {
+      "channel": "color",
+      "field": "site"
+    }
+  ],
+  "guides": [],
+  "mark": "bar"
+}

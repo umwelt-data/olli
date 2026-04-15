@@ -1,41 +1,15 @@
 <script type="module">
-let spec = {
-  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "A Wilkinson Dot Plot",
-  "data": {
-    "values": [
-      1,1,1,1,1,1,1,1,1,1,
-      2,2,2,
-      3,3,
-      4,4,4,4,4,4
-    ]
-  },
-  "mark": {
-  	"type": "circle",
-  	"opacity": 1
-  },
-  "encoding": {
-    "x": { "field": "data", "type": "ordinal" },
-    "y": { "field": "id", "type": "ordinal", "axis": null, "sort": "descending" }
-  },
-  "height": 100,
-  "transform": [{
-    "window": [{"op": "rank", "as": "id"}],
-    "groupby": ["data"]
-  }],
-}
-
-let vegaSpec = vegaLite.compile(spec).spec
+const spec = {{ site.data.vl_specs.wilkinsonDotPlot | jsonify }};
+const vegaSpec = vegaLite.compile(spec).spec;
 const runtime = vega.parse(vegaSpec);
 const vegaRender = document.getElementById('Visualization-Vega-Lite');
-let view = new vega.View(runtime)
+const view = new vega.View(runtime)
   .logLevel(vega.Warn)
   .initialize(vegaRender)
   .renderer('svg')
   .hover()
   .run();
-
 OlliAdapters.VegaLiteAdapter(spec).then(olliVisSpec => {
-  document.getElementById("AccessibilityTree-Vega-Lite").append(olli(olliVisSpec))
-})
+  document.getElementById("AccessibilityTree-Vega-Lite").append(olli(olliVisSpec));
+});
 </script>

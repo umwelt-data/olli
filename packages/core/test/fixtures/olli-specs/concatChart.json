@@ -1,0 +1,340 @@
+{
+  "operator": "concat",
+  "units": [
+    {
+      "description": "Two vertically concatenated charts that show a histogram of precipitation in Seattle and the relationship between min and max temperature.",
+      "data": [
+        {
+          "month_date": "2012-01-01T00:00:00.000Z",
+          "mean_precipitation": 3.758064516129033
+        },
+        {
+          "month_date": "2012-02-01T00:00:00.000Z",
+          "mean_precipitation": 3.734513274336282
+        },
+        {
+          "month_date": "2012-03-01T00:00:00.000Z",
+          "mean_precipitation": 4.888709677419357
+        },
+        {
+          "month_date": "2012-04-01T00:00:00.000Z",
+          "mean_precipitation": 3.128333333333334
+        },
+        {
+          "month_date": "2012-05-01T00:00:00.000Z",
+          "mean_precipitation": 1.673387096774193
+        },
+        {
+          "month_date": "2012-06-01T00:00:00.000Z",
+          "mean_precipitation": 1.1075
+        },
+        {
+          "month_date": "2012-07-01T00:00:00.000Z",
+          "mean_precipitation": 0.3887096774193549
+        },
+        {
+          "month_date": "2012-08-01T00:00:00.000Z",
+          "mean_precipitation": 1.320161290322581
+        },
+        {
+          "month_date": "2012-09-01T00:00:00.000Z",
+          "mean_precipitation": 1.962500000000002
+        },
+        {
+          "month_date": "2012-10-01T00:00:00.000Z",
+          "mean_precipitation": 4.0596774193548395
+        },
+        {
+          "month_date": "2012-11-01T00:00:00.000Z",
+          "mean_precipitation": 5.354166666666665
+        },
+        {
+          "month_date": "2012-12-01T00:00:00.000Z",
+          "mean_precipitation": 5.021774193548385
+        }
+      ],
+      "fields": [
+        {
+          "timeUnit": "month",
+          "field": "month_date",
+          "type": "ordinal",
+          "label": "date (month)"
+        },
+        {
+          "aggregate": "mean",
+          "field": "mean_precipitation",
+          "type": "quantitative",
+          "label": "mean precipitation"
+        }
+      ],
+      "axes": [
+        {
+          "axisType": "x",
+          "field": "month_date",
+          "ticks": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "axisType": "y",
+          "field": "mean_precipitation",
+          "ticks": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        }
+      ],
+      "legends": [],
+      "mark": "bar"
+    },
+    {
+      "description": "Two vertically concatenated charts that show a histogram of precipitation in Seattle and the relationship between min and max temperature.",
+      "data": [
+        {
+          "bin_maxbins_10_temp_min": 5,
+          "bin_maxbins_10_temp_min_end": 10,
+          "bin_maxbins_10_temp_max": 10,
+          "bin_maxbins_10_temp_max_end": 15,
+          "__count": 254
+        },
+        {
+          "bin_maxbins_10_temp_min": 0,
+          "bin_maxbins_10_temp_min_end": 5,
+          "bin_maxbins_10_temp_max": 10,
+          "bin_maxbins_10_temp_max_end": 15,
+          "__count": 110
+        },
+        {
+          "bin_maxbins_10_temp_min": 0,
+          "bin_maxbins_10_temp_min_end": 5,
+          "bin_maxbins_10_temp_max": 5,
+          "bin_maxbins_10_temp_max_end": 10,
+          "__count": 168
+        },
+        {
+          "bin_maxbins_10_temp_min": 0,
+          "bin_maxbins_10_temp_min_end": 5,
+          "bin_maxbins_10_temp_max": 0,
+          "bin_maxbins_10_temp_max_end": 5,
+          "__count": 9
+        },
+        {
+          "bin_maxbins_10_temp_min": 5,
+          "bin_maxbins_10_temp_min_end": 10,
+          "bin_maxbins_10_temp_max": 5,
+          "bin_maxbins_10_temp_max_end": 10,
+          "__count": 44
+        },
+        {
+          "bin_maxbins_10_temp_min": -5,
+          "bin_maxbins_10_temp_min_end": 0,
+          "bin_maxbins_10_temp_max": 5,
+          "bin_maxbins_10_temp_max_end": 10,
+          "__count": 38
+        },
+        {
+          "bin_maxbins_10_temp_min": -5,
+          "bin_maxbins_10_temp_min_end": 0,
+          "bin_maxbins_10_temp_max": 0,
+          "bin_maxbins_10_temp_max_end": 5,
+          "__count": 27
+        },
+        {
+          "bin_maxbins_10_temp_min": -5,
+          "bin_maxbins_10_temp_min_end": 0,
+          "bin_maxbins_10_temp_max": -5,
+          "bin_maxbins_10_temp_max_end": 0,
+          "__count": 1
+        },
+        {
+          "bin_maxbins_10_temp_min": 5,
+          "bin_maxbins_10_temp_min_end": 10,
+          "bin_maxbins_10_temp_max": 15,
+          "bin_maxbins_10_temp_max_end": 20,
+          "__count": 113
+        },
+        {
+          "bin_maxbins_10_temp_min": 0,
+          "bin_maxbins_10_temp_min_end": 5,
+          "bin_maxbins_10_temp_max": 15,
+          "bin_maxbins_10_temp_max_end": 20,
+          "__count": 25
+        },
+        {
+          "bin_maxbins_10_temp_min": 5,
+          "bin_maxbins_10_temp_min_end": 10,
+          "bin_maxbins_10_temp_max": 20,
+          "bin_maxbins_10_temp_max_end": 25,
+          "__count": 50
+        },
+        {
+          "bin_maxbins_10_temp_min": 0,
+          "bin_maxbins_10_temp_min_end": 5,
+          "bin_maxbins_10_temp_max": 20,
+          "bin_maxbins_10_temp_max_end": 25,
+          "__count": 1
+        },
+        {
+          "bin_maxbins_10_temp_min": 10,
+          "bin_maxbins_10_temp_min_end": 15,
+          "bin_maxbins_10_temp_max": 10,
+          "bin_maxbins_10_temp_max_end": 15,
+          "__count": 27
+        },
+        {
+          "bin_maxbins_10_temp_min": 5,
+          "bin_maxbins_10_temp_min_end": 10,
+          "bin_maxbins_10_temp_max": 25,
+          "bin_maxbins_10_temp_max_end": 30,
+          "__count": 5
+        },
+        {
+          "bin_maxbins_10_temp_min": 10,
+          "bin_maxbins_10_temp_min_end": 15,
+          "bin_maxbins_10_temp_max": 25,
+          "bin_maxbins_10_temp_max_end": 30,
+          "__count": 111
+        },
+        {
+          "bin_maxbins_10_temp_min": 10,
+          "bin_maxbins_10_temp_min_end": 15,
+          "bin_maxbins_10_temp_max": 15,
+          "bin_maxbins_10_temp_max_end": 20,
+          "__count": 141
+        },
+        {
+          "bin_maxbins_10_temp_min": 10,
+          "bin_maxbins_10_temp_min_end": 15,
+          "bin_maxbins_10_temp_max": 20,
+          "bin_maxbins_10_temp_max_end": 25,
+          "__count": 169
+        },
+        {
+          "bin_maxbins_10_temp_min": 15,
+          "bin_maxbins_10_temp_min_end": 20,
+          "bin_maxbins_10_temp_max": 20,
+          "bin_maxbins_10_temp_max_end": 25,
+          "__count": 31
+        },
+        {
+          "bin_maxbins_10_temp_min": 15,
+          "bin_maxbins_10_temp_min_end": 20,
+          "bin_maxbins_10_temp_max": 25,
+          "bin_maxbins_10_temp_max_end": 30,
+          "__count": 62
+        },
+        {
+          "bin_maxbins_10_temp_min": 15,
+          "bin_maxbins_10_temp_min_end": 20,
+          "bin_maxbins_10_temp_max": 30,
+          "bin_maxbins_10_temp_max_end": 35,
+          "__count": 44
+        },
+        {
+          "bin_maxbins_10_temp_min": 10,
+          "bin_maxbins_10_temp_min_end": 15,
+          "bin_maxbins_10_temp_max": 30,
+          "bin_maxbins_10_temp_max_end": 35,
+          "__count": 17
+        },
+        {
+          "bin_maxbins_10_temp_min": 15,
+          "bin_maxbins_10_temp_min_end": 20,
+          "bin_maxbins_10_temp_max": 15,
+          "bin_maxbins_10_temp_max_end": 20,
+          "__count": 6
+        },
+        {
+          "bin_maxbins_10_temp_min": -10,
+          "bin_maxbins_10_temp_min_end": -5,
+          "bin_maxbins_10_temp_max": 0,
+          "bin_maxbins_10_temp_max_end": 5,
+          "__count": 2
+        },
+        {
+          "bin_maxbins_10_temp_min": -10,
+          "bin_maxbins_10_temp_min_end": -5,
+          "bin_maxbins_10_temp_max": -5,
+          "bin_maxbins_10_temp_max_end": 0,
+          "__count": 2
+        },
+        {
+          "bin_maxbins_10_temp_min": 15,
+          "bin_maxbins_10_temp_min_end": 20,
+          "bin_maxbins_10_temp_max": 35,
+          "bin_maxbins_10_temp_max_end": 40,
+          "__count": 2
+        },
+        {
+          "bin_maxbins_10_temp_min": -5,
+          "bin_maxbins_10_temp_min_end": 0,
+          "bin_maxbins_10_temp_max": 10,
+          "bin_maxbins_10_temp_max_end": 15,
+          "__count": 2
+        }
+      ],
+      "fields": [
+        {
+          "field": "bin_maxbins_10_temp_min",
+          "type": "quantitative",
+          "bin": true,
+          "label": "binned temp_min"
+        },
+        {
+          "field": "bin_maxbins_10_temp_max",
+          "type": "quantitative",
+          "bin": true,
+          "label": "binned temp_max"
+        },
+        {
+          "aggregate": "count",
+          "type": "quantitative",
+          "field": "__count",
+          "label": "count"
+        }
+      ],
+      "axes": [
+        {
+          "axisType": "x",
+          "field": "bin_maxbins_10_temp_min",
+          "ticks": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "axisType": "y",
+          "field": "bin_maxbins_10_temp_max",
+          "ticks": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        }
+      ],
+      "legends": [
+        {
+          "channel": "size",
+          "field": "__count"
+        }
+      ],
+      "mark": "point"
+    }
+  ]
+}

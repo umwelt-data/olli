@@ -1,45 +1,15 @@
 <script type="module">
-let spec = {
-  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "data": { 
-    "values": [
-      {"category": 1, "value": 4},
-      {"category": 2, "value": 6},
-      {"category": 3, "value": 10},
-      {"category": 4, "value": 3},
-      {"category": 5, "value": 7},
-      {"category": 6, "value": 8}
-    ]
-   },
-  "description": "Pie Chart with percentage_tooltip",
-  "mark": {
-    "type": "arc", 
-    "tooltip": true
-  },
-  "encoding": {
-    "theta": {
-      "field": "value", 
-      "type": "quantitative", 
-      "stack": "normalize"
-    },
-    "color": {
-      "field": "category", 
-      "type": "nominal"
-    }
-  }
-}
-
-let vegaSpec = vegaLite.compile(spec).spec
+const spec = {{ site.data.vl_specs.pieChart | jsonify }};
+const vegaSpec = vegaLite.compile(spec).spec;
 const runtime = vega.parse(vegaSpec);
 const vegaRender = document.getElementById('Visualization-Vega-Lite');
-let view = new vega.View(runtime)
+const view = new vega.View(runtime)
   .logLevel(vega.Warn)
   .initialize(vegaRender)
   .renderer('svg')
   .hover()
   .run();
-
 OlliAdapters.VegaLiteAdapter(spec).then(olliVisSpec => {
-  document.getElementById("AccessibilityTree-Vega-Lite").append(olli(olliVisSpec))
-})
+  document.getElementById("AccessibilityTree-Vega-Lite").append(olli(olliVisSpec));
+});
 </script>

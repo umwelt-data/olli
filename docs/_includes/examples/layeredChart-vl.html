@@ -1,36 +1,15 @@
 <script type="module">
-  let spec = {
-    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-    "description": "Plot showing average data with raw values in the background.",
-    "data": { "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/stocks.csv" },
-    "transform": [{"filter": "datum.symbol==='GOOG'"}],
-    "layer": [{
-      "mark": {"type": "point", "opacity": 0.3},
-      "encoding": {
-        "x": {"timeUnit":"year", "field": "date"},
-        "y": {"field": "price", "type": "quantitative"}
-      }
-    }, {
-      "mark": "line",
-      "encoding": {
-        "x": {"timeUnit":"year", "field": "date"},
-        "y": {"aggregate": "mean", "field": "price"}
-      }
-    }]
-  }
-
-  let vegaSpec = vegaLite.compile(spec).spec
-  const runtime = vega.parse(vegaSpec);
-  const vegaRender = document.getElementById('Visualization-Vega-Lite');
-  let view = new vega.View(runtime)
-    .logLevel(vega.Warn)
-    .initialize(vegaRender)
-    .renderer('svg')
-    .hover()
-    .runAsync()
-    .then(v => {
-      OlliAdapters.VegaLiteAdapter(spec).then(olliVisSpec => {
-        document.getElementById("AccessibilityTree-Vega-Lite").append(olli(olliVisSpec))
-      })
-    });
+const spec = {{ site.data.vl_specs.layeredChart | jsonify }};
+const vegaSpec = vegaLite.compile(spec).spec;
+const runtime = vega.parse(vegaSpec);
+const vegaRender = document.getElementById('Visualization-Vega-Lite');
+const view = new vega.View(runtime)
+  .logLevel(vega.Warn)
+  .initialize(vegaRender)
+  .renderer('svg')
+  .hover()
+  .run();
+OlliAdapters.VegaLiteAdapter(spec).then(olliVisSpec => {
+  document.getElementById("AccessibilityTree-Vega-Lite").append(olli(olliVisSpec));
+});
 </script>

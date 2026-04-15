@@ -7,8 +7,16 @@
   "scripts": {
     "start": "webpack --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "gen-fixtures": "TZ=UTC vite-node --config vitest.config.ts scripts/gen-fixtures.ts",
     "prettier:check": "npx prettier --check .",
     "prettier:write": "npx prettier --write ."
+  },
+  "devDependencies": {
+    "vitest": "^1.6.0",
+    "jsdom": "^24.0.0",
+    "@types/jsdom": "^21.1.6"
   },
   "files": ["dist"],
   "repository": {

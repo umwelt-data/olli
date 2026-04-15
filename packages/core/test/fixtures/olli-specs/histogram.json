@@ -1,0 +1,96 @@
+{
+  "data": [
+    {
+      "bin_maxbins_10_IMDB Rating": 6,
+      "bin_maxbins_10_IMDB Rating_end": 7,
+      "__count": 985
+    },
+    {
+      "bin_maxbins_10_IMDB Rating": 3,
+      "bin_maxbins_10_IMDB Rating_end": 4,
+      "__count": 100
+    },
+    {
+      "bin_maxbins_10_IMDB Rating": 7,
+      "bin_maxbins_10_IMDB Rating_end": 8,
+      "__count": 741
+    },
+    {
+      "bin_maxbins_10_IMDB Rating": 5,
+      "bin_maxbins_10_IMDB Rating_end": 6,
+      "__count": 633
+    },
+    {
+      "bin_maxbins_10_IMDB Rating": 8,
+      "bin_maxbins_10_IMDB Rating_end": 9,
+      "__count": 204
+    },
+    {
+      "bin_maxbins_10_IMDB Rating": 2,
+      "bin_maxbins_10_IMDB Rating_end": 3,
+      "__count": 43
+    },
+    {
+      "bin_maxbins_10_IMDB Rating": 4,
+      "bin_maxbins_10_IMDB Rating_end": 5,
+      "__count": 273
+    },
+    {
+      "bin_maxbins_10_IMDB Rating": 9,
+      "bin_maxbins_10_IMDB Rating_end": 10,
+      "__count": 4
+    },
+    {
+      "bin_maxbins_10_IMDB Rating": 1,
+      "bin_maxbins_10_IMDB Rating_end": 2,
+      "__count": 5
+    }
+  ],
+  "fields": [
+    {
+      "bin": true,
+      "field": "bin_maxbins_10_IMDB Rating",
+      "label": "binned IMDB Rating",
+      "type": "quantitative"
+    },
+    {
+      "aggregate": "count",
+      "field": "__count",
+      "label": "count",
+      "type": "quantitative"
+    }
+  ],
+  "axes": [
+    {
+      "axisType": "x",
+      "field": "bin_maxbins_10_IMDB Rating",
+      "ticks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "axisType": "y",
+      "field": "__count",
+      "ticks": [
+        0,
+        200,
+        400,
+        600,
+        800,
+        1000
+      ]
+    }
+  ],
+  "legends": [],
+  "guides": [],
+  "mark": "bar"
+}

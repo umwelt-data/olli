@@ -1,37 +1,15 @@
 <script type="module">
-let spec = {
-  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "data": {
-    "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/penguins.json"
-  },
-  "mark": "point",
-  "encoding": {
-    "x": {
-      "field": "Flipper Length (mm)",
-      "type": "quantitative",
-      "scale": { "zero": false }
-    },
-    "y": {
-      "field": "Body Mass (g)",
-      "type": "quantitative",
-      "scale": { "zero": false }
-    },
-    "color": { "field": "Species", "type": "nominal" },
-    "shape": { "field": "Species", "type": "nominal" }
-  }
-}
-
-let vegaSpec = vegaLite.compile(spec).spec
+const spec = {{ site.data.vl_specs.scatterplot | jsonify }};
+const vegaSpec = vegaLite.compile(spec).spec;
 const runtime = vega.parse(vegaSpec);
 const vegaRender = document.getElementById('Visualization-Vega-Lite');
-let view = new vega.View(runtime)
+const view = new vega.View(runtime)
   .logLevel(vega.Warn)
   .initialize(vegaRender)
   .renderer('svg')
   .hover()
   .run();
-
 OlliAdapters.VegaLiteAdapter(spec).then(olliVisSpec => {
-  document.getElementById("AccessibilityTree-Vega-Lite").append(olli(olliVisSpec))
-})
+  document.getElementById("AccessibilityTree-Vega-Lite").append(olli(olliVisSpec));
+});
 </script>

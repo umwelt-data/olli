@@ -1,0 +1,29 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": "Distribution of Body Mass of Penguins",
+  "data": {
+    "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/penguins.json"
+  },
+  "mark": "area",
+  "encoding": {
+    "x": {
+      "field": "value",
+      "type": "quantitative",
+      "title": "Body Mass (g)"
+    },
+    "y": {
+      "field": "density",
+      "type": "quantitative",
+      "stack": "zero"
+    }
+  },
+  "width": 400,
+  "height": 80,
+  "transform": [
+    {
+      "density": "Body Mass (g)",
+      "groupby": ["Species"],
+      "extent": [2500, 6500]
+    }
+  ]
+}

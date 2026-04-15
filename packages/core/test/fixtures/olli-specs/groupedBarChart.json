@@ -1,0 +1,115 @@
+{
+  "data": [
+    {
+      "category": "A",
+      "group": "x",
+      "value": 0.1,
+      "value_start": 0,
+      "value_end": 0.1
+    },
+    {
+      "category": "A",
+      "group": "y",
+      "value": 0.6,
+      "value_start": 0,
+      "value_end": 0.6
+    },
+    {
+      "category": "A",
+      "group": "z",
+      "value": 0.9,
+      "value_start": 0,
+      "value_end": 0.9
+    },
+    {
+      "category": "B",
+      "group": "x",
+      "value": 0.7,
+      "value_start": 0,
+      "value_end": 0.7
+    },
+    {
+      "category": "B",
+      "group": "y",
+      "value": 0.2,
+      "value_start": 0,
+      "value_end": 0.2
+    },
+    {
+      "category": "B",
+      "group": "z",
+      "value": 1.1,
+      "value_start": 0,
+      "value_end": 1.1
+    },
+    {
+      "category": "C",
+      "group": "x",
+      "value": 0.6,
+      "value_start": 0,
+      "value_end": 0.6
+    },
+    {
+      "category": "C",
+      "group": "y",
+      "value": 0.1,
+      "value_start": 0,
+      "value_end": 0.1
+    },
+    {
+      "category": "C",
+      "group": "z",
+      "value": 0.2,
+      "value_start": 0,
+      "value_end": 0.2
+    }
+  ],
+  "fields": [
+    {
+      "field": "category",
+      "label": "category",
+      "type": "nominal"
+    },
+    {
+      "field": "value",
+      "type": "quantitative",
+      "label": "value"
+    },
+    {
+      "field": "group",
+      "label": "group",
+      "type": "nominal"
+    }
+  ],
+  "axes": [
+    {
+      "axisType": "x",
+      "field": "category",
+      "ticks": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "axisType": "y",
+      "field": "value",
+      "ticks": [
+        0,
+        0.2,
+        0.4,
+        0.6,
+        0.8,
+        1
+      ]
+    }
+  ],
+  "legends": [
+    {
+      "channel": "color",
+      "field": "group"
+    }
+  ],
+  "guides": [],
+  "mark": "bar"
+}

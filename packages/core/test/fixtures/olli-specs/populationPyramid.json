@@ -1,0 +1,354 @@
+{
+  "description": "A population pyramid for the US in 2000, created using stack.",
+  "data": [
+    {
+      "age": 0,
+      "gender": "Male",
+      "sum_signed_people": 9735380,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": 9735380
+    },
+    {
+      "age": 0,
+      "gender": "Female",
+      "sum_signed_people": -9310714,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": -9310714
+    },
+    {
+      "age": 5,
+      "gender": "Male",
+      "sum_signed_people": 10552146,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": 10552146
+    },
+    {
+      "age": 5,
+      "gender": "Female",
+      "sum_signed_people": -10069564,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": -10069564
+    },
+    {
+      "age": 10,
+      "gender": "Male",
+      "sum_signed_people": 10563233,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": 10563233
+    },
+    {
+      "age": 10,
+      "gender": "Female",
+      "sum_signed_people": -10022524,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": -10022524
+    },
+    {
+      "age": 15,
+      "gender": "Male",
+      "sum_signed_people": 10237419,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": 10237419
+    },
+    {
+      "age": 15,
+      "gender": "Female",
+      "sum_signed_people": -9692669,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": -9692669
+    },
+    {
+      "age": 20,
+      "gender": "Male",
+      "sum_signed_people": 9731315,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": 9731315
+    },
+    {
+      "age": 20,
+      "gender": "Female",
+      "sum_signed_people": -9324244,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": -9324244
+    },
+    {
+      "age": 25,
+      "gender": "Male",
+      "sum_signed_people": 9659493,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": 9659493
+    },
+    {
+      "age": 25,
+      "gender": "Female",
+      "sum_signed_people": -9518507,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": -9518507
+    },
+    {
+      "age": 30,
+      "gender": "Male",
+      "sum_signed_people": 10205879,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": 10205879
+    },
+    {
+      "age": 30,
+      "gender": "Female",
+      "sum_signed_people": -10119296,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": -10119296
+    },
+    {
+      "age": 35,
+      "gender": "Male",
+      "sum_signed_people": 11475182,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": 11475182
+    },
+    {
+      "age": 35,
+      "gender": "Female",
+      "sum_signed_people": -11635647,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": -11635647
+    },
+    {
+      "age": 40,
+      "gender": "Male",
+      "sum_signed_people": 11320252,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": 11320252
+    },
+    {
+      "age": 40,
+      "gender": "Female",
+      "sum_signed_people": -11488578,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": -11488578
+    },
+    {
+      "age": 45,
+      "gender": "Male",
+      "sum_signed_people": 9925006,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": 9925006
+    },
+    {
+      "age": 45,
+      "gender": "Female",
+      "sum_signed_people": -10261253,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": -10261253
+    },
+    {
+      "age": 50,
+      "gender": "Male",
+      "sum_signed_people": 8507934,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": 8507934
+    },
+    {
+      "age": 50,
+      "gender": "Female",
+      "sum_signed_people": -8911133,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": -8911133
+    },
+    {
+      "age": 55,
+      "gender": "Male",
+      "sum_signed_people": 6459082,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": 6459082
+    },
+    {
+      "age": 55,
+      "gender": "Female",
+      "sum_signed_people": -6921268,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": -6921268
+    },
+    {
+      "age": 60,
+      "gender": "Male",
+      "sum_signed_people": 5123399,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": 5123399
+    },
+    {
+      "age": 60,
+      "gender": "Female",
+      "sum_signed_people": -5668961,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": -5668961
+    },
+    {
+      "age": 65,
+      "gender": "Male",
+      "sum_signed_people": 4453623,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": 4453623
+    },
+    {
+      "age": 65,
+      "gender": "Female",
+      "sum_signed_people": -4804784,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": -4804784
+    },
+    {
+      "age": 70,
+      "gender": "Male",
+      "sum_signed_people": 3792145,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": 3792145
+    },
+    {
+      "age": 70,
+      "gender": "Female",
+      "sum_signed_people": -5184855,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": -5184855
+    },
+    {
+      "age": 75,
+      "gender": "Male",
+      "sum_signed_people": 2912655,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": 2912655
+    },
+    {
+      "age": 75,
+      "gender": "Female",
+      "sum_signed_people": -4355644,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": -4355644
+    },
+    {
+      "age": 80,
+      "gender": "Male",
+      "sum_signed_people": 1902638,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": 1902638
+    },
+    {
+      "age": 80,
+      "gender": "Female",
+      "sum_signed_people": -3221898,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": -3221898
+    },
+    {
+      "age": 85,
+      "gender": "Male",
+      "sum_signed_people": 970357,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": 970357
+    },
+    {
+      "age": 85,
+      "gender": "Female",
+      "sum_signed_people": -1981156,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": -1981156
+    },
+    {
+      "age": 90,
+      "gender": "Male",
+      "sum_signed_people": 336303,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": 336303
+    },
+    {
+      "age": 90,
+      "gender": "Female",
+      "sum_signed_people": -1064581,
+      "sum_signed_people_start": 0,
+      "sum_signed_people_end": -1064581
+    }
+  ],
+  "fields": [
+    {
+      "aggregate": "sum",
+      "field": "sum_signed_people",
+      "title": "population",
+      "axis": {
+        "format": "s"
+      },
+      "label": "sum signed_people",
+      "type": "quantitative"
+    },
+    {
+      "field": "age",
+      "axis": null,
+      "sort": "descending",
+      "label": "age",
+      "type": "quantitative"
+    },
+    {
+      "field": "gender",
+      "scale": {
+        "range": [
+          "#675193",
+          "#ca8861"
+        ]
+      },
+      "legend": {
+        "orient": "top",
+        "title": null
+      },
+      "label": "gender",
+      "type": "nominal"
+    }
+  ],
+  "axes": [
+    {
+      "axisType": "x",
+      "field": "sum_signed_people",
+      "title": "population",
+      "ticks": [
+        -12000000,
+        -10000000,
+        -8000000,
+        -6000000,
+        -4000000,
+        -2000000,
+        0,
+        2000000,
+        4000000,
+        6000000,
+        8000000,
+        10000000,
+        12000000
+      ]
+    },
+    {
+      "axisType": "y",
+      "field": "age",
+      "ticks": [
+        -12000000,
+        -10000000,
+        -8000000,
+        -6000000,
+        -4000000,
+        -2000000,
+        0,
+        2000000,
+        4000000,
+        6000000,
+        8000000,
+        10000000,
+        12000000
+      ]
+    }
+  ],
+  "legends": [
+    {
+      "channel": "color",
+      "field": "gender"
+    }
+  ],
+  "guides": [],
+  "mark": "bar"
+}

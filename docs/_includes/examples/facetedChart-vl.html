@@ -1,44 +1,15 @@
 <script type="module">
-let spec = {
-  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "Becker's Barley Trellis Plot.",
-  "data": { "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/barley.json" },
-  "mark": "point",
-  "height": { "step": 12 },
-  "encoding": {
-    "facet": {
-      "field": "site",
-      "type": "ordinal",
-      "columns": 2,
-      "sort": { "op": "median", "field": "yield" }
-    },
-    "x": {
-      "field": "yield",
-      "type": "quantitative",
-      "scale": { "zero": false }
-    },
-    "y": {
-      "field": "variety",
-      "type": "ordinal",
-      "sort": "-x"
-    },
-    "color": { "field": "year", "type": "nominal" }
-  }
-}
-
-
-let vegaSpec = vegaLite.compile(spec).spec
+const spec = {{ site.data.vl_specs.facetedChart | jsonify }};
+const vegaSpec = vegaLite.compile(spec).spec;
 const runtime = vega.parse(vegaSpec);
 const vegaRender = document.getElementById('Visualization-Vega-Lite');
-let view = new vega.View(runtime)
+const view = new vega.View(runtime)
   .logLevel(vega.Warn)
   .initialize(vegaRender)
   .renderer('svg')
   .hover()
-  .runAsync()
-  .then(v => {
-    OlliAdapters.VegaLiteAdapter(spec).then(olliVisSpec => {
-      document.getElementById("AccessibilityTree-Vega-Lite").append(olli(olliVisSpec))
-    })
-  });
-  </script>
+  .run();
+OlliAdapters.VegaLiteAdapter(spec).then(olliVisSpec => {
+  document.getElementById("AccessibilityTree-Vega-Lite").append(olli(olliVisSpec));
+});
+</script>
