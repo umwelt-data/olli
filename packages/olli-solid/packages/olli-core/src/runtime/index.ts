@@ -8,3 +8,5 @@ export type { PredicateProvider, PredicateProviderRegistry } from './predicates.
 export { createPredicateProviderRegistry, composeAncestorPredicates } from './predicates.js';
 export type { MoveDirection, NavigationRuntime } from './runtime.js';
 export { createNavigationRuntime } from './runtime.js';
+export type { OlliDomain } from './domain.js';
+export { registerDomain } from './domain.js';

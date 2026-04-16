@@ -34,6 +34,21 @@ importers:
         specifier: ^2.1.8
         version: 2.1.9(jsdom@25.0.1)
 
+  examples/pulley-medium:
+    dependencies:
+      olli-core:
+        specifier: workspace:*
+        version: link:../../packages/olli-core
+      olli-diagram:
+        specifier: workspace:*
+        version: link:../../packages/olli-diagram
+      olli-render-solid:
+        specifier: workspace:*
+        version: link:../../packages/olli-render-solid
+      solid-js:
+        specifier: ^1.9.3
+        version: 1.9.12
+
   packages/olli-adapters:
     dependencies:
       olli-vis:
@@ -51,12 +66,6 @@ importers:
       olli-core:
         specifier: workspace:*
         version: link:../olli-core
-      olli-render-solid:
-        specifier: workspace:*
-        version: link:../olli-render-solid
-      solid-js:
-        specifier: ^1.9.3
-        version: 1.9.12
 
   packages/olli-js:
     dependencies:

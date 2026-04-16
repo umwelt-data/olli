@@ -7,9 +7,15 @@ export default defineConfig({
     conditions: ['development', 'browser'],
   },
   test: {
-    include: ['packages/*/src/**/*.test.ts', 'packages/*/src/**/*.test.tsx'],
+    include: [
+      'packages/*/src/**/*.test.ts',
+      'packages/*/src/**/*.test.tsx',
+      'examples/*/src/**/*.test.ts',
+      'examples/*/src/**/*.test.tsx',
+    ],
     environmentMatchGlobs: [
       ['packages/olli-render-solid/**', 'jsdom'],
+      ['examples/**', 'jsdom'],
     ],
     environment: 'node',
     passWithNoTests: true,

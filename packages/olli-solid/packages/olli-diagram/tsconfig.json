@@ -5,5 +5,5 @@
     "rootDir": "src"
   },
   "include": ["src/**/*"],
-  "references": [{ "path": "../olli-core" }, { "path": "../olli-render-solid" }]
+  "references": [{ "path": "../olli-core" }]
 }
