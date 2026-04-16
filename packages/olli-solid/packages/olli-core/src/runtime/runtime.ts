@@ -2,6 +2,15 @@ import { createMemo, createSignal, type Accessor } from 'solid-js';
 import type { Hyperedge, HyperedgeId, Hypergraph } from '../hypergraph/types.js';
 import type { Selection } from '../predicate/types.js';
 import { EMPTY_AND } from '../predicate/types.js';
+import type { CustomizationStore } from '../description/customization.js';
+import { createCustomizationStore } from '../description/customization.js';
+import { describe } from '../description/describe.js';
+import {
+  createTokenRegistry,
+  registerBuiltinTokens,
+  type DescriptionToken,
+  type TokenRegistry,
+} from '../description/tokens.js';
 import {
   buildNavTree,
   isVirtualNavId,
@@ -56,9 +65,15 @@ export interface NavigationRuntime<P> {
   registerKeybinding(binding: KeybindingContribution<P>): void;
   registerDialog(dialog: DialogContribution<P>): void;
   registerPredicateProvider(provider: PredicateProvider<P>): void;
+  registerToken(token: DescriptionToken<P>): void;
   keybindings: KeybindingRegistry<P>;
   dialogs: DialogRegistry<P>;
   predicateProviders: PredicateProviderRegistry<P>;
+  tokens: TokenRegistry<P>;
+  customization: CustomizationStore;
+
+  // Descriptions
+  getDescriptionFor(navId: NavNodeId): Accessor<string>;
 }
 
 export function createNavigationRuntime<P>(initialGraph: Hypergraph<P>): NavigationRuntime<P> {
@@ -76,6 +91,9 @@ export function createNavigationRuntime<P>(initialGraph: Hypergraph<P>): Navigat
   const keybindings = createKeybindingRegistry<P>();
   const dialogs = createDialogRegistry<P>();
   const predicateProviders = createPredicateProviderRegistry<P>();
+  const tokens = createTokenRegistry<P>();
+  registerBuiltinTokens(tokens);
+  const customization = createCustomizationStore();
 
   function getHyperedge(id: HyperedgeId): Hyperedge<P> | undefined {
     return hypergraph().edges.get(id);
@@ -257,9 +275,13 @@ export function createNavigationRuntime<P>(initialGraph: Hypergraph<P>): Navigat
     registerKeybinding: (b) => keybindings.register(b),
     registerDialog: (d) => dialogs.register(d),
     registerPredicateProvider: (p) => predicateProviders.register(p),
+    registerToken: (t) => tokens.register(t),
     keybindings,
     dialogs,
     predicateProviders,
+    tokens,
+    customization,
+    getDescriptionFor: (navId) => describe(runtime, tokens, customization, navId),
   };
 
   return runtime;
