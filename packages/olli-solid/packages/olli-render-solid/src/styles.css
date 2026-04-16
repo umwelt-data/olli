@@ -1,0 +1,48 @@
+.olli-tree,
+.olli-tree-group {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.olli-tree-group {
+  padding-left: 1.5em;
+}
+
+.olli-tree-item {
+  outline: none;
+  padding: 2px 4px;
+}
+
+.olli-tree-item[aria-expanded='false'] > .olli-tree-group {
+  display: none;
+}
+
+.olli-tree-item.olli-focused > .olli-node-label {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+
+.olli-tree-item.olli-virtual > .olli-node-label {
+  font-style: italic;
+}
+
+.olli-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.olli-dialog {
+  background: white;
+  padding: 1em;
+  border-radius: 4px;
+  min-width: 320px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+}
