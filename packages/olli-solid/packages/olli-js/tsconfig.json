@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "include": ["src/**/*"],
+  "references": [
+    { "path": "../olli-core" },
+    { "path": "../olli-render-solid" },
+    { "path": "../olli-vis" },
+    { "path": "../olli-diagram" },
+    { "path": "../olli-adapters" }
+  ]
+}

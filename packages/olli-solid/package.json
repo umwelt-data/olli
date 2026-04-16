@@ -1,0 +1,20 @@
+{
+  "name": "olli-solid-workspace",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check:boundaries": "node scripts/check-import-boundaries.mjs",
+    "check": "pnpm run check:boundaries && pnpm run build && pnpm run test"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
+  },
+  "dependencies": {
+    "solid-js": "^1.9.3"
+  }
+}
