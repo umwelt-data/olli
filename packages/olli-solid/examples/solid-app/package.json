@@ -1,0 +1,17 @@
+{
+  "name": "solid-app-example",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.tsx",
+  "types": "./src/index.tsx",
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "dependencies": {
+    "olli-core": "workspace:*",
+    "olli-render-solid": "workspace:*",
+    "olli-vis": "workspace:*",
+    "solid-js": "^1.9.3"
+  }
+}
