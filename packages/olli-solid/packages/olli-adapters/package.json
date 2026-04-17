@@ -13,5 +13,13 @@
   },
   "dependencies": {
     "olli-vis": "workspace:*"
+  },
+  "peerDependencies": {
+    "vega": "^5.0.0",
+    "vega-lite": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "vega": { "optional": true },
+    "vega-lite": { "optional": true }
   }
 }
