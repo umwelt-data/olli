@@ -56,18 +56,23 @@ describe('NavigationRuntime — single-parent navigation', () => {
     });
   });
 
-  it('Right/Left cycles siblings', () => {
+  it('Right/Left clamps at boundaries', () => {
     createRoot((dispose) => {
       const rt = createNavigationRuntime(singleParentTree());
       rt.moveFocus('down');
+      expect(rt.focusedNavId()).toBe('r/a');
       rt.moveFocus('right');
       expect(rt.focusedNavId()).toBe('r/b');
       rt.moveFocus('right');
       expect(rt.focusedNavId()).toBe('r/c');
       rt.moveFocus('right');
+      expect(rt.focusedNavId()).toBe('r/c');
+      rt.moveFocus('left');
+      expect(rt.focusedNavId()).toBe('r/b');
+      rt.moveFocus('left');
       expect(rt.focusedNavId()).toBe('r/a');
       rt.moveFocus('left');
-      expect(rt.focusedNavId()).toBe('r/c');
+      expect(rt.focusedNavId()).toBe('r/a');
       dispose();
     });
   });

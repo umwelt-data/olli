@@ -173,13 +173,13 @@ export function createNavigationRuntime<P>(initialGraph: Hypergraph<P>): Navigat
         case 'down':
           return;
         case 'left': {
-          const next = (cursor - 1 + opts.length) % opts.length;
-          setVirtualCursor(current, next);
+          if (cursor <= 0) return;
+          setVirtualCursor(current, cursor - 1);
           return;
         }
         case 'right': {
-          const next = (cursor + 1) % opts.length;
-          setVirtualCursor(current, next);
+          if (cursor >= opts.length - 1) return;
+          setVirtualCursor(current, cursor + 1);
           return;
         }
       }
@@ -211,9 +211,9 @@ export function createNavigationRuntime<P>(initialGraph: Hypergraph<P>): Navigat
         if (!parent) return;
         const idx = parent.childNavIds.indexOf(current);
         if (idx < 0) return;
-        const delta = direction === 'right' ? 1 : -1;
-        const n = parent.childNavIds.length;
-        const target = parent.childNavIds[(idx + delta + n) % n];
+        const nextIdx = direction === 'right' ? idx + 1 : idx - 1;
+        if (nextIdx < 0 || nextIdx >= parent.childNavIds.length) return;
+        const target = parent.childNavIds[nextIdx];
         if (target) focus(target);
         return;
       }
