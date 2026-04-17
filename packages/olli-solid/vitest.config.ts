@@ -15,6 +15,7 @@ export default defineConfig({
     ],
     environmentMatchGlobs: [
       ['packages/olli-render-solid/**', 'jsdom'],
+      ['packages/olli-vis/**', 'jsdom'],
       ['examples/**', 'jsdom'],
     ],
     environment: 'node',
