@@ -1,6 +1,6 @@
 # Quickstart
 
-This is the developer quickstart page. To get started as a user, check the [guide](/guide).
+This is the developer quickstart page. To get started as a user, check the [guide](/guide/).
 
 Render a Vega-Lite bar chart with an Olli accessible tree next to it.
 

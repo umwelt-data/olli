@@ -14,6 +14,13 @@ export default defineConfig({
   cleanUrls: true,
   lastUpdated: true,
   lang: 'en-US',
+  srcExclude: ['**/README.md','**/CLAUDE.md'],
+
+  ignoreDeadLinks: [
+    // Dynamic gallery routes are generated at build time from [id].paths.ts;
+    // the link checker can't see them.
+    /^\/gallery\/[^/]+$/,
+  ],
 
   head: [['link', { rel: 'icon', href: '/olli/favicon.svg', type: 'image/svg+xml' }]],
 
