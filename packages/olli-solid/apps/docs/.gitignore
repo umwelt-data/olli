@@ -1,5 +1,3 @@
 .vitepress/dist/
 .vitepress/cache/
-.vitepress/sidebar.api.ts
-api/
 node_modules/

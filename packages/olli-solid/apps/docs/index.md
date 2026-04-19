@@ -7,8 +7,8 @@ hero:
   tagline: Screen-reader navigation and keyboard exploration over any Vega-Lite chart, diagram, or custom visualization.
   actions:
     - theme: brand
-      text: Quickstart
-      link: /guide/quickstart
+      text: Guide
+      link: /guide/
     - theme: alt
       text: Browse the gallery
       link: /gallery/
@@ -41,3 +41,23 @@ olli(spec, document.getElementById('olli-tree')!);
 ```
 
 See [Quickstart](/guide/quickstart) for the full pipeline, or the [Gallery](/gallery/) for runnable examples.
+
+## Contributors
+
+Point of contact:
+- [Jonathan Zong](mailto:jzong@colorado.edu)
+
+
+Contributors:
+- Matt Blanco
+- Daniel Hajas
+- Jonathan Zong
+- Arvind Satyanarayan
+- Shuli Jones
+- Isabella Pedraza Pineros
+- Catherine Mei
+- Josh Pollock
+
+## Research
+
+Learn more about the [research behind Olli](https://data-and-design.org/projects/olli/).

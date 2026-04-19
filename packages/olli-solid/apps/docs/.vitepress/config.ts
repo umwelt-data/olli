@@ -1,6 +1,5 @@
 import { defineConfig } from 'vitepress';
 import solidPlugin from 'vite-plugin-solid';
-import { apiSidebar } from './sidebar.api.js';
 
 export default defineConfig({
   vite: {
@@ -22,7 +21,6 @@ export default defineConfig({
     nav: [
       { text: 'Guide', link: '/guide/', activeMatch: '/guide/' },
       { text: 'Gallery', link: '/gallery/', activeMatch: '/gallery/' },
-      { text: 'API', link: '/api/', activeMatch: '/api/' },
     ],
 
     sidebar: {
@@ -55,7 +53,6 @@ export default defineConfig({
           items: [{ text: 'All examples', link: '/gallery/' }],
         },
       ],
-      '/api/': apiSidebar,
     },
 
     socialLinks: [{ icon: 'github', link: 'https://github.com/umwelt-data/olli' }],
