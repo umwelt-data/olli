@@ -3,7 +3,20 @@ import { createNavigationRuntime, type Hypergraph } from 'olli-core';
 import { mount, registerDefaultKeybindings } from 'olli-render-solid';
 import { buildHandle, type OlliHandle, type OlliOptions } from './handle.js';
 import { bridgeSignal } from './bridge.js';
+import { registerForJumpHotkey } from './globalJumpHotkey.js';
 
+/**
+ * Render an accessible tree view of an {@link Hypergraph} into the given container.
+ *
+ * Returns an {@link OlliHandle} you can use to drive focus, read or set the
+ * current selection, subscribe to changes, and ultimately tear the view down.
+ *
+ * @example
+ * ```ts
+ * const handle = olli(graph, document.getElementById('tree')!);
+ * handle.onSelectionChange((sel) => console.log('olli selection:', sel));
+ * ```
+ */
 export function olli<P = unknown>(
   graph: Hypergraph<P>,
   container: HTMLElement,
@@ -41,11 +54,14 @@ export function olli<P = unknown>(
       bridgeSignal(() => runtime.selection(), cb);
     }
 
+    let unregisterHotkey: (() => void) | undefined;
     const destroy = () => {
+      unregisterHotkey?.();
       unmount();
       dispose();
     };
     handle = buildHandle(runtime, destroy, bridgeSignal);
+    unregisterHotkey = registerForJumpHotkey(container, handle);
   });
 
   return handle;

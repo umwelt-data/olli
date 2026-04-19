@@ -1,0 +1,31 @@
+{
+  "name": "docs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm run build:api && vitepress dev",
+    "build": "pnpm run build:api && vitepress build",
+    "build:api": "tsx scripts/build-typedoc.ts",
+    "preview": "vitepress preview"
+  },
+  "dependencies": {
+    "olli-adapters": "workspace:*",
+    "olli-core": "workspace:*",
+    "olli-diagram": "workspace:*",
+    "olli-js": "workspace:*",
+    "olli-render-solid": "workspace:*",
+    "olli-vis": "workspace:*",
+    "@umwelt-data/umwelt-utils": "link:../../../../../umwelt-utils",
+    "vega": "^5.30.0",
+    "vega-lite": "^5.19.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typedoc": "^0.28.0",
+    "typedoc-plugin-markdown": "^4.8.0",
+    "vite-plugin-solid": "^2.11.0",
+    "vitepress": "^1.5.0",
+    "vue": "^3.4.0"
+  }
+}

@@ -1,0 +1,41 @@
+import type { VisualizationExample } from '../types.js';
+
+export const populationPyramid: VisualizationExample = {
+  id: 'population-pyramid',
+  title: 'Population pyramid',
+  domain: 'visualization',
+  toolkit: 'vega-lite',
+  tags: ['bar', 'diverging', 'demographic'],
+  description: 'A US population pyramid for 2000, rendered as a diverging bar chart.',
+  spec: {
+    $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+    description: 'A population pyramid for the US in 2000, created using stack.',
+    data: { url: 'https://raw.githubusercontent.com/vega/vega-datasets/next/data/population.json' },
+    transform: [
+      { filter: 'datum.year == 2000' },
+      { calculate: "datum.sex == 2 ? 'Female' : 'Male'", as: 'gender' },
+      { calculate: 'datum.sex == 2 ? -datum.people : datum.people', as: 'signed_people' },
+    ],
+    width: 300,
+    height: 200,
+    mark: 'bar',
+    encoding: {
+      x: {
+        aggregate: 'sum',
+        field: 'signed_people',
+        title: 'population',
+        axis: { format: 's' },
+      },
+      y: { field: 'age', axis: null, sort: 'descending' },
+      color: {
+        field: 'gender',
+        scale: { range: ['#675193', '#ca8861'] },
+        legend: { orient: 'top', title: null },
+      },
+    },
+    config: {
+      view: { stroke: null },
+      axis: { grid: false },
+    },
+  },
+};

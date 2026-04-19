@@ -43,4 +43,18 @@ export function registerDefaultKeybindings<P>(runtime: NavigationRuntime<P>): vo
       return true;
     },
   });
+  runtime.registerKeybinding({
+    key: 'Home',
+    handler: (rt) => {
+      rt.moveFocus('first');
+      return true;
+    },
+  });
+  runtime.registerKeybinding({
+    key: 'End',
+    handler: (rt) => {
+      rt.moveFocus('last');
+      return true;
+    },
+  });
 }

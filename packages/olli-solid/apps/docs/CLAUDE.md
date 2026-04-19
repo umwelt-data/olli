@@ -1,0 +1,13 @@
+Documentation writing style:
+- write terse docs prose, no marketing fluff, no trailing summaries.
+- keep sentences relatively short (1-2 concise clauses).
+- use active voice.
+- when writing instructions or example walkthroughs for a user, always assume they are using a screen reader.
+- be precise about instructions when giving example walkthroughs. don't skip steps or assume prior knowledge of olli.
+- when talking about other relevant information that's elsewhere on the docsite, include links.
+- avoid AI writing cliches such as "it's not X, it's Y" and overuse of em-dashes
+- if you do use em-dashes, don't put spaces before/after the dash
+- to avoid vague overclaiming, do not say that we "made it more accessible" without being precise about how / what we did.
+- prefer "a user" over "users", i.e. clear singular subjects in sentences
+- audience: documentation is focused on teaching external developers and people who want to add Olli to their own pages how to do so. it's also focused on teaching screen reader users who are end users of Olli how it works.
+- design decisions: it's good to talk about why we did things a certain way, and what benefit that brings to users and/or developers. be excited about intellectual ideas from the research behind olli (rich screen readers, benthic, etc) but while remaining practical and not overly academic.

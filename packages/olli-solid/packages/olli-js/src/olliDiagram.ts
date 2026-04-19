@@ -5,6 +5,7 @@ import { diagramDomain } from 'olli-diagram';
 import { mount, registerDefaultKeybindings } from 'olli-render-solid';
 import { buildHandle, type OlliHandle, type OlliOptions } from './handle.js';
 import { bridgeSignal } from './bridge.js';
+import { registerForJumpHotkey } from './globalJumpHotkey.js';
 
 export function olliDiagram(
   spec: DiagramSpec,
@@ -46,11 +47,14 @@ export function olliDiagram(
       bridgeSignal(() => runtime.selection(), cb);
     }
 
+    let unregisterHotkey: (() => void) | undefined;
     const destroy = () => {
+      unregisterHotkey?.();
       unmount();
       dispose();
     };
     handle = buildHandle(runtime, destroy, bridgeSignal);
+    unregisterHotkey = registerForJumpHotkey(container, handle);
   });
 
   return handle;

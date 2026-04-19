@@ -5,6 +5,7 @@ import { visDomain, elaborateSpec, lowerVisSpec } from 'olli-vis';
 import { mount, registerDefaultKeybindings } from 'olli-render-solid';
 import { buildHandle, type OlliHandle, type OlliOptions } from './handle.js';
 import { bridgeSignal } from './bridge.js';
+import { registerForJumpHotkey } from './globalJumpHotkey.js';
 
 export function olliVis(
   spec: OlliVisSpec,
@@ -47,11 +48,14 @@ export function olliVis(
       bridgeSignal(() => runtime.selection(), cb);
     }
 
+    let unregisterHotkey: (() => void) | undefined;
     const destroy = () => {
+      unregisterHotkey?.();
       unmount();
       dispose();
     };
     handle = buildHandle(runtime, destroy, bridgeSignal);
+    unregisterHotkey = registerForJumpHotkey(container, handle);
   });
 
   return handle;

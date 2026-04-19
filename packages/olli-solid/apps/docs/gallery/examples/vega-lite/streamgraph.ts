@@ -1,0 +1,26 @@
+import type { VisualizationExample } from '../types.js';
+
+export const streamgraph: VisualizationExample = {
+  id: 'streamgraph',
+  title: 'Streamgraph',
+  domain: 'visualization',
+  toolkit: 'vega-lite',
+  tags: ['area', 'streamgraph', 'temporal'],
+  description: 'A streamgraph of unemployment across industries.',
+  spec: {
+    $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+    width: 300,
+    height: 200,
+    data: { url: 'https://raw.githubusercontent.com/vega/vega-datasets/next/data/unemployment-across-industries.json' },
+    mark: 'area',
+    encoding: {
+      x: {
+        timeUnit: 'yearmonth',
+        field: 'date',
+        axis: { domain: false, format: '%Y', tickSize: 0 },
+      },
+      y: { aggregate: 'sum', field: 'count', axis: null, stack: 'center' },
+      color: { field: 'series', scale: { scheme: 'category20b' } },
+    },
+  },
+};

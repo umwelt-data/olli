@@ -17,6 +17,15 @@ export interface OlliHandle {
   setSelection(selection: Selection): void;
   getSelection(): Selection;
 
+  /**
+   * Compose the ancestor predicates along the path to `navId` into a single
+   * Selection describing the subset of the data at that node. This is
+   * independent of the selection signal (which is only moved by `setSelection`);
+   * callers that want focus-drives-highlighting should pair this with
+   * `onFocusChange`.
+   */
+  fullPredicate(navId: NavNodeId): Selection;
+
   getDescription(navId: NavNodeId): string;
 
   setCustomization(role: string, customization: Customization): void;
@@ -38,6 +47,7 @@ export function buildHandle<P>(
     getFocusedNavId: () => runtime.focusedNavId(),
     setSelection: (s) => runtime.setSelection(s),
     getSelection: () => runtime.selection(),
+    fullPredicate: (id) => runtime.fullPredicate(id),
     getDescription: (id) => runtime.getDescriptionFor(id)(),
     setCustomization: (r, c) => runtime.customization.setFor(r, c),
     applyPreset: (n) => runtime.customization.applyPreset(n),

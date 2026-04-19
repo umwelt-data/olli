@@ -37,7 +37,7 @@ import {
   type PredicateProviderRegistry,
 } from './predicates.js';
 
-export type MoveDirection = 'up' | 'down' | 'left' | 'right';
+export type MoveDirection = 'up' | 'down' | 'left' | 'right' | 'first' | 'last';
 
 export interface NavigationRuntime<P> {
   // Reactive state
@@ -182,6 +182,14 @@ export function createNavigationRuntime<P>(initialGraph: Hypergraph<P>): Navigat
           setVirtualCursor(current, cursor + 1);
           return;
         }
+        case 'first': {
+          setVirtualCursor(current, 0);
+          return;
+        }
+        case 'last': {
+          setVirtualCursor(current, opts.length - 1);
+          return;
+        }
       }
     }
 
@@ -214,6 +222,18 @@ export function createNavigationRuntime<P>(initialGraph: Hypergraph<P>): Navigat
         const nextIdx = direction === 'right' ? idx + 1 : idx - 1;
         if (nextIdx < 0 || nextIdx >= parent.childNavIds.length) return;
         const target = parent.childNavIds[nextIdx];
+        if (target) focus(target);
+        return;
+      }
+      case 'first':
+      case 'last': {
+        if (!node.parentNavId) return;
+        const parent = getRealNavNode(node.parentNavId);
+        if (!parent || parent.childNavIds.length === 0) return;
+        const target =
+          direction === 'first'
+            ? parent.childNavIds[0]
+            : parent.childNavIds[parent.childNavIds.length - 1];
         if (target) focus(target);
         return;
       }
