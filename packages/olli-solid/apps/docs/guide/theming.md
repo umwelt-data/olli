@@ -7,7 +7,7 @@ Olli ships a single stylesheet for its tree view and dialog components. A develo
 Import the stylesheet once, at the top of the entry file that mounts Olli.
 
 ```js
-import 'olli-render-solid/styles.css';
+import 'olli-js/styles.css';
 ```
 
 Without this import, the tree renders unstyled: every branch stays visible and the focused node has no highlight.
@@ -15,8 +15,6 @@ Without this import, the tree renders unstyled: every branch stays visible and t
 ## What the defaults do
 
 A user who navigates the tree with the arrow keys sees only the path from the root to the currently focused node. Siblings and the focused node's own children are hidden. The focused node gets a grey background and a black border on its label.
-
-The collapse behavior comes from the renderer: when focus changes, Olli rebuilds the expanded set so it contains exactly the ancestors of the focused node (the focused node itself stays collapsed). Pressing the down arrow moves focus into a child, which then expands the previously focused node so the new child is visible. This matches the original Olli core's focus-path visualization, which keeps the reading context tight for a screen reader user who is tabbing through.
 
 ## Override with CSS variables
 

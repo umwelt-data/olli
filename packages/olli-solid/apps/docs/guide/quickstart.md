@@ -27,7 +27,7 @@ npm install olli-js vega-lite vega
       import { compile } from 'vega-lite';
       import { parse, View } from 'vega';
       import { olliVis, VegaLiteAdapter } from 'olli-js';
-      import 'olli-render-solid/styles.css';
+      import 'olli-js/styles.css';
 
       const spec = {
         $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
