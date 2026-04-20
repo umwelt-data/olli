@@ -14,15 +14,14 @@ Without this import, the tree renders unstyled: every branch stays visible and t
 
 ## What the defaults do
 
-A user who navigates the tree with the arrow keys sees only the path from the root to the currently focused node. Siblings and the focused node's own children are hidden. The focused node gets a grey background and a black border on its label.
+A user who navigates the tree with the arrow keys sees only the path from the root to the currently focused node. Siblings and the focused node's own children are hidden. The focused node gets a grey background on its label.
 
 ## Override with CSS variables
 
-The stylesheet defines five variables on `.olli-vis`, the wrapper class on the root tree element. Set any of them on `.olli-vis` or any ancestor to theme the tree.
+The stylesheet defines four variables on `.olli-vis`, the wrapper class on the root tree element. Set any of them on `.olli-vis` or any ancestor to theme the tree.
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `--olli-focus-border` | `black` | Border color of the focused label |
 | `--olli-focus-bg` | `#eee` | Background color of the focused label |
 | `--olli-hover-bg` | `#ddd` | Background color on label hover |
 | `--olli-indent` | `1.5em` | Left padding of each nested tree group |
@@ -33,7 +32,7 @@ Example override, scoped to a single Olli instance:
 ```css
 .my-olli-container .olli-vis {
   --olli-focus-bg: #fff3b0;
-  --olli-focus-border: #8a6d00;
+  --olli-hover-bg: #ffe180;
 }
 ```
 

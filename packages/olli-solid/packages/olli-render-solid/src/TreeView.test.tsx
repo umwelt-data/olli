@@ -127,6 +127,63 @@ describe('<TreeView /> — keyboard navigation', () => {
     expect(runtime.focusedNavId()).toBe('root/a');
   });
 
+  it('Enter and Space descend like ArrowDown', () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(smallGraph()),
+    );
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'Enter' });
+    expect(runtime.focusedNavId()).toBe('root/a');
+    fireEvent.keyDown(tree, { key: ' ' });
+    expect(runtime.focusedNavId()).toBe('root/a/a1');
+  });
+
+  it('Escape ascends like ArrowUp', () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(smallGraph()),
+    );
+    runtime.focus('root/a/a1');
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'Escape' });
+    expect(runtime.focusedNavId()).toBe('root/a');
+    fireEvent.keyDown(tree, { key: 'Escape' });
+    expect(runtime.focusedNavId()).toBe('root');
+  });
+
+  it("'o' jumps focus to the first root", () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(smallGraph()),
+    );
+    runtime.focus('root/a/a1');
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'o' });
+    expect(runtime.focusedNavId()).toBe('root');
+  });
+
+  it('click on a non-focused label focuses it', () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(smallGraph()),
+    );
+    runtime.focus('root/a');
+    const bLabel = container.querySelector<HTMLElement>(
+      '[data-nav-id="root/b"] > .olli-node-label',
+    )!;
+    fireEvent.click(bLabel);
+    expect(runtime.focusedNavId()).toBe('root/b');
+  });
+
+  it('click on the already-focused label descends into its first child', () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(smallGraph()),
+    );
+    runtime.focus('root/a');
+    const aLabel = container.querySelector<HTMLElement>(
+      '[data-nav-id="root/a"] > .olli-node-label',
+    )!;
+    fireEvent.click(aLabel);
+    expect(runtime.focusedNavId()).toBe('root/a/a1');
+  });
+
   it('focus-path expansion: only the ancestors of the focused node are expanded', () => {
     const { runtime, container } = renderWith(() =>
       createNavigationRuntime(smallGraph()),

@@ -10,10 +10,10 @@ hero:
       text: Guide
       link: /guide/
     - theme: alt
-      text: Browse the gallery
+      text: Example gallery
       link: /gallery/
     - theme: alt
-      text: View on GitHub
+      text: GitHub
       link: https://github.com/umwelt-data/olli
 ---
 

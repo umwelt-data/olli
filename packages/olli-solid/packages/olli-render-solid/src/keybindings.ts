@@ -48,4 +48,33 @@ export function registerDefaultKeybindings<P>(runtime: NavigationRuntime<P>): vo
       return true;
     },
   });
+  runtime.registerKeybinding({
+    key: 'Enter',
+    handler: (rt) => {
+      rt.moveFocus('down');
+      return true;
+    },
+  });
+  runtime.registerKeybinding({
+    key: ' ',
+    handler: (rt) => {
+      rt.moveFocus('down');
+      return true;
+    },
+  });
+  runtime.registerKeybinding({
+    key: 'Escape',
+    handler: (rt) => {
+      rt.moveFocus('up');
+      return true;
+    },
+  });
+  runtime.registerKeybinding({
+    key: 'o',
+    handler: (rt) => {
+      const rootId = rt.navTree().roots[0];
+      if (rootId) rt.focus(rootId);
+      return true;
+    },
+  });
 }
