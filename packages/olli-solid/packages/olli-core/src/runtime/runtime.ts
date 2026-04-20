@@ -58,6 +58,7 @@ export interface NavigationRuntime<P> {
   moveFocus(direction: MoveDirection): void;
   expand(navId: NavNodeId): void;
   collapse(navId: NavNodeId): void;
+  setExpanded(set: ReadonlySet<NavNodeId>): void;
   setSelection(s: Selection): void;
   setHypergraph(g: Hypergraph<P>): void;
 
@@ -83,7 +84,7 @@ export function createNavigationRuntime<P>(initialGraph: Hypergraph<P>): Navigat
   const initialFocus: NavNodeId = initialGraph.roots[0] ?? '';
   const [focusedNavId, setFocusedNavId] = createSignal<NavNodeId>(initialFocus);
   const [selection, setSelectionSignal] = createSignal<Selection>(EMPTY_AND);
-  const [expanded, setExpanded] = createSignal<ReadonlySet<NavNodeId>>(new Set());
+  const [expanded, setExpandedSignal] = createSignal<ReadonlySet<NavNodeId>>(new Set());
   const [virtualCursors, setVirtualCursors] = createSignal<ReadonlyMap<NavNodeId, number>>(
     new Map(),
   );
@@ -241,7 +242,7 @@ export function createNavigationRuntime<P>(initialGraph: Hypergraph<P>): Navigat
   }
 
   function expand(navId: NavNodeId): void {
-    setExpanded((prev) => {
+    setExpandedSignal((prev) => {
       if (prev.has(navId)) return prev;
       const next = new Set(prev);
       next.add(navId);
@@ -250,12 +251,16 @@ export function createNavigationRuntime<P>(initialGraph: Hypergraph<P>): Navigat
   }
 
   function collapse(navId: NavNodeId): void {
-    setExpanded((prev) => {
+    setExpandedSignal((prev) => {
       if (!prev.has(navId)) return prev;
       const next = new Set(prev);
       next.delete(navId);
       return next;
     });
+  }
+
+  function setExpanded(set: ReadonlySet<NavNodeId>): void {
+    setExpandedSignal(set);
   }
 
   function setSelectionAction(s: Selection): void {
@@ -290,6 +295,7 @@ export function createNavigationRuntime<P>(initialGraph: Hypergraph<P>): Navigat
     moveFocus,
     expand,
     collapse,
+    setExpanded,
     setSelection: setSelectionAction,
     setHypergraph,
     registerKeybinding: (b) => keybindings.register(b),

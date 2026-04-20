@@ -17,6 +17,10 @@ hero:
       link: https://github.com/umwelt-data/olli
 ---
 
+Olli is an open-source library for converting data visualizations and diagrams into accessible text structures for screen reader users. Starting with a visualization or diagram specification, Olli produces a keyboard-navigable tree view with descriptions at varying levels of detail. A user can explore these structures both to get an initial overview, and to dive into the data in more detail.
+
+Check out the [example gallery](/gallery/) for examples of accessible charts and diagrams made with Olli. Read the [guide](/guide/) to get started with the [user tutorial](/guide/tutorial/) or [developer quickstart](/guide/quickstart/). Or, contribute to the open-source project on [Github](https://github.com/umwelt-data/olli).
+
 ## Contributors
 
 Point of contact:

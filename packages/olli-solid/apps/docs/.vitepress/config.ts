@@ -50,6 +50,7 @@ export default defineConfig({
           items: [
             { text: 'Quickstart', link: '/guide/quickstart' },
             { text: 'Entry points', link: '/guide/entry-points' },
+            { text: 'Theming', link: '/guide/theming' },
             { text: 'Extending Olli', link: '/guide/extending' },
           ],
         },

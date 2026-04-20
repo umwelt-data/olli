@@ -35,15 +35,6 @@ export function registerDefaultKeybindings<P>(runtime: NavigationRuntime<P>): vo
     },
   });
   runtime.registerKeybinding({
-    key: 'Enter',
-    handler: (rt) => {
-      const id = rt.focusedNavId();
-      if (rt.expanded().has(id)) rt.collapse(id);
-      else rt.expand(id);
-      return true;
-    },
-  });
-  runtime.registerKeybinding({
     key: 'Home',
     handler: (rt) => {
       rt.moveFocus('first');

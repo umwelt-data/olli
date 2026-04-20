@@ -127,15 +127,32 @@ describe('<TreeView /> — keyboard navigation', () => {
     expect(runtime.focusedNavId()).toBe('root/a');
   });
 
-  it('Enter toggles aria-expanded', () => {
-    const { container } = renderWith(() => createNavigationRuntime(smallGraph()));
-    const tree = container.querySelector('[role="tree"]')!;
+  it('focus-path expansion: only the ancestors of the focused node are expanded', () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(smallGraph()),
+    );
     const root = container.querySelector<HTMLElement>('[data-nav-id="root"]')!;
+    const a = container.querySelector<HTMLElement>('[data-nav-id="root/a"]')!;
+
+    // Initial focus on root: root has no ancestors, so nothing is expanded.
+    // The focused node itself is collapsed; its children are not shown until
+    // the user navigates down.
     expect(root.getAttribute('aria-expanded')).toBe('false');
-    fireEvent.keyDown(tree, { key: 'Enter' });
+
+    // Focusing a child expands the parent (but not the focused node itself).
+    runtime.focus('root/a');
     expect(root.getAttribute('aria-expanded')).toBe('true');
-    fireEvent.keyDown(tree, { key: 'Enter' });
+    expect(a.getAttribute('aria-expanded')).toBe('false');
+
+    // Focusing a leaf expands every ancestor on the path.
+    runtime.focus('root/a/a1');
+    expect(root.getAttribute('aria-expanded')).toBe('true');
+    expect(a.getAttribute('aria-expanded')).toBe('true');
+
+    // Moving focus back up collapses the sibling branch again.
+    runtime.focus('root');
     expect(root.getAttribute('aria-expanded')).toBe('false');
+    expect(a.getAttribute('aria-expanded')).toBe('false');
   });
 });
 

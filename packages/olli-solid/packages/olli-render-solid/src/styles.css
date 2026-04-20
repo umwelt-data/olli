@@ -1,30 +1,48 @@
+.olli-vis {
+  --olli-focus-border: black;
+  --olli-focus-bg: #eee;
+  --olli-hover-bg: #ddd;
+  --olli-indent: 1.5em;
+  --olli-virtual-style: italic;
+}
+
 .olli-tree,
-.olli-tree-group {
+.olli-vis .olli-tree-group {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.olli-tree-group {
-  padding-left: 1.5em;
+.olli-vis .olli-tree-group {
+  padding-left: var(--olli-indent);
 }
 
-.olli-tree-item {
+.olli-vis .olli-tree-item {
   outline: none;
   padding: 2px 4px;
 }
 
-.olli-tree-item[aria-expanded='false'] > .olli-tree-group {
+.olli-vis .olli-tree-item[aria-expanded='false'] > .olli-tree-group {
   display: none;
 }
 
-.olli-tree-item.olli-focused > .olli-node-label {
-  outline: 2px solid currentColor;
-  outline-offset: 1px;
+.olli-vis .olli-node-label {
+  border: 1px solid transparent;
+  padding: 0 2px;
+  border-radius: 2px;
 }
 
-.olli-tree-item.olli-virtual > .olli-node-label {
-  font-style: italic;
+.olli-vis .olli-node-label:hover {
+  background: var(--olli-hover-bg);
+}
+
+.olli-vis .olli-tree-item.olli-focused > .olli-node-label {
+  border-color: var(--olli-focus-border);
+  background: var(--olli-focus-bg);
+}
+
+.olli-vis .olli-tree-item.olli-virtual > .olli-node-label {
+  font-style: var(--olli-virtual-style);
 }
 
 .olli-dialog-overlay {

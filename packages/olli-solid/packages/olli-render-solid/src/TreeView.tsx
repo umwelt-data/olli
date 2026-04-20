@@ -1,5 +1,6 @@
 import { For, createEffect } from 'solid-js';
-import type { NavigationRuntime } from 'olli-core';
+import type { NavigationRuntime, NavNodeId } from 'olli-core';
+import { isVirtualNavId, sourceNavIdOfVirtual } from 'olli-core';
 import { TreeItem } from './TreeItem.jsx';
 import { registerDefaultKeybindings } from './keybindings.js';
 
@@ -25,13 +26,28 @@ export function TreeView<P>(props: { runtime: NavigationRuntime<P> }) {
     if (el && document.activeElement !== el) el.focus();
   });
 
+  createEffect(() => {
+    const id = props.runtime.focusedNavId();
+    const ancestors = new Set<NavNodeId>();
+    const startId = isVirtualNavId(id) ? sourceNavIdOfVirtual(id) : id;
+    const startNode = props.runtime.getNavNode(startId);
+    let cursor: NavNodeId | null = startNode?.parentNavId ?? null;
+    while (cursor) {
+      if (ancestors.has(cursor)) break;
+      ancestors.add(cursor);
+      const node = props.runtime.getNavNode(cursor);
+      cursor = node?.parentNavId ?? null;
+    }
+    props.runtime.setExpanded(ancestors);
+  });
+
   const roots = () => props.runtime.navTree().roots;
 
   return (
     <ul
       ref={treeEl}
       role="tree"
-      class="olli-tree"
+      class="olli-vis olli-tree"
       onKeyDown={handleKeyDown}
     >
       <For each={roots()}>

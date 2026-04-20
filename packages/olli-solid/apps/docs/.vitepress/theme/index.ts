@@ -2,6 +2,7 @@ import type { Theme } from 'vitepress';
 import DefaultTheme from 'vitepress/theme';
 import GalleryIndex from '../../gallery/components/GalleryIndex.vue';
 import ExamplePage from '../../gallery/components/ExamplePage.vue';
+import 'olli-render-solid/styles.css';
 
 export default {
   extends: DefaultTheme,

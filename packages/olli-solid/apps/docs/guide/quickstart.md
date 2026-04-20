@@ -27,6 +27,7 @@ npm install olli-js vega-lite vega
       import { compile } from 'vega-lite';
       import { parse, View } from 'vega';
       import { olliVis, VegaLiteAdapter } from 'olli-js';
+      import 'olli-render-solid/styles.css';
 
       const spec = {
         $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
@@ -67,6 +68,7 @@ Open it, focus on the Olli tree. The initial root node describes the whole chart
 ## Next
 
 - [Entry points](/guide/entry-points) — `olliVis`, `olliDiagram`, `olli`, the handle surface, and options.
+- [Theming](/guide/theming) — override the tree's colors and class rules.
 - [Extending Olli](/guide/extending) — build a new domain on top of the same kernel.
 - [Gallery](/gallery/) — runnable examples across chart types.
 
