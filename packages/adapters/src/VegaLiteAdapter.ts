@@ -106,6 +106,14 @@ const geoFieldLabel = (field: string) => {
   return labelMap[field] || field.replace(/_/g, ' ');
 };
 
+const geoFieldType = (field: string, data: OlliDataset) => {
+  if (['county_id', 'state_id', 'id'].includes(field)) {
+    return 'nominal';
+  }
+
+  return typeInference(data, field);
+};
+
 const ensureGeoScalarFields = (olliSpec: UnitOlliSpec) => {
   if (!olliSpec.data.length) {
     return;
@@ -120,7 +128,7 @@ const ensureGeoScalarFields = (olliSpec: UnitOlliSpec) => {
       olliSpec.fields.push({
         field,
         label: geoFieldLabel(field),
-        type: typeInference(olliSpec.data, field),
+        type: geoFieldType(field, olliSpec.data),
       });
     }
   });

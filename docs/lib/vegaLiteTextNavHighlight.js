@@ -80,8 +80,8 @@ export const predicateToSelectionStore = (predicate) => {
 
 const withFillHighlight = (update) => {
   update.opacity = [{ test: HIGHLIGHT_TEST, value: 1 }, { value: 0.2 }];
-  update.stroke = [{ test: HIGHLIGHT_TEST, value: "#111827" }, { value: "#ffffff" }];
-  update.strokeWidth = [{ test: HIGHLIGHT_TEST, value: 2 }, { value: 0.5 }];
+  update.stroke = { value: "#d1d5db" };
+  update.strokeWidth = { value: 1 };
 };
 
 const withPointHighlight = (update) => {
@@ -90,16 +90,21 @@ const withPointHighlight = (update) => {
   update.strokeWidth = [{ test: HIGHLIGHT_TEST, value: 2 }, { value: 1 }];
 };
 
+const withLineHighlight = (update) => {
+  update.opacity = [{ test: HIGHLIGHT_TEST, value: 1 }, { value: 0.18 }];
+  update.strokeWidth = [{ test: HIGHLIGHT_TEST, value: 2 }, { value: 1.25 }];
+};
+
 const withArcHighlight = (update) => {
   update.opacity = [{ test: HIGHLIGHT_TEST, value: 1 }, { value: 0.2 }];
-  update.stroke = [{ test: HIGHLIGHT_TEST, value: "#111827" }, { value: "#ffffff" }];
-  update.strokeWidth = [{ test: HIGHLIGHT_TEST, value: 2 }, { value: 1 }];
+  update.stroke = { value: "#d1d5db" };
+  update.strokeWidth = { value: 1 };
 };
 
 const withShapeHighlight = (update) => {
   update.opacity = [{ test: HIGHLIGHT_TEST, value: 1 }, { value: 0.25 }];
-  update.stroke = [{ test: HIGHLIGHT_TEST, value: "#111827" }, { value: "#ffffff" }];
-  update.strokeWidth = [{ test: HIGHLIGHT_TEST, value: 2.5 }, { value: 1 }];
+  update.stroke = { value: "#d1d5db" };
+  update.strokeWidth = { value: 1 };
 };
 
 const applyMarkHighlight = (mark) => {
@@ -109,6 +114,11 @@ const applyMarkHighlight = (mark) => {
 
   if (mark.type === "symbol") {
     withPointHighlight(mark.encode.update);
+    return;
+  }
+
+  if (mark.type === "line") {
+    withLineHighlight(mark.encode.update);
     return;
   }
 

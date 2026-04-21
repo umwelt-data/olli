@@ -1,4 +1,6 @@
 <script type="module">
+import { mountHighlightedVegaLiteExample } from "{{site.baseurl}}/lib/vegaLiteTextNavHighlight.js";
+
 let states = [
   { "state_id": "01", "state": "Alabama" },
   { "state_id": "02", "state": "Alaska" },
@@ -144,73 +146,5 @@ const baseSpec = {
   }
 };
 
-const buildOverlaySpec = (focusedPredicate) => {
-  return {
-    ...baseSpec,
-    "transform": [...baseSpec.transform, { "filter": focusedPredicate }],
-    "mark": {
-      "type": "geoshape",
-      "stroke": "#111",
-      "strokeWidth": 2
-    },
-    "encoding": {
-      ...baseSpec.encoding,
-      "opacity": { "value": 1 }
-    }
-  };
-};
-
-const vegaRender = document.getElementById("Visualization-Vega-Lite");
-vegaRender.style.position = "relative";
-const baseLayer = document.createElement("div");
-const overlayLayer = document.createElement("div");
-overlayLayer.style.position = "absolute";
-overlayLayer.style.inset = "0";
-overlayLayer.style.pointerEvents = "none";
-vegaRender.append(baseLayer, overlayLayer);
-let baseView;
-let overlayView;
-
-const renderBaseChart = () => {
-  const vegaSpec = vegaLite.compile(baseSpec).spec;
-  const runtime = vega.parse(vegaSpec);
-  baseView = new vega.View(runtime)
-    .logLevel(vega.Warn)
-    .initialize(baseLayer)
-    .renderer("svg")
-    .hover()
-    .run();
-};
-
-const renderOverlay = (focusedPredicate) => {
-  if (overlayView) {
-    overlayView.finalize();
-    overlayView = undefined;
-  }
-  overlayLayer.replaceChildren();
-  if (!focusedPredicate || !("and" in focusedPredicate) || focusedPredicate.and.length === 0) {
-    return;
-  }
-  const vegaSpec = vegaLite.compile(buildOverlaySpec(focusedPredicate)).spec;
-  const runtime = vega.parse(vegaSpec);
-  overlayView = new vega.View(runtime)
-    .logLevel(vega.Warn)
-    .initialize(overlayLayer)
-    .renderer("svg")
-    .hover()
-    .run();
-};
-
-renderBaseChart();
-
-OlliAdapters.VegaLiteAdapter(baseSpec).then((olliVisSpec) => {
-  document.getElementById("AccessibilityTree-Vega-Lite").append(
-    olli(olliVisSpec, {
-      onTextNavPred: (predicate) => {
-        const hasPredicate = "and" in predicate && predicate.and.length > 0;
-        renderOverlay(hasPredicate ? predicate : undefined);
-      }
-    })
-  );
-});
+mountHighlightedVegaLiteExample({ baseSpec });
 </script>

@@ -33,7 +33,5 @@ export function olli(olliSpec: OlliSpec, config?: OlliConfigOptions): HTMLElemen
   t.init();
   updateGlobalStateOnInitialRender(t);
 
-  console.log('hi');
-
   return renderContainer;
 }
