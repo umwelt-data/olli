@@ -267,6 +267,27 @@
       }
     ]
   },
+  "choropleth_map": {
+    "title": "Choropleth Map",
+    "url": "/gallery/choropleth.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/choropleth-vl.html"
+      }
+    ]
+  },
+  "usa_choropleth_map": {
+    "title": "USA Choropleth Map",
+    "url": "/gallery/usaChoropleth.html",
+    "development_only": true,
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/usaChoropleth-vl.html"
+      }
+    ]
+  },
   "lasagna_plot": {
     "title": "Lasagna Plot",
     "url": "/gallery/lasagnaPlot.html",

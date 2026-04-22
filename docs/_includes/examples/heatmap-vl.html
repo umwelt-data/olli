@@ -1,4 +1,6 @@
 <script type="module">
+import { mountHighlightedVegaLiteExample } from "{{site.baseurl}}/lib/vegaLiteTextNavHighlight.js";
+
 let spec = {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
   "title": "Daily Max Temperatures (C) in Seattle, WA",
@@ -41,17 +43,5 @@ let spec = {
   }
 }
 
-let vegaSpec = vegaLite.compile(spec).spec
-const runtime = vega.parse(vegaSpec);
-const vegaRender = document.getElementById('Visualization-Vega-Lite');
-let view = new vega.View(runtime)
-  .logLevel(vega.Warn)
-  .initialize(vegaRender)
-  .renderer('svg')
-  .hover()
-  .run();
-
-OlliAdapters.VegaLiteAdapter(spec).then(olliVisSpec => {
-  document.getElementById("AccessibilityTree-Vega-Lite").append(olli(olliVisSpec))
-})
+mountHighlightedVegaLiteExample({ baseSpec: spec });
 </script>

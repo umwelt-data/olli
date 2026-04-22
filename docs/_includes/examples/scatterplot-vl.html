@@ -1,5 +1,5 @@
 <script type="module">
-let spec = {
+let baseSpec = {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
   "data": {
     "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/penguins.json"
@@ -19,19 +19,119 @@ let spec = {
     "color": { "field": "Species", "type": "nominal" },
     "shape": { "field": "Species", "type": "nominal" }
   }
-}
+};
 
-let vegaSpec = vegaLite.compile(spec).spec
-const runtime = vega.parse(vegaSpec);
+const TYPE_ENUM = "E";
+const TYPE_RANGE_INC = "R";
+const TYPE_RANGE_RE = "R-RE";
+const TYPE_PRED_LT = "E-LT";
+const TYPE_PRED_LTE = "E-LTE";
+const TYPE_PRED_GT = "E-GT";
+const TYPE_PRED_GTE = "E-GTE";
+const TYPE_PRED_VALID = "E-VALID";
+const TYPE_PRED_ONE_OF = "E-ONE";
+
+const predicateToTupleType = (predicate) => {
+  if ("equal" in predicate) {
+    return TYPE_ENUM;
+  } else if ("lt" in predicate) {
+    return TYPE_PRED_LT;
+  } else if ("gt" in predicate) {
+    return TYPE_PRED_GT;
+  } else if ("lte" in predicate) {
+    return TYPE_PRED_LTE;
+  } else if ("gte" in predicate) {
+    return TYPE_PRED_GTE;
+  } else if ("range" in predicate) {
+    if (predicate.inclusive) {
+      return TYPE_RANGE_INC;
+    }
+    return TYPE_RANGE_RE;
+  } else if ("oneOf" in predicate) {
+    return TYPE_PRED_ONE_OF;
+  } else if ("valid" in predicate) {
+    return TYPE_PRED_VALID;
+  }
+  return TYPE_ENUM;
+};
+
+const predicateToSelectionStore = (predicate) => {
+  if (!predicate) {
+    return null;
+  }
+  const getPredValue = (entry) => {
+    const key = Object.keys(entry).find((candidate) => candidate !== "field");
+    return key ? entry[key] : undefined;
+  };
+  if ("and" in predicate) {
+    const stores = predicate.and.map((entry) => predicateToSelectionStore(entry));
+    return {
+      unit: "",
+      fields: stores.flatMap((store) => store?.fields || []),
+      values: stores.flatMap((store) => store?.values || []),
+    };
+  }
+  if ("or" in predicate || "not" in predicate) {
+    return null;
+  }
+  return {
+    unit: "",
+    fields: [
+      {
+        type: predicateToTupleType(predicate),
+        field: predicate.field,
+      },
+    ],
+    values: [getPredValue(predicate)],
+  };
+};
+
+const editScatterplotConditionalBehavior = (vgSpec) => {
+  const edited = structuredClone(vgSpec);
+  edited.data = [...(edited.data || []), { name: "external_state_store", values: [] }];
+  const symbol = edited.marks?.find((mark) => mark.name === "marks");
+  const symbolUpdate = symbol?.encode?.update;
+  if (symbolUpdate) {
+    const highlightTest = '!length(data("external_state_store")) || vlSelectionTest("external_state_store", datum)';
+    symbolUpdate.opacity = [{ test: highlightTest, value: 0.9 }, { value: 0.15 }];
+    symbolUpdate.size = [{ test: highlightTest, value: 110 }, { value: 70 }];
+    symbolUpdate.strokeWidth = [{ test: highlightTest, value: 2 }, { value: 1 }];
+  }
+  return edited;
+};
+
 const vegaRender = document.getElementById('Visualization-Vega-Lite');
-let view = new vega.View(runtime)
-  .logLevel(vega.Warn)
-  .initialize(vegaRender)
-  .renderer('svg')
-  .hover()
-  .run();
+let view;
 
-OlliAdapters.VegaLiteAdapter(spec).then(olliVisSpec => {
-  document.getElementById("AccessibilityTree-Vega-Lite").append(olli(olliVisSpec))
-})
+const renderChart = () => {
+  const vegaSpec = editScatterplotConditionalBehavior(vegaLite.compile(baseSpec).spec);
+  const runtime = vega.parse(vegaSpec);
+  view = new vega.View(runtime)
+    .logLevel(vega.Warn)
+    .initialize(vegaRender)
+    .renderer('svg')
+    .hover()
+    .run();
+};
+
+const updateFocus = (focusedPredicate) => {
+  if (!view) {
+    return;
+  }
+  const store = predicateToSelectionStore(focusedPredicate);
+  view.data("external_state_store", store ? [store] : []).run();
+};
+
+renderChart();
+
+OlliAdapters.VegaLiteAdapter(baseSpec).then(olliVisSpec => {
+  document.getElementById("AccessibilityTree-Vega-Lite").append(
+    olli(olliVisSpec, {
+      onTextNavPred: (predicate, olliNode) => {
+        const hasPredicate = "and" in predicate && predicate.and.length > 0;
+        updateFocus(hasPredicate ? predicate : undefined);
+      }
+    })
+  );
+});
 </script>

@@ -1,0 +1,150 @@
+<script type="module">
+import { mountHighlightedVegaLiteExample } from "{{site.baseurl}}/lib/vegaLiteTextNavHighlight.js";
+
+let states = [
+  { "state_id": "01", "state": "Alabama" },
+  { "state_id": "02", "state": "Alaska" },
+  { "state_id": "04", "state": "Arizona" },
+  { "state_id": "05", "state": "Arkansas" },
+  { "state_id": "06", "state": "California" },
+  { "state_id": "08", "state": "Colorado" },
+  { "state_id": "09", "state": "Connecticut" },
+  { "state_id": "10", "state": "Delaware" },
+  { "state_id": "11", "state": "District of Columbia" },
+  { "state_id": "12", "state": "Florida" },
+  { "state_id": "13", "state": "Georgia" },
+  { "state_id": "15", "state": "Hawaii" },
+  { "state_id": "16", "state": "Idaho" },
+  { "state_id": "17", "state": "Illinois" },
+  { "state_id": "18", "state": "Indiana" },
+  { "state_id": "19", "state": "Iowa" },
+  { "state_id": "20", "state": "Kansas" },
+  { "state_id": "21", "state": "Kentucky" },
+  { "state_id": "22", "state": "Louisiana" },
+  { "state_id": "23", "state": "Maine" },
+  { "state_id": "24", "state": "Maryland" },
+  { "state_id": "25", "state": "Massachusetts" },
+  { "state_id": "26", "state": "Michigan" },
+  { "state_id": "27", "state": "Minnesota" },
+  { "state_id": "28", "state": "Mississippi" },
+  { "state_id": "29", "state": "Missouri" },
+  { "state_id": "30", "state": "Montana" },
+  { "state_id": "31", "state": "Nebraska" },
+  { "state_id": "32", "state": "Nevada" },
+  { "state_id": "33", "state": "New Hampshire" },
+  { "state_id": "34", "state": "New Jersey" },
+  { "state_id": "35", "state": "New Mexico" },
+  { "state_id": "36", "state": "New York" },
+  { "state_id": "37", "state": "North Carolina" },
+  { "state_id": "38", "state": "North Dakota" },
+  { "state_id": "39", "state": "Ohio" },
+  { "state_id": "40", "state": "Oklahoma" },
+  { "state_id": "41", "state": "Oregon" },
+  { "state_id": "42", "state": "Pennsylvania" },
+  { "state_id": "44", "state": "Rhode Island" },
+  { "state_id": "45", "state": "South Carolina" },
+  { "state_id": "46", "state": "South Dakota" },
+  { "state_id": "47", "state": "Tennessee" },
+  { "state_id": "48", "state": "Texas" },
+  { "state_id": "49", "state": "Utah" },
+  { "state_id": "50", "state": "Vermont" },
+  { "state_id": "51", "state": "Virginia" },
+  { "state_id": "53", "state": "Washington" },
+  { "state_id": "54", "state": "West Virginia" },
+  { "state_id": "55", "state": "Wisconsin" },
+  { "state_id": "56", "state": "Wyoming" },
+  { "state_id": "72", "state": "Puerto Rico" }
+];
+
+const baseSpec = {
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": "Choropleth of Unemployment Rate per State",
+  "width": 650,
+  "height": 400,
+  "data": {
+    "url": "https://cdn.jsdelivr.net/npm/vega-datasets@2/data/us-10m.json",
+    "format": {
+      "type": "topojson",
+      "feature": "counties"
+    }
+  },
+  "transform": [
+    {
+      "lookup": "id",
+      "from": {
+        "data": {
+          "url": "https://cdn.jsdelivr.net/npm/vega-datasets@2/data/unemployment.tsv"
+        },
+        "key": "id",
+        "fields": ["rate"]
+      }
+    },
+    {
+      "calculate": "datum.id < 10000 ? '0' + datum.id : '' + datum.id",
+      "as": "county_id"
+    },
+    {
+      "calculate": "substring(datum.county_id, 0, 2)",
+      "as": "state_id"
+    },
+    {
+      "lookup": "state_id",
+      "from": {
+        "data": {
+          "values": states
+        },
+        "key": "state_id",
+        "fields": ["state"]
+      }
+    },
+    {
+      "lookup": "county_id",
+      "from": {
+        "data": {
+          "url": "https://cdn.jsdelivr.net/gh/dbreunig/county-state-fips-csvs@master/county_fips.csv",
+          "format": { "type": "csv" }
+        },
+        "key": "code",
+        "fields": ["name"]
+      },
+      "as": ["county_name"]
+    }
+  ],
+  "projection": {
+    "type": "albersUsa"
+  },
+  "mark": {
+    "type": "geoshape"
+  },
+  "encoding": {
+    "color": {
+      "field": "rate",
+      "type": "quantitative"
+    },
+    "tooltip": [
+      {
+        "field": "state",
+        "type": "nominal",
+        "title": "State"
+      },
+      {
+        "field": "county_name",
+        "type": "nominal",
+        "title": "County"
+      },
+      {
+        "field": "county_id",
+        "type": "nominal",
+        "title": "County ID"
+      },
+      {
+        "field": "rate",
+        "type": "quantitative",
+        "title": "Unemployment rate"
+      }
+    ]
+  }
+};
+
+mountHighlightedVegaLiteExample({ baseSpec });
+</script>

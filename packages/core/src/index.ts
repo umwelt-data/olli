@@ -13,6 +13,7 @@ export type { OlliGlobalState } from './util/globalState';
 
 export type OlliConfigOptions = {
   onFocus?: (elem: HTMLElement, olliNode: ElaboratedOlliNode) => void;
+  onTextNavPred?: (predicate: LogicalComposition<FieldPredicate>, olliNode: ElaboratedOlliNode) => void;
   onSelection?: (predicate: LogicalComposition<FieldPredicate>) => void;
 };
 
@@ -24,6 +25,7 @@ export function olli(olliSpec: OlliSpec, config?: OlliConfigOptions): HTMLElemen
 
   const treeCallbacks: RuntimeCallbacks = {
     onFocus: config?.onFocus,
+    onTextNavPred: config?.onTextNavPred,
     onSelection: config?.onSelection,
   };
 

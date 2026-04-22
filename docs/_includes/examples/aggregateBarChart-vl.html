@@ -1,4 +1,6 @@
 <script type="module">
+  import { mountHighlightedVegaLiteExample } from "{{site.baseurl}}/lib/vegaLiteTextNavHighlight.js";
+
   let spec = {
     "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
     "data": { "url": "https://raw.githubusercontent.com/vega/vega-datasets/next/data/seattle-weather.csv" },
@@ -18,18 +20,5 @@
     }
   }
 
-  let vegaSpec = vegaLite.compile(spec).spec
-  const runtime = vega.parse(vegaSpec);
-  const vegaRender = document.getElementById('Visualization-Vega-Lite');
-  let view = new vega.View(runtime)
-    .logLevel(vega.Warn)
-    .initialize(vegaRender)
-    .renderer('svg')
-    .hover()
-    .runAsync()
-    .then(v => {
-      OlliAdapters.VegaLiteAdapter(spec).then(olliVisSpec => {
-        document.getElementById("AccessibilityTree-Vega-Lite").append(olli(olliVisSpec))
-      })
-    });
-    </script>
+  mountHighlightedVegaLiteExample({ baseSpec: spec });
+</script>

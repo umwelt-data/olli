@@ -10,7 +10,7 @@ export interface OlliDatum {
 
 export type OlliDataset = OlliDatum[];
 
-export type OlliMark = 'point' | 'bar' | 'line';
+export type OlliMark = 'point' | 'bar' | 'line' | 'geoshape';
 
 /**
  * Spec describing a visualization

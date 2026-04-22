@@ -8,6 +8,62 @@ import './dialog.css';
 import { makeSelectionMenu } from './selectionMenu';
 import { makeTargetedNavMenu } from './targetedNavMenu';
 import { getSpecForNode } from '../../Structure';
+import { fmtValue } from '../../util/values';
+import { getFieldDef } from '../../util/data';
+import { getChoroplethValueField, isChoroplethMap } from '../../util/description';
+
+function getPredicateValueLabel(olliNode: ElaboratedOlliNode, olliSpec: UnitOlliSpec) {
+  if (!('predicate' in olliNode) || !('field' in olliNode.predicate) || !('equal' in olliNode.predicate)) {
+    return null;
+  }
+
+  const fieldDef = getFieldDef(olliNode.predicate.field, olliSpec.fields);
+  if (!fieldDef) {
+    return `${olliNode.predicate.equal}`;
+  }
+
+  return fmtValue(olliNode.predicate.equal as any, fieldDef);
+}
+
+function getChoroplethTableFields(olliNode: ElaboratedOlliNode, olliSpec: UnitOlliSpec) {
+  if (!isChoroplethMap(olliSpec)) {
+    return olliSpec.fields;
+  }
+
+  const valueField = getChoroplethValueField(olliSpec);
+  const predicateField = 'predicate' in olliNode && 'field' in olliNode.predicate ? olliNode.predicate.field : undefined;
+  const isStateSelection = ['state', 'state_name', 'state_id'].includes(predicateField);
+
+  if (!isStateSelection) {
+    return olliSpec.fields;
+  }
+
+  const preferredFields = ['county_name', 'county', 'county_id', valueField].filter(Boolean);
+  const selectedFields = preferredFields
+    .map((field) => olliSpec.fields.find((fieldDef) => fieldDef.field === field))
+    .filter(Boolean);
+
+  return selectedFields.length ? selectedFields : olliSpec.fields;
+}
+
+function getTableDialogTitle(olliNode: ElaboratedOlliNode, olliSpec: UnitOlliSpec) {
+  if (!isChoroplethMap(olliSpec)) {
+    return 'Table View';
+  }
+
+  const predicateField = 'predicate' in olliNode && 'field' in olliNode.predicate ? olliNode.predicate.field : undefined;
+  const predicateValue = getPredicateValueLabel(olliNode, olliSpec);
+
+  if (predicateValue && ['state', 'state_name', 'state_id'].includes(predicateField)) {
+    return `County Stats for ${predicateValue}`;
+  }
+
+  if (predicateValue && ['county_name', 'county', 'county_id'].includes(predicateField)) {
+    return `County Stats for ${predicateValue}`;
+  }
+
+  return 'Table View';
+}
 
 export function makeDialog(
   tree: OlliRuntime,
@@ -97,8 +153,15 @@ function openDialog(dialog: HTMLElement, renderContainer: HTMLElement) {
 
 export function openTableDialog(olliNode: ElaboratedOlliNode, tree: OlliRuntime) {
   const olliSpec: UnitOlliSpec = getSpecForNode(olliNode, tree.olliSpec);
-  const table = renderTable(selectionTest(olliSpec.data, olliNode.fullPredicate), olliSpec.fields);
-  const dialog = makeDialog(tree, 'Table View', predicateToDescription(olliNode.fullPredicate, olliSpec.fields), table);
+  const filteredData = selectionTest(olliSpec.data, olliNode.fullPredicate);
+  const tableFields = getChoroplethTableFields(olliNode, olliSpec);
+  const table = renderTable(filteredData, tableFields);
+  const dialog = makeDialog(
+    tree,
+    getTableDialogTitle(olliNode, olliSpec),
+    predicateToDescription(olliNode.fullPredicate, olliSpec.fields),
+    table
+  );
 
   openDialog(dialog, tree.renderContainer);
 }

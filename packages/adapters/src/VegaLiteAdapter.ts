@@ -6,6 +6,134 @@ import { TopLevel, LayerSpec, GenericHConcatSpec, GenericVConcatSpec } from 'veg
 import { GenericConcatSpec } from 'vega-lite/build/src/spec/concat';
 import { Scene, SceneGroup, View } from 'vega';
 
+const getMark = (spec: any) => {
+  // TODO vega-lite mark type exceeds olli mark type, should do some validation
+  const mark: any = spec.mark;
+  if (mark && mark.type) {
+    // e.g. "mark": {"type": "line", "point": true}
+    return mark.type;
+  }
+  return mark;
+};
+
+const isScalarValue = (value: unknown) => {
+  return value === null || value === undefined || typeof value !== 'object' || value instanceof Date;
+};
+
+const inferRegionField = (data: OlliDataset, fields: { field: string; type?: string }[]): string | undefined => {
+  if (!data.length) {
+    return fields[0]?.field;
+  }
+
+  const keys = Object.keys(data[0]);
+  const scalarKeys = keys.filter((key) => data.every((datum) => isScalarValue(datum[key])));
+
+  const preferred = [
+    'region',
+    'name',
+    'state',
+    'state_name',
+    'county',
+    'county_name',
+    'province',
+    'country',
+    'district',
+    'county_id',
+    'state_id',
+    'id',
+  ].find((key) => scalarKeys.includes(key));
+  if (preferred) {
+    return preferred;
+  }
+
+  const nominal = fields.find((field) => field.type === 'nominal' || field.type === 'ordinal');
+  if (nominal) {
+    return nominal.field;
+  }
+
+  const scalarNominal = scalarKeys.find((field) => typeInference(data, field) === 'nominal');
+  if (scalarNominal) {
+    return scalarNominal;
+  }
+
+  if (scalarKeys.length) {
+    return scalarKeys[0];
+  }
+
+  return fields[0]?.field;
+};
+
+const inferGeoHierarchy = (data: OlliDataset, fields: { field: string; type?: string }[]) => {
+  if (!data.length) {
+    return null;
+  }
+
+  const keys = Object.keys(data[0]);
+  const scalarKeys = keys.filter((key) => data.every((datum) => isScalarValue(datum[key])));
+  const stateField = ['state', 'state_name', 'state_id'].find((key) => scalarKeys.includes(key));
+  const countyField = ['county', 'county_name', 'county_id'].find((key) => scalarKeys.includes(key));
+
+  if (stateField && countyField && stateField !== countyField) {
+    return { stateField, regionField: countyField };
+  }
+
+  return null;
+};
+
+const ensureNominalField = (olliSpec: UnitOlliSpec, field: string) => {
+  const fieldDef = olliSpec.fields.find((f) => f.field === field);
+  if (fieldDef) {
+    fieldDef.type = 'nominal';
+    return;
+  }
+
+  olliSpec.fields.push({
+    field,
+    label: field,
+    type: 'nominal',
+  });
+};
+
+const geoFieldLabel = (field: string) => {
+  const labelMap = {
+    county_name: 'County',
+    county: 'County',
+    county_id: 'County ID',
+    state_name: 'State',
+    state: 'State',
+    state_id: 'State ID',
+  };
+  return labelMap[field] || field.replace(/_/g, ' ');
+};
+
+const geoFieldType = (field: string, data: OlliDataset) => {
+  if (['county_id', 'state_id', 'id'].includes(field)) {
+    return 'nominal';
+  }
+
+  return typeInference(data, field);
+};
+
+const ensureGeoScalarFields = (olliSpec: UnitOlliSpec) => {
+  if (!olliSpec.data.length) {
+    return;
+  }
+
+  const keys = Object.keys(olliSpec.data[0]).filter((key) =>
+    olliSpec.data.every((datum) => isScalarValue(datum[key]))
+  );
+
+  keys.forEach((field) => {
+    if (!olliSpec.fields.find((f) => f.field === field)) {
+      olliSpec.fields.push({
+        field,
+        label: geoFieldLabel(field),
+        type: geoFieldType(field, olliSpec.data),
+      });
+    }
+  });
+};
+
 /**
  * Adapter to deconstruct Vega-Lite visualizations into an {@link OlliVisSpec}
  * @param spec The Vega-Lite Spec that rendered the visualization
@@ -78,15 +206,6 @@ function adaptUnitSpec(scene: SceneGroup, spec: TopLevelUnitSpec<any>, data: Oll
     guides: [],
   };
 
-  const getMark = (spec: any) => {
-    // TODO vega-lite mark type exceeds olli mark type, should do some validation
-    const mark: any = spec.mark;
-    if (mark && mark.type) {
-      // e.g. "mark": {"type": "line", "point": true}
-      return mark.type;
-    }
-    return mark;
-  };
   olliSpec.mark = getMark(spec);
 
   if (spec.encoding) {
@@ -101,6 +220,10 @@ function adaptUnitSpec(scene: SceneGroup, spec: TopLevelUnitSpec<any>, data: Oll
         typeInference(data, fieldDef.field);
 
       if (!fieldDef.field) {
+        return;
+      }
+      if (olliSpec.mark === 'geoshape' && (channel === 'shape' || fieldDef.type === 'geojson')) {
+        // Geometry objects are not directly navigable by Olli. We keep scalar metadata fields only.
         return;
       }
       if (['row', 'column', 'facet'].includes(channel)) {
@@ -147,6 +270,22 @@ function adaptUnitSpec(scene: SceneGroup, spec: TopLevelUnitSpec<any>, data: Oll
         olliSpec.fields.push(fieldDef);
       }
     });
+  }
+
+  if (olliSpec.mark === 'geoshape') {
+    ensureGeoScalarFields(olliSpec);
+
+    const geoHierarchy = inferGeoHierarchy(olliSpec.data, olliSpec.fields);
+    if (geoHierarchy) {
+      ensureNominalField(olliSpec, geoHierarchy.stateField);
+      olliSpec.structure = [{ groupby: geoHierarchy.stateField, children: [] }];
+    }
+
+    const regionField = inferRegionField(olliSpec.data, olliSpec.fields);
+    if (regionField && !olliSpec.structure) {
+      ensureNominalField(olliSpec, regionField);
+      olliSpec.structure = [{ groupby: regionField, children: [] }];
+    }
   }
 
   typeCoerceData(olliSpec);

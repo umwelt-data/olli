@@ -23,6 +23,7 @@ import { selectionTest } from '../util/selection';
 
 export interface RuntimeCallbacks {
   onFocus?: (el: HTMLElement, olliNode: ElaboratedOlliNode) => void;
+  onTextNavPred?: (predicate: LogicalComposition<FieldPredicate>, olliNode: ElaboratedOlliNode) => void;
   onSelection?: (predicate: LogicalComposition<FieldPredicate>) => void;
 }
 
@@ -152,6 +153,9 @@ export class OlliRuntime {
         this.lastFocusedTreeItem = ti;
         if (this.callbacks.onFocus) {
           this.callbacks.onFocus(ti.domNode, ti.olliNode);
+        }
+        if (this.callbacks.onTextNavPred) {
+          this.callbacks.onTextNavPred(ti.olliNode.fullPredicate, ti.olliNode);
         }
         setOlliGlobalState({ lastVisitedInstance: this });
       } else {

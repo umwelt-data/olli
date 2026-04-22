@@ -1,0 +1,156 @@
+%PDF-1.4
+%âãÏÓ
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R /F2 6 0 R >> >> /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Length 2342 >>
+stream
+BT
+/F2 18 Tf
+54.00 738.00 Td
+(Olli - Screen Reader Accessibility for Data Visualization) Tj
+ET
+BT
+/F2 12 Tf
+54.00 716.00 Td
+(What it is) Tj
+ET
+BT
+/F1 10 Tf
+54.00 700.00 Td
+(Olli is an open-source library that converts data visualization specs into accessible text) Tj
+ET
+BT
+/F1 10 Tf
+54.00 686.50 Td
+(structures for screen reader users.) Tj
+ET
+BT
+/F1 10 Tf
+54.00 673.00 Td
+(It produces a keyboard-navigable tree view with descriptions at varying levels of detail.) Tj
+ET
+BT
+/F2 12 Tf
+54.00 659.50 Td
+(Who it is for) Tj
+ET
+BT
+/F1 10 Tf
+54.00 643.50 Td
+(Primary persona: screen reader users \(blind/low-vision\) exploring data visualizations.) Tj
+ET
+BT
+/F2 12 Tf
+54.00 630.00 Td
+(What it does) Tj
+ET
+BT
+/F1 10 Tf
+54.00 614.00 Td
+(- Converts visualization specs into an accessible text structure for screen readers.) Tj
+ET
+BT
+/F1 10 Tf
+54.00 600.50 Td
+(- Produces a keyboard-navigable tree view with overview-to-detail descriptions.) Tj
+ET
+BT
+/F1 10 Tf
+54.00 587.00 Td
+(- Supports adapters for Vega, Vega-Lite, and Observable Plot.) Tj
+ET
+BT
+/F1 10 Tf
+54.00 573.50 Td
+(- Builds a hierarchical AccessibilityTreeNode tree with node descriptions.) Tj
+ET
+BT
+/F1 10 Tf
+54.00 560.00 Td
+(- Renders an accessible HTML tree view using WAI-ARIA roles and attributes.) Tj
+ET
+BT
+/F1 10 Tf
+54.00 546.50 Td
+(- Includes a table renderer for accessible tabular output.) Tj
+ET
+BT
+/F2 12 Tf
+54.00 533.00 Td
+(How it works \(architecture\)) Tj
+ET
+BT
+/F1 10 Tf
+54.00 517.00 Td
+(- Input spec \(Vega/Vega-Lite/Observable Plot\) goes to adapters in olli-adapters.) Tj
+ET
+BT
+/F1 10 Tf
+54.00 503.50 Td
+(- Adapters output a standard OlliVisSpec \(single or multi-view\).) Tj
+ET
+BT
+/F1 10 Tf
+54.00 490.00 Td
+(- Core Structure builds an AccessibilityTreeNode hierarchy and descriptions.) Tj
+ET
+BT
+/F1 10 Tf
+54.00 476.50 Td
+(- Core Render outputs HTML tree view and table with ARIA attributes.) Tj
+ET
+BT
+/F1 10 Tf
+54.00 463.00 Td
+(- Backend/services: Not found in repo.) Tj
+ET
+BT
+/F2 12 Tf
+54.00 449.50 Td
+(How to run \(minimal\)) Tj
+ET
+BT
+/F1 10 Tf
+54.00 433.50 Td
+(- From repo root: `npm install` \(workspace dependencies\).) Tj
+ET
+BT
+/F1 10 Tf
+54.00 420.00 Td
+(- From `packages/core` or `packages/adapters`: `npm run start` \(webpack watch\).) Tj
+ET
+BT
+/F1 10 Tf
+54.00 406.50 Td
+(- First-time note: build `olli` before `olli-adapters` if needed \(`npm run build`\).) Tj
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000019 00000 n 
+0000000068 00000 n 
+0000000125 00000 n 
+0000000261 00000 n 
+0000000331 00000 n 
+0000002725 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+2800
+%%EOF
