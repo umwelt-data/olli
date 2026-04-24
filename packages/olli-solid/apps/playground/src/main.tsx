@@ -1,3 +1,4 @@
+import 'olli-js/styles.css';
 import { createSignal, onCleanup, createEffect, For } from 'solid-js';
 import { render } from 'solid-js/web';
 import type { OlliHandle } from 'olli-js';
