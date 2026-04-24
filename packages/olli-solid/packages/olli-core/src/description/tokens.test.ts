@@ -9,7 +9,7 @@ import {
   indexToken,
   levelToken,
   nameToken,
-  parentContextsToken,
+  parentContextToken,
   parentToken,
   VIRTUAL_ROLE,
 } from './tokens.js';
@@ -103,7 +103,7 @@ testSuite('built-in tokens', () => {
     });
   });
 
-  it('parentContextsToken describes a virtual node', () => {
+  it('parentContextToken describes a single virtual sibling', () => {
     createRoot((dispose) => {
       const rt = createNavigationRuntime(
         buildHypergraph([
@@ -113,23 +113,35 @@ testSuite('built-in tokens', () => {
         ]),
       );
       rt.focus('root/hangs/x');
-      rt.moveFocus('up'); // synthesize virtual
-      const virtualNavId = rt.focusedNavId();
-      const virtualNode = rt.getNavNode(virtualNavId)!;
-      const ctx: TokenContext<unknown> = {
-        navNode: virtualNode,
+      rt.moveFocus('up'); // default virtual sibling
+      const defaultId = rt.focusedNavId();
+      const defaultCtx: TokenContext<unknown> = {
+        navNode: rt.getNavNode(defaultId)!,
         edge: null,
         hypergraph: rt.hypergraph(),
         runtime: rt,
         selection: rt.selection(),
-        fullPredicate: rt.fullPredicate(virtualNavId),
+        fullPredicate: rt.fullPredicate(defaultId),
       };
-      const v = parentContextsToken().compute(ctx);
-      expect(v.short).toContain('Parent contexts for Box B1');
-      expect(v.long).toContain('Default: Hangs relation');
-      expect(v.long).toContain('Other options: Diagram');
-      // check applicableRoles
-      expect(parentContextsToken().applicableRoles).toEqual([VIRTUAL_ROLE]);
+      const defaultV = parentContextToken().compute(defaultCtx);
+      expect(defaultV.short).toBe('Parent context: Hangs relation (default)');
+      expect(defaultV.long).toBe('Parent context for Box B1: Hangs relation (default)');
+
+      rt.moveFocus('right');
+      const otherId = rt.focusedNavId();
+      const otherCtx: TokenContext<unknown> = {
+        navNode: rt.getNavNode(otherId)!,
+        edge: null,
+        hypergraph: rt.hypergraph(),
+        runtime: rt,
+        selection: rt.selection(),
+        fullPredicate: rt.fullPredicate(otherId),
+      };
+      const otherV = parentContextToken().compute(otherCtx);
+      expect(otherV.short).toBe('Parent context: Diagram');
+      expect(otherV.long).toBe('Parent context for Box B1: Diagram');
+
+      expect(parentContextToken().applicableRoles).toEqual([VIRTUAL_ROLE]);
       dispose();
     });
   });

@@ -109,25 +109,22 @@ describe('NavigationRuntime — single-parent navigation', () => {
   });
 });
 
-describe('NavigationRuntime — multi-parent ascent via virtual parent-context node', () => {
-  it('Up from a two-parent leaf synthesizes a virtual node', () => {
+describe('NavigationRuntime — multi-parent ascent via virtual parent-context siblings', () => {
+  it('Up from a two-parent leaf focuses the default virtual sibling', () => {
     createRoot((dispose) => {
       const rt = createNavigationRuntime(twoParentGraph());
       rt.focus('root/hangs/x');
       rt.moveFocus('up');
-      const focused = rt.focusedNavId();
-      expect(focused).toBe(`root/hangs/x${VIRTUAL_SUFFIX}`);
-      const node = rt.getNavNode(focused)!;
+      expect(rt.focusedNavId()).toBe(`root/hangs/x${VIRTUAL_SUFFIX}0`);
+      const node = rt.getNavNode(rt.focusedNavId())!;
       expect(node.kind).toBe('virtualParentContext');
-      // default parent (the descended one) is first
-      expect(node.childNavIds[0]).toBe('root/hangs');
-      // the other option is the other parent's NavNode
-      expect(node.childNavIds).toContain('root');
+      expect(node.parentNavId).toBe('root/hangs');
+      expect(node.childNavIds).toEqual([]);
       dispose();
     });
   });
 
-  it('Up again from the virtual node commits to the default parent', () => {
+  it('Up on the default virtual commits to the descended parent', () => {
     createRoot((dispose) => {
       const rt = createNavigationRuntime(twoParentGraph());
       rt.focus('root/hangs/x');
@@ -138,44 +135,67 @@ describe('NavigationRuntime — multi-parent ascent via virtual parent-context n
     });
   });
 
-  it('Right on a virtual node advances cursor; Up commits the new selection', () => {
+  it('Right moves between virtual siblings; Up commits the non-default parent', () => {
     createRoot((dispose) => {
       const rt = createNavigationRuntime(twoParentGraph());
       rt.focus('root/hangs/x');
       rt.moveFocus('up');
-      const virtualId = rt.focusedNavId();
-      expect(rt.virtualCursor(virtualId)).toBe(0);
+      expect(rt.focusedNavId()).toBe(`root/hangs/x${VIRTUAL_SUFFIX}0`);
       rt.moveFocus('right');
-      expect(rt.virtualCursor(virtualId)).toBe(1);
+      expect(rt.focusedNavId()).toBe(`root/hangs/x${VIRTUAL_SUFFIX}1`);
+      rt.moveFocus('left');
+      expect(rt.focusedNavId()).toBe(`root/hangs/x${VIRTUAL_SUFFIX}0`);
+      rt.moveFocus('right');
       rt.moveFocus('up');
       expect(rt.focusedNavId()).toBe('root');
       dispose();
     });
   });
 
-  it('Down from a virtual node is a no-op', () => {
+  it('Down on the default virtual returns to the original source nav id', () => {
     createRoot((dispose) => {
       const rt = createNavigationRuntime(twoParentGraph());
       rt.focus('root/hangs/x');
       rt.moveFocus('up');
-      const vid = rt.focusedNavId();
+      expect(rt.focusedNavId()).toBe(`root/hangs/x${VIRTUAL_SUFFIX}0`);
       rt.moveFocus('down');
-      expect(rt.focusedNavId()).toBe(vid);
+      expect(rt.focusedNavId()).toBe('root/hangs/x');
       dispose();
     });
   });
 
-  it('triple-parent case: virtual node lists all three with default first', () => {
+  it('Down on a non-default virtual focuses the regrouped source under the alternate parent', () => {
+    createRoot((dispose) => {
+      const rt = createNavigationRuntime(twoParentGraph());
+      rt.focus('root/hangs/x');
+      rt.moveFocus('up');
+      rt.moveFocus('right');
+      expect(rt.focusedNavId()).toBe(`root/hangs/x${VIRTUAL_SUFFIX}1`);
+      rt.moveFocus('down');
+      expect(rt.focusedNavId()).toBe('root/x');
+      dispose();
+    });
+  });
+
+  it('triple-parent case exposes three virtual siblings and First/Last jump to ends', () => {
     createRoot((dispose) => {
       const rt = createNavigationRuntime(threeParentGraph());
       rt.focus('root/s/floor');
       rt.moveFocus('up');
-      const node = rt.getNavNode(rt.focusedNavId())!;
-      expect(node.kind).toBe('virtualParentContext');
-      expect(node.childNavIds[0]).toBe('root/s');
-      expect(node.childNavIds).toHaveLength(3);
-      expect(node.childNavIds).toContain('root');
-      expect(node.childNavIds).toContain('root/u');
+      const ids = rt.virtualOptionsFor('root/s/floor');
+      expect(ids).toEqual([
+        `root/s/floor${VIRTUAL_SUFFIX}0`,
+        `root/s/floor${VIRTUAL_SUFFIX}1`,
+        `root/s/floor${VIRTUAL_SUFFIX}2`,
+      ]);
+      expect(rt.commitTargetOfVirtual(ids[0]!)).toBe('root/s');
+      expect(rt.commitTargetOfVirtual(ids[1]!)).toBe('root');
+      expect(rt.commitTargetOfVirtual(ids[2]!)).toBe('root/u');
+      expect(rt.focusedNavId()).toBe(ids[0]);
+      rt.moveFocus('last');
+      expect(rt.focusedNavId()).toBe(ids[2]);
+      rt.moveFocus('first');
+      expect(rt.focusedNavId()).toBe(ids[0]);
       dispose();
     });
   });

@@ -67,7 +67,7 @@ The `payload` travels with each edge and is passed through to token computations
 
 ## Tokens
 
-A token computes a short and long string for a node. The core ships six generic tokens (`name`, `index`, `level`, `parent`, `children`, `parentContexts`); a domain contributes more when it wants richer descriptions.
+A token computes a short and long string for a node. The core ships six generic tokens (`name`, `index`, `level`, `parent`, `children`, `parentContext`); a domain contributes more when it wants richer descriptions.
 
 ```ts
 import type { DescriptionToken } from 'olli-core';

@@ -43,21 +43,23 @@ describe('Phase 1 acceptance: programmatic Trace-B-like ascent', () => {
       rt.moveFocus('down');          // 0/18 -> 0/18/4 (Box B1)
       expect(rt.focusedNavId()).toBe('0/18/4');
 
-      rt.moveFocus('up');            // multi-parent -> virtual
-      const virtualId = rt.focusedNavId();
-      expect(virtualId).toBe(`0/18/4${VIRTUAL_SUFFIX}`);
-      const vnode = rt.getNavNode(virtualId)!;
-      expect(vnode.kind).toBe('virtualParentContext');
-      expect(vnode.childNavIds[0]).toBe('0/18'); // default: descended parent
-      expect(vnode.childNavIds).toContain('0');  // other option: root
+      rt.moveFocus('up');            // multi-parent -> default virtual sibling
+      expect(rt.focusedNavId()).toBe(`0/18/4${VIRTUAL_SUFFIX}0`);
+      const options = rt.virtualOptionsFor('0/18/4');
+      expect(options).toEqual([
+        `0/18/4${VIRTUAL_SUFFIX}0`,
+        `0/18/4${VIRTUAL_SUFFIX}1`,
+      ]);
+      expect(rt.commitTargetOfVirtual(options[0]!)).toBe('0/18');
+      expect(rt.commitTargetOfVirtual(options[1]!)).toBe('0');
 
       rt.moveFocus('up');            // commit default -> 0/18
       expect(rt.focusedNavId()).toBe('0/18');
 
       // Now do the "right then up" variant — pick the other parent.
       rt.focus('0/18/4');
-      rt.moveFocus('up');            // virtual again
-      rt.moveFocus('right');         // cursor -> other option (root)
+      rt.moveFocus('up');            // default virtual sibling
+      rt.moveFocus('right');         // -> /^1 (root)
       rt.moveFocus('up');            // commit
       expect(rt.focusedNavId()).toBe('0');
       dispose();

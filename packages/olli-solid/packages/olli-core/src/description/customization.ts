@@ -32,7 +32,7 @@ export const DEFAULT_RECIPE: readonly RecipeEntry[] = [
 ];
 
 export const DEFAULT_VIRTUAL_RECIPE: readonly RecipeEntry[] = [
-  { token: 'parentContexts', brevity: 'long' },
+  { token: 'parentContext', brevity: 'long' },
 ];
 
 export function defaultCustomizationFor(role: string): Customization {

@@ -14,8 +14,9 @@ import {
 import {
   buildNavTree,
   isVirtualNavId,
+  optionIndexOfVirtual,
   sourceNavIdOfVirtual,
-  VIRTUAL_SUFFIX,
+  virtualNavIdFor,
   type NavNode,
   type NavNodeId,
   type NavTree,
@@ -51,7 +52,24 @@ export interface NavigationRuntime<P> {
   getNavNode(navId: NavNodeId): NavNode | undefined;
   getHyperedge(id: HyperedgeId): Hyperedge<P> | undefined;
   fullPredicate(navId: NavNodeId): Selection;
-  virtualCursor(navId: NavNodeId): number;
+  /**
+   * For a real multi-parent nav node, return the ordered list of virtual-option
+   * nav ids `[default, ...others]`. Returns `[]` when the source is not
+   * multi-parent or is not a real node.
+   */
+  virtualOptionsFor(sourceNavId: NavNodeId): readonly NavNodeId[];
+  /**
+   * For a virtual nav id, return the underlying real parent nav id it would
+   * commit to on Up. Returns `undefined` when the id is malformed or out of
+   * range.
+   */
+  commitTargetOfVirtual(virtualNavId: NavNodeId): NavNodeId | undefined;
+  /**
+   * For a virtual nav id, return the nav id of the source hyperedge as a child
+   * of the commit-target parent. This is X_i — the "same conceptual node,
+   * regrouped under parent_i". Returns `undefined` on any resolution failure.
+   */
+  regroupedSourceOfVirtual(virtualNavId: NavNodeId): NavNodeId | undefined;
 
   // Actions
   focus(navId: NavNodeId): void;
@@ -85,9 +103,6 @@ export function createNavigationRuntime<P>(initialGraph: Hypergraph<P>): Navigat
   const [focusedNavId, setFocusedNavId] = createSignal<NavNodeId>(initialFocus);
   const [selection, setSelectionSignal] = createSignal<Selection>(EMPTY_AND);
   const [expanded, setExpandedSignal] = createSignal<ReadonlySet<NavNodeId>>(new Set());
-  const [virtualCursors, setVirtualCursors] = createSignal<ReadonlyMap<NavNodeId, number>>(
-    new Map(),
-  );
 
   const keybindings = createKeybindingRegistry<P>();
   const dialogs = createDialogRegistry<P>();
@@ -104,52 +119,74 @@ export function createNavigationRuntime<P>(initialGraph: Hypergraph<P>): Navigat
     return navTree().byNavId.get(navId);
   }
 
-  function synthesizeVirtualNode(virtualNavId: NavNodeId): NavNode | undefined {
-    const sourceNavId = sourceNavIdOfVirtual(virtualNavId);
-    const source = getRealNavNode(sourceNavId);
-    if (!source || source.hyperedgeId === null) return undefined;
+  function parentOptionsForSource(source: NavNode): readonly NavNodeId[] {
+    if (source.hyperedgeId === null) return [];
     const edge = getHyperedge(source.hyperedgeId);
-    if (!edge || edge.parents.length < 2) return undefined;
-
+    if (!edge || edge.parents.length < 2) return [];
     const descentParentEdgeId = source.path[source.path.length - 2];
     const defaultParentNavId = source.parentNavId;
-
-    const childNavIds: NavNodeId[] = [];
-    if (defaultParentNavId) childNavIds.push(defaultParentNavId);
-
+    const opts: NavNodeId[] = [];
+    if (defaultParentNavId) opts.push(defaultParentNavId);
     const idx = navTree().hyperedgeToNavIds;
     for (const parentEdgeId of edge.parents) {
       if (parentEdgeId === descentParentEdgeId) continue;
       const candidates = idx.get(parentEdgeId) ?? [];
       const pick = candidates[0];
-      if (pick && !childNavIds.includes(pick)) childNavIds.push(pick);
+      if (pick && !opts.includes(pick)) opts.push(pick);
     }
+    return opts;
+  }
 
+  function virtualOptionsFor(sourceNavId: NavNodeId): readonly NavNodeId[] {
+    const source = getRealNavNode(sourceNavId);
+    if (!source) return [];
+    const parents = parentOptionsForSource(source);
+    return parents.map((_, i) => virtualNavIdFor(sourceNavId, i));
+  }
+
+  function commitTargetOfVirtual(virtualNavId: NavNodeId): NavNodeId | undefined {
+    const sourceNavId = sourceNavIdOfVirtual(virtualNavId);
+    const source = getRealNavNode(sourceNavId);
+    if (!source) return undefined;
+    const parents = parentOptionsForSource(source);
+    const i = optionIndexOfVirtual(virtualNavId);
+    if (i < 0 || i >= parents.length) return undefined;
+    return parents[i];
+  }
+
+  function regroupedSourceOfVirtual(virtualNavId: NavNodeId): NavNodeId | undefined {
+    const ct = commitTargetOfVirtual(virtualNavId);
+    if (!ct) return undefined;
+    const sourceNavId = sourceNavIdOfVirtual(virtualNavId);
+    const source = getRealNavNode(sourceNavId);
+    if (!source || source.hyperedgeId === null) return undefined;
+    const ctNode = getRealNavNode(ct);
+    if (!ctNode || ctNode.hyperedgeId === null) return undefined;
+    const parentEdge = getHyperedge(ctNode.hyperedgeId);
+    if (!parentEdge || !parentEdge.children.includes(source.hyperedgeId)) return undefined;
+    return `${ct}/${source.hyperedgeId}`;
+  }
+
+  function synthesizeVirtualNode(virtualNavId: NavNodeId): NavNode | undefined {
+    const sourceNavId = sourceNavIdOfVirtual(virtualNavId);
+    const source = getRealNavNode(sourceNavId);
+    if (!source) return undefined;
+    const parents = parentOptionsForSource(source);
+    const i = optionIndexOfVirtual(virtualNavId);
+    if (i < 0 || i >= parents.length) return undefined;
     return {
       navId: virtualNavId,
       kind: 'virtualParentContext',
       hyperedgeId: null,
       path: source.path,
-      parentNavId: null,
-      childNavIds,
+      parentNavId: source.parentNavId ?? source.navId,
+      childNavIds: [],
     };
   }
 
   function getNavNode(navId: NavNodeId): NavNode | undefined {
     if (isVirtualNavId(navId)) return synthesizeVirtualNode(navId);
     return getRealNavNode(navId);
-  }
-
-  function virtualCursor(navId: NavNodeId): number {
-    return virtualCursors().get(navId) ?? 0;
-  }
-
-  function setVirtualCursor(navId: NavNodeId, n: number): void {
-    setVirtualCursors((prev) => {
-      const next = new Map(prev);
-      next.set(navId, n);
-      return next;
-    });
   }
 
   function focus(navId: NavNodeId): void {
@@ -162,33 +199,41 @@ export function createNavigationRuntime<P>(initialGraph: Hypergraph<P>): Navigat
     if (!node) return;
 
     if (node.kind === 'virtualParentContext') {
-      const opts = node.childNavIds;
-      if (opts.length === 0) return;
-      const cursor = virtualCursor(current);
+      const sourceNavId = sourceNavIdOfVirtual(current);
+      const siblings = virtualOptionsFor(sourceNavId);
+      if (siblings.length === 0) return;
+      const i = optionIndexOfVirtual(current);
       switch (direction) {
         case 'up': {
-          const target = opts[cursor];
+          const target = commitTargetOfVirtual(current);
           if (target) focus(target);
           return;
         }
-        case 'down':
+        case 'down': {
+          const rs = regroupedSourceOfVirtual(current);
+          if (rs) focus(rs);
           return;
+        }
         case 'left': {
-          if (cursor <= 0) return;
-          setVirtualCursor(current, cursor - 1);
+          if (i <= 0) return;
+          const target = siblings[i - 1];
+          if (target) focus(target);
           return;
         }
         case 'right': {
-          if (cursor >= opts.length - 1) return;
-          setVirtualCursor(current, cursor + 1);
+          if (i >= siblings.length - 1) return;
+          const target = siblings[i + 1];
+          if (target) focus(target);
           return;
         }
         case 'first': {
-          setVirtualCursor(current, 0);
+          const target = siblings[0];
+          if (target) focus(target);
           return;
         }
         case 'last': {
-          setVirtualCursor(current, opts.length - 1);
+          const target = siblings[siblings.length - 1];
+          if (target) focus(target);
           return;
         }
       }
@@ -208,9 +253,7 @@ export function createNavigationRuntime<P>(initialGraph: Hypergraph<P>): Navigat
           if (node.parentNavId) focus(node.parentNavId);
           return;
         }
-        const virtualNavId = current + VIRTUAL_SUFFIX;
-        setVirtualCursor(virtualNavId, 0);
-        focus(virtualNavId);
+        focus(virtualNavIdFor(current, 0));
         return;
       }
       case 'left':
@@ -290,7 +333,9 @@ export function createNavigationRuntime<P>(initialGraph: Hypergraph<P>): Navigat
     getNavNode,
     getHyperedge,
     fullPredicate,
-    virtualCursor,
+    virtualOptionsFor,
+    commitTargetOfVirtual,
+    regroupedSourceOfVirtual,
     focus,
     moveFocus,
     expand,

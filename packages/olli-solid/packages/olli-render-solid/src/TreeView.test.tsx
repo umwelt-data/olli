@@ -213,16 +213,18 @@ describe('<TreeView /> — keyboard navigation', () => {
   });
 });
 
-describe('<TreeView /> — virtual parent-context node', () => {
-  it('renders a virtual tree item after ArrowUp from a multi-parent node', () => {
+describe('<TreeView /> — virtual parent-context siblings', () => {
+  function multiParentGraph() {
+    return buildHypergraph([
+      edge('root', 'Diagram', ['x', 'hangs']),
+      edge('hangs', 'Hangs relation', ['x'], ['root']),
+      edge('x', 'Box B1', [], ['root', 'hangs']),
+    ]);
+  }
+
+  it('renders virtuals in the parent group as leaf treeitems', () => {
     const { runtime, container } = renderWith(() =>
-      createNavigationRuntime(
-        buildHypergraph([
-          edge('root', 'Diagram', ['x', 'hangs']),
-          edge('hangs', 'Hangs relation', ['x'], ['root']),
-          edge('x', 'Box B1', [], ['root', 'hangs']),
-        ]),
-      ),
+      createNavigationRuntime(multiParentGraph()),
     );
     runtime.focus('root/hangs/x');
     expect(container.querySelector('[data-virtual="true"]')).toBeNull();
@@ -230,13 +232,102 @@ describe('<TreeView /> — virtual parent-context node', () => {
     const tree = container.querySelector('[role="tree"]')!;
     fireEvent.keyDown(tree, { key: 'ArrowUp' });
 
-    const virtual = container.querySelector<HTMLElement>('[data-virtual="true"]');
-    expect(virtual).toBeTruthy();
-    expect(virtual!.getAttribute('aria-selected')).toBe('true');
-    const virtualLabel = virtual!.querySelector('.olli-node-label')!.textContent ?? '';
-    expect(virtualLabel).toContain('Parent contexts for Box B1');
-    expect(virtualLabel).toContain('Default: Hangs relation');
-    expect(virtualLabel).toContain('Other options: Diagram');
+    const virtuals = container.querySelectorAll<HTMLElement>('[data-virtual="true"]');
+    expect(virtuals.length).toBe(2);
+    expect(virtuals[0]!.getAttribute('data-nav-id')).toBe('root/hangs/x/^0');
+    expect(virtuals[0]!.getAttribute('aria-selected')).toBe('true');
+    expect(virtuals[0]!.getAttribute('aria-posinset')).toBe('1');
+    expect(virtuals[0]!.getAttribute('aria-setsize')).toBe('2');
+    expect(virtuals[1]!.getAttribute('data-nav-id')).toBe('root/hangs/x/^1');
+    expect(virtuals[1]!.getAttribute('aria-posinset')).toBe('2');
+
+    const label0 = virtuals[0]!.querySelector(':scope > .olli-node-label')!.textContent ?? '';
+    expect(label0).toContain('Parent context for Box B1');
+    expect(label0).toContain('Hangs relation');
+    expect(label0).toContain('(default)');
+    const label1 = virtuals[1]!.querySelector(':scope > .olli-node-label')!.textContent ?? '';
+    expect(label1).toContain('Parent context for Box B1');
+    expect(label1).toContain('Diagram');
+
+    // Virtuals live in the "hangs" node's group, not in "x"'s group.
+    const hangsGroup = container.querySelector<HTMLElement>(
+      '[data-nav-id="root/hangs"] > [role="group"]',
+    )!;
+    expect(hangsGroup.contains(virtuals[0]!)).toBe(true);
+    expect(hangsGroup.contains(virtuals[1]!)).toBe(true);
+
+    // The original "x" is hidden — replaced by virtuals (not a direct child of hangs' group).
+    const directChildren = Array.from(hangsGroup.children).filter(
+      (el) => el.getAttribute('data-nav-id') === 'root/hangs/x',
+    );
+    expect(directChildren.length).toBe(0);
+
+    // Virtuals are leaf nodes — no nested children.
+    expect(virtuals[0]!.querySelector('[role="group"]')).toBeNull();
+    expect(virtuals[1]!.querySelector('[role="group"]')).toBeNull();
+  });
+
+  it('ArrowRight and ArrowLeft move focus across virtual siblings', () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(multiParentGraph()),
+    );
+    runtime.focus('root/hangs/x');
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'ArrowUp' });
+    expect(runtime.focusedNavId()).toBe('root/hangs/x/^0');
+    fireEvent.keyDown(tree, { key: 'ArrowRight' });
+    expect(runtime.focusedNavId()).toBe('root/hangs/x/^1');
+    fireEvent.keyDown(tree, { key: 'ArrowLeft' });
+    expect(runtime.focusedNavId()).toBe('root/hangs/x/^0');
+  });
+
+  it('siblings of the active virtual source are hidden while virtual layer is open', () => {
+    function graphWithSibling() {
+      return buildHypergraph([
+        edge('root', 'Diagram', ['x', 'hangs']),
+        edge('hangs', 'Hangs relation', ['x', 'y'], ['root']),
+        edge('x', 'Box B1', [], ['root', 'hangs']),
+        edge('y', 'Box B2', [], ['hangs']),
+      ]);
+    }
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(graphWithSibling()),
+    );
+    runtime.focus('root/hangs/x');
+
+    // Before virtuals: y is visible as a sibling of x under hangs.
+    const hangsGroup = container.querySelector<HTMLElement>(
+      '[data-nav-id="root/hangs"] > [role="group"]',
+    )!;
+    expect(hangsGroup.querySelector('[data-nav-id="root/hangs/y"]')).toBeTruthy();
+
+    // Activate virtual layer on x.
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'ArrowUp' });
+    expect(runtime.focusedNavId()).toBe('root/hangs/x/^0');
+
+    // y is now hidden.
+    expect(hangsGroup.querySelector('[data-nav-id="root/hangs/y"]')).toBeNull();
+
+    // Commit back down — y reappears.
+    fireEvent.keyDown(tree, { key: 'ArrowDown' });
+    expect(runtime.focusedNavId()).toBe('root/hangs/x');
+    expect(hangsGroup.querySelector('[data-nav-id="root/hangs/y"]')).toBeTruthy();
+  });
+
+  it('ArrowDown on a non-default virtual focuses the regrouped source', () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(multiParentGraph()),
+    );
+    runtime.focus('root/hangs/x');
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'ArrowUp' });
+    fireEvent.keyDown(tree, { key: 'ArrowRight' });
+    expect(runtime.focusedNavId()).toBe('root/hangs/x/^1');
+    fireEvent.keyDown(tree, { key: 'ArrowDown' });
+    expect(runtime.focusedNavId()).toBe('root/x');
+    // Virtual layer collapses — no more virtual items.
+    expect(container.querySelector('[data-virtual="true"]')).toBeNull();
   });
 });
 
@@ -305,7 +396,7 @@ describe('<TreeView /> — reactivity', () => {
 
     const virtual = container.querySelector<HTMLElement>('[data-virtual="true"]')!;
     const virtualLabel = virtual.querySelector('.olli-node-label')!.textContent ?? '';
-    expect(virtualLabel).toContain('Parent contexts for Box B1');
+    expect(virtualLabel).toContain('Parent context for Box B1');
     expect(VIRTUAL_ROLE).toBe('__virtualParentContext__');
   });
 });

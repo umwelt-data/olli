@@ -1,6 +1,6 @@
 import type { Hyperedge, Hypergraph } from '../hypergraph/types.js';
 import type { Selection } from '../predicate/types.js';
-import type { NavNode } from '../runtime/navtree.js';
+import { optionIndexOfVirtual, type NavNode } from '../runtime/navtree.js';
 import type { NavigationRuntime } from '../runtime/runtime.js';
 
 export type TokenName = string;
@@ -69,7 +69,7 @@ export function nameToken<P>(): DescriptionToken<P> {
     applicableRoles: '*',
     compute: ({ navNode, edge }) => {
       if (navNode.kind === 'virtualParentContext') {
-        return { short: 'Parent contexts', long: 'Parent contexts' };
+        return { short: 'Parent context', long: 'Parent context' };
       }
       if (!edge) return { short: '', long: '' };
       const short = edge.displayName;
@@ -142,9 +142,9 @@ export function childrenToken<P>(): DescriptionToken<P> {
   };
 }
 
-export function parentContextsToken<P>(): DescriptionToken<P> {
+export function parentContextToken<P>(): DescriptionToken<P> {
   return {
-    name: 'parentContexts',
+    name: 'parentContext',
     applicableRoles: [VIRTUAL_ROLE],
     compute: ({ navNode, runtime, hypergraph }) => {
       if (navNode.kind !== 'virtualParentContext') return { short: '', long: '' };
@@ -153,26 +153,18 @@ export function parentContextsToken<P>(): DescriptionToken<P> {
         ? hypergraph.edges.get(sourceEdgeId)?.displayName ?? ''
         : '';
 
-      const cursor = runtime.virtualCursor(navNode.navId);
-      const optNames = navNode.childNavIds.map((id) => {
-        const node = runtime.getNavNode(id);
-        const edgeId = node?.hyperedgeId ?? null;
-        return edgeId ? hypergraph.edges.get(edgeId)?.displayName ?? id : id;
-      });
-      const highlighted = optNames[cursor] ?? optNames[0] ?? '';
-      const defaultName = optNames[0] ?? '';
-      const others = optNames.slice(1);
+      const target = runtime.commitTargetOfVirtual(navNode.navId);
+      if (!target) return { short: '', long: '' };
+      const targetNode = runtime.getNavNode(target);
+      const targetEdgeId = targetNode?.hyperedgeId ?? null;
+      const targetName = targetEdgeId
+        ? hypergraph.edges.get(targetEdgeId)?.displayName ?? ''
+        : '';
 
-      const short =
-        optNames.length === 0
-          ? ''
-          : `Parent contexts for ${sourceName}: ${optNames.length} options, selected ${highlighted}.`;
-      const long =
-        optNames.length === 0
-          ? ''
-          : others.length > 0
-            ? `Parent contexts for ${sourceName}. ${optNames.length} options. Default: ${defaultName}. Other options: ${others.join(', ')}. Currently selected: ${highlighted}.`
-            : `Parent contexts for ${sourceName}. Default: ${defaultName}.`;
+      const isDefault = optionIndexOfVirtual(navNode.navId) === 0;
+      const suffix = isDefault ? ' (default)' : '';
+      const short = `Parent context: ${targetName}${suffix}`;
+      const long = `Parent context for ${sourceName}: ${targetName}${suffix}`;
       return { short, long };
     },
   };
@@ -184,5 +176,5 @@ export function registerBuiltinTokens<P>(registry: TokenRegistry<P>): void {
   registry.register(levelToken<P>());
   registry.register(parentToken<P>());
   registry.register(childrenToken<P>());
-  registry.register(parentContextsToken<P>());
+  registry.register(parentContextToken<P>());
 }

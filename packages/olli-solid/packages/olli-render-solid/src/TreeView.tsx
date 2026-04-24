@@ -20,10 +20,12 @@ export function TreeView<P>(props: { runtime: NavigationRuntime<P> }) {
   createEffect(() => {
     const id = props.runtime.focusedNavId();
     if (!treeEl) return;
-    const el = treeEl.querySelector<HTMLElement>(
-      `[data-nav-id="${CSS.escape(id)}"]`,
-    );
-    if (el && document.activeElement !== el) el.focus();
+    queueMicrotask(() => {
+      const el = treeEl!.querySelector<HTMLElement>(
+        `[data-nav-id="${CSS.escape(id)}"]`,
+      );
+      if (el && document.activeElement !== el) el.focus();
+    });
   });
 
   createEffect(() => {

@@ -1,5 +1,12 @@
 export type { NavNode, NavNodeId, NavNodeKind, NavTree } from './navtree.js';
-export { buildNavTree, isVirtualNavId, sourceNavIdOfVirtual, VIRTUAL_SUFFIX } from './navtree.js';
+export {
+  buildNavTree,
+  isVirtualNavId,
+  optionIndexOfVirtual,
+  sourceNavIdOfVirtual,
+  VIRTUAL_SUFFIX,
+  virtualNavIdFor,
+} from './navtree.js';
 export type { KeybindingContribution, KeybindingRegistry } from './keybindings.js';
 export { createKeybindingRegistry } from './keybindings.js';
 export type { DialogContribution, DialogRegistry } from './dialogs.js';

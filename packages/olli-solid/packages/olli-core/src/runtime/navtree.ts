@@ -22,6 +22,8 @@ export interface NavTree {
 
 export const VIRTUAL_SUFFIX = '/^';
 
+const VIRTUAL_RE = /\/\^(\d+)$/;
+
 export function buildNavTree<P>(graph: Hypergraph<P>): NavTree {
   const byNavId = new Map<NavNodeId, NavNode>();
   const hyperedgeToNavIds = new Map<HyperedgeId, NavNodeId[]>();
@@ -84,9 +86,18 @@ function indexNode(
 }
 
 export function isVirtualNavId(navId: NavNodeId): boolean {
-  return navId.endsWith(VIRTUAL_SUFFIX);
+  return VIRTUAL_RE.test(navId);
 }
 
 export function sourceNavIdOfVirtual(navId: NavNodeId): NavNodeId {
-  return navId.slice(0, -VIRTUAL_SUFFIX.length);
+  return navId.replace(VIRTUAL_RE, '');
+}
+
+export function optionIndexOfVirtual(navId: NavNodeId): number {
+  const m = VIRTUAL_RE.exec(navId);
+  return m ? Number(m[1]) : -1;
+}
+
+export function virtualNavIdFor(sourceNavId: NavNodeId, index: number): NavNodeId {
+  return `${sourceNavId}${VIRTUAL_SUFFIX}${index}`;
 }

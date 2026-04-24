@@ -156,8 +156,8 @@ describe('describe() — presets', () => {
   });
 });
 
-describe('describe() — virtual parent-context node', () => {
-  it('renders parentContexts description', () => {
+describe('describe() — virtual parent-context sibling', () => {
+  it('renders the per-option parentContext description', () => {
     createRoot((dispose) => {
       const rt = createNavigationRuntime(
         buildHypergraph([
@@ -168,12 +168,20 @@ describe('describe() — virtual parent-context node', () => {
       );
       rt.focus('root/hangs/x');
       rt.moveFocus('up');
-      const virtualNavId = rt.focusedNavId();
-      expect(virtualNavId.endsWith(VIRTUAL_SUFFIX)).toBe(true);
-      const desc = rt.getDescriptionFor(virtualNavId)();
-      expect(desc).toContain('Parent contexts for Box B1');
-      expect(desc).toContain('Default: Hangs relation');
-      expect(desc).toContain('Other options: Diagram');
+      const defaultId = rt.focusedNavId();
+      expect(defaultId).toBe(`root/hangs/x${VIRTUAL_SUFFIX}0`);
+      const defaultDesc = rt.getDescriptionFor(defaultId)();
+      expect(defaultDesc).toContain('Parent context for Box B1');
+      expect(defaultDesc).toContain('Hangs relation');
+      expect(defaultDesc).toContain('(default)');
+
+      rt.moveFocus('right');
+      const otherId = rt.focusedNavId();
+      expect(otherId).toBe(`root/hangs/x${VIRTUAL_SUFFIX}1`);
+      const otherDesc = rt.getDescriptionFor(otherId)();
+      expect(otherDesc).toContain('Parent context for Box B1');
+      expect(otherDesc).toContain('Diagram');
+      expect(otherDesc).not.toContain('(default)');
       dispose();
     });
   });

@@ -36,7 +36,7 @@ describe('pulley example — DOM acceptance', () => {
     expect(ropeQ.getAttribute('aria-level')).toBe('3');
   });
 
-  it('Trace B end-to-end: focus Box B1 under 18, Up produces virtual, Up commits', () => {
+  it('Trace B end-to-end: focus Box B1 under 18, Up produces virtual siblings, Up commits', () => {
     const { runtime, container } = setup();
     runtime.focus('0/18/4');
     expect(container.querySelector('[data-virtual="true"]')).toBeNull();
@@ -44,20 +44,24 @@ describe('pulley example — DOM acceptance', () => {
     const tree = container.querySelector('[role="tree"]')!;
     fireEvent.keyDown(tree, { key: 'ArrowUp' });
 
-    const virtual = container.querySelector<HTMLElement>('[data-virtual="true"]');
-    expect(virtual).toBeTruthy();
-    expect(virtual!.getAttribute('aria-selected')).toBe('true');
-    const label = virtual!.querySelector('.olli-node-label')!.textContent ?? '';
-    expect(label).toContain('Parent contexts for Box B1');
-    expect(label).toContain('Default: Box B1 hangs from Rope q');
-    expect(label).toContain('Other options: Pulley diagram');
+    const virtuals = container.querySelectorAll<HTMLElement>('[data-virtual="true"]');
+    expect(virtuals.length).toBe(2);
+    expect(virtuals[0]!.getAttribute('data-nav-id')).toBe('0/18/4/^0');
+    expect(virtuals[0]!.getAttribute('aria-selected')).toBe('true');
+    const label0 = virtuals[0]!.querySelector('.olli-node-label')!.textContent ?? '';
+    expect(label0).toContain('Parent context for Box B1');
+    expect(label0).toContain('Box B1 hangs from Rope q');
+    expect(label0).toContain('(default)');
+    const label1 = virtuals[1]!.querySelector('.olli-node-label')!.textContent ?? '';
+    expect(label1).toContain('Pulley diagram');
+    expect(label1).not.toContain('(default)');
 
     fireEvent.keyDown(tree, { key: 'ArrowUp' }); // commit
     expect(runtime.focusedNavId()).toBe('0/18');
     expect(container.querySelector('[data-virtual="true"]')).toBeNull();
   });
 
-  it('Trace C: Floor virtual enumerates 3 parents', () => {
+  it('Trace C: Floor virtual siblings enumerate 3 parents', () => {
     const { runtime, container } = setup();
     runtime.focus('0/24');
     const tree = container.querySelector('[role="tree"]')!;
@@ -65,23 +69,26 @@ describe('pulley example — DOM acceptance', () => {
     fireEvent.keyDown(tree, { key: 'ArrowRight' }); // → 0/24/7 (Floor)
     expect(runtime.focusedNavId()).toBe('0/24/7');
     fireEvent.keyDown(tree, { key: 'ArrowUp' });
-    const virtual = container.querySelector<HTMLElement>('[data-virtual="true"]')!;
-    const label = virtual.querySelector('.olli-node-label')!.textContent ?? '';
-    expect(label).toContain('Parent contexts for Floor');
-    expect(label).toContain('3 options');
-    expect(label).toContain('Default: Rope s is anchored to Floor');
-    expect(label).toContain('Rope u is anchored to Floor');
-    expect(label).toContain('Pulley diagram');
+    const virtuals = container.querySelectorAll<HTMLElement>('[data-virtual="true"]');
+    expect(virtuals.length).toBe(3);
+    const labels = Array.from(virtuals).map(
+      (v) => v.querySelector('.olli-node-label')!.textContent ?? '',
+    );
+    expect(labels[0]).toContain('Parent context for Floor');
+    expect(labels[0]).toContain('Rope s is anchored to Floor');
+    expect(labels[0]).toContain('(default)');
+    expect(labels[1]).toContain('Pulley diagram');
+    expect(labels[2]).toContain('Rope u is anchored to Floor');
   });
 
-  it('Trace D: Rope r ascent, switch parent, commit to "Pulley B hangs from Rope r"', () => {
+  it('Trace D: Rope r ascent, switch parent sibling, commit to "Pulley B hangs from Rope r"', () => {
     const { runtime, container } = setup();
     runtime.focus('0/1/13');
     const tree = container.querySelector('[role="tree"]')!;
-    fireEvent.keyDown(tree, { key: 'ArrowUp' }); // virtual
-    const virtual = container.querySelector<HTMLElement>('[data-virtual="true"]')!;
-    expect(virtual.getAttribute('aria-selected')).toBe('true');
-    fireEvent.keyDown(tree, { key: 'ArrowRight' }); // cursor → option 1
+    fireEvent.keyDown(tree, { key: 'ArrowUp' }); // /^0 (default)
+    expect(runtime.focusedNavId()).toBe('0/1/13/^0');
+    fireEvent.keyDown(tree, { key: 'ArrowRight' }); // /^1
+    expect(runtime.focusedNavId()).toBe('0/1/13/^1');
     fireEvent.keyDown(tree, { key: 'ArrowUp' }); // commit
     expect(runtime.focusedNavId()).toBe('0/21');
   });

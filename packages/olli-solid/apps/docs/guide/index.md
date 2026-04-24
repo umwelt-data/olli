@@ -6,7 +6,7 @@ Olli currently supports visualizations and diagrams. For visualizations, Olli ta
 
 ## Pick a path
 
-**I landed on an Olli tree on a web page and want to know how to use it.**
+**I'm a screen reader user and want to know how to use Olli.**
 Start with the [tutorial](/guide/tutorial): a hands-on walk through a live example with a screen reader. Once the keyboard feels natural, [concepts](/guide/concepts) covers the vocabulary shared across every Olli tree, and [visualizations](/guide/visualizations) and [diagrams](/guide/diagrams) go deeper on each domain.
 
 **I'm a developer and want to add Olli to my site.**

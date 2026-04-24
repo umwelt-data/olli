@@ -15,7 +15,7 @@ export {
   levelToken,
   parentToken,
   childrenToken,
-  parentContextsToken,
+  parentContextToken,
 } from './tokens.js';
 export type {
   Brevity,
