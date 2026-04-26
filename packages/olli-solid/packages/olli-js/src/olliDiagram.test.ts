@@ -4,11 +4,15 @@ import type { OlliHandle } from './handle.js';
 import type { DiagramSpec } from 'olli-diagram';
 
 const spec: DiagramSpec = {
-  edges: [
-    { id: 'root', displayName: 'System', children: ['a', 'b'], parents: [] },
-    { id: 'a', displayName: 'Component A', children: ['shared'], parents: ['root'] },
-    { id: 'b', displayName: 'Component B', children: ['shared'], parents: ['root'] },
-    { id: 'shared', displayName: 'Shared Resource', children: [], parents: ['a', 'b'] },
+  title: 'Test System',
+  elements: [
+    { id: 'a', label: 'Component A' },
+    { id: 'b', label: 'Component B' },
+    { id: 'shared', label: 'Shared Resource' },
+  ],
+  relations: [
+    { kind: 'grouping', id: 'gA', members: ['a', 'shared'], label: 'Group A' },
+    { kind: 'grouping', id: 'gB', members: ['b', 'shared'], label: 'Group B' },
   ],
 };
 

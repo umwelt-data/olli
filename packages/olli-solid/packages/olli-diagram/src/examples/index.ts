@@ -1,1 +1,1 @@
-export { pulleyMedium } from './pulleyMedium.js';
+export { pulleySpec } from './pulley.js';

@@ -1,1 +1,11 @@
-export type { DiagramPayload, DiagramSpec } from './types.js';
+export type {
+  DiagramElement,
+  DiagramRelation,
+  ConnectionRelation,
+  ContainmentRelation,
+  AlignmentRelation,
+  DistributionRelation,
+  GroupingRelation,
+  DiagramSpec,
+  DiagramPayload,
+} from './types.js';

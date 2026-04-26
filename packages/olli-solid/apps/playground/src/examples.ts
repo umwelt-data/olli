@@ -2,8 +2,7 @@ import type { OlliHandle } from 'olli-js';
 import { olliVis, olliDiagram, olli } from 'olli-js';
 import { buildHypergraph } from 'olli-core';
 import type { UnitOlliVisSpec } from 'olli-vis';
-import type { DiagramSpec } from 'olli-diagram';
-import { pulleyMedium } from 'olli-diagram';
+import { pulleySpec } from 'olli-diagram';
 
 const barChartSpec: UnitOlliVisSpec = {
   data: [
@@ -76,7 +75,7 @@ export const examples: ExampleDef[] = [
   },
   {
     name: 'Pulley Diagram',
-    mount: (c) => olliDiagram(pulleyMedium, c),
+    mount: (c) => olliDiagram(pulleySpec, c),
   },
   {
     name: 'Raw Hypergraph',
