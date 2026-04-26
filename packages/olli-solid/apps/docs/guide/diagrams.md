@@ -18,12 +18,12 @@ This is what [parent-context switching](/guide/concepts#parent-context-switching
 
 ```ts
 import { olliDiagram } from 'olli-js';
-import { pulleyMedium } from 'olli-diagram/examples';
+import { pulleySpec } from 'olli-diagram/examples';
 
-olliDiagram(pulleyMedium, document.getElementById('tree'));
+olliDiagram(pulleySpec, document.getElementById('tree'));
 ```
 
-The `pulleyMedium` spec describes three pulley systems with shared ropes and boxes. A user presses the down arrow at the root to enter the first system, then arrows through its parts. Reaching a shared rope, the user arrows sideways through virtual siblings to switch context into another system's subtree.
+The `pulleySpec` describes three pulley systems with shared ropes and boxes. A user presses the down arrow at the root to enter the first system, then arrows through its parts. Reaching a shared rope, the user arrows sideways through virtual siblings to switch context into another system's subtree.
 
 The pulley case comes from [Cheng (1999)](https://doi.org/10.1207/s15516709cog2303_2) and was used in the Benthic user study ([Mei et al. ASSETS '25](https://dl.acm.org/doi/10.1145/3663548.3675623)), which tested how blind users build a mental model of a structural diagram through hypergraph navigation.
 

@@ -26,8 +26,4 @@ export interface VisualizationExample extends BaseExample {
 
 export interface DiagramExample extends BaseExample {
   domain: 'diagram';
-  /** Consumed by `olli-diagram`. Typed as `unknown` here to keep this file framework-agnostic. */
-  spec: unknown;
-  /** Optional SVG markup to render alongside the tree. */
-  svg?: string;
 }

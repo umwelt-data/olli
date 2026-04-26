@@ -94,7 +94,6 @@ render(() => <TreeView runtime={runtime} />, container);
 ## Examples
 
 - `examples/bar-chart/` — Vanilla JS bar chart via `olli-js` (no Solid imports)
-- `examples/pulley-medium/` — Diagram domain with the medium pulley system
 - `examples/solid-app/` — Direct Solid integration bypassing `olli-js`
 
 ## Development

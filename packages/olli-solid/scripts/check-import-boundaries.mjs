@@ -24,10 +24,8 @@ const LAYERS = {
 
 // Per-example layering rules: keys are example dir names under examples/, values
 // are the set of workspace packages they are allowed to import. Anything not in
-// this allowlist is a violation. This enforces the Phase 4 architectural test
-// that pulley-medium depends only on olli-core + olli-render-solid + olli-diagram.
+// this allowlist is a violation.
 const EXAMPLE_ALLOWED = {
-  'pulley-medium': new Set(['olli-core', 'olli-render-solid', 'olli-diagram']),
 };
 
 // Explicit allowlists so we don't accidentally let a peer-layer import slip by.

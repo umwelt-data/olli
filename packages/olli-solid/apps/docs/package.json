@@ -9,13 +9,14 @@
     "preview": "vitepress preview"
   },
   "dependencies": {
+    "@umwelt-data/umwelt-utils": "link:../../../../../umwelt-utils",
+    "bluefish-solid": "^0.0.38",
     "olli-adapters": "workspace:*",
     "olli-core": "workspace:*",
     "olli-diagram": "workspace:*",
     "olli-js": "workspace:*",
     "olli-render-solid": "workspace:*",
     "olli-vis": "workspace:*",
-    "@umwelt-data/umwelt-utils": "link:../../../../../umwelt-utils",
     "vega": "^5.30.0",
     "vega-lite": "^5.19.0"
   },

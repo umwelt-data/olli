@@ -17,7 +17,6 @@ import { lasagnaPlot } from './vega-lite/lasagna-plot.js';
 import { facetedChart } from './vega-lite/faceted-chart.js';
 import { layeredChart } from './vega-lite/layered-chart.js';
 import { concatChart } from './vega-lite/concat-chart.js';
-import { pulleyMedium } from './diagram/pulley-medium.js';
 
 /**
  * All gallery examples, in display order.
@@ -42,11 +41,10 @@ export const examples: GalleryExample[] = [
   facetedChart,
   layeredChart,
   concatChart,
-  pulleyMedium,
 ];
 
 export function findExample(id: string): GalleryExample | undefined {
   return examples.find((e) => e.id === id);
 }
 
-export type { GalleryExample, VisualizationExample, DiagramExample } from './types.js';
+export type { GalleryExample, VisualizationExample, DiagramExample, DiagramMount } from './types.js';

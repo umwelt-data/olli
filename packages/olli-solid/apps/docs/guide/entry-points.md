@@ -19,9 +19,9 @@ Use `olliVis` when the data is tabular and the rendered view is a chart. It acce
 
 ```ts
 import { olliDiagram } from 'olli-js';
-import { pulleyMedium } from 'olli-diagram/examples';
+import { pulleySpec } from 'olli-diagram/examples';
 
-const handle = olliDiagram(pulleyMedium, document.getElementById('tree'));
+const handle = olliDiagram(pulleySpec, document.getElementById('tree'));
 ```
 
 Use `olliDiagram` when the data is relational—including both containment (grouping) and connection (edges). It accepts a `DiagramSpec` (hyperedges with parents and children) and uses the diagram domain. See [Diagrams](/guide/diagrams) for the hypergraph model.
