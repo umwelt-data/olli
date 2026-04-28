@@ -39,9 +39,9 @@ importers:
       '@umwelt-data/umwelt-utils':
         specifier: link:../../../../../umwelt-utils
         version: link:../../../../../umwelt-utils
-      bluefish-solid:
+      bluefish-js:
         specifier: ^0.0.38
-        version: 0.0.38(solid-js@1.9.12)(tsx@4.21.0)(yaml@2.8.3)
+        version: 0.0.38(tsx@4.21.0)(yaml@2.8.3)
       olli-adapters:
         specifier: workspace:*
         version: link:../../packages/olli-adapters
@@ -110,7 +110,6 @@ importers:
       olli-js:
         specifier: workspace:*
         version: link:../../packages/olli-js
-
 
   examples/solid-app:
     dependencies:
@@ -1334,6 +1333,9 @@ packages:
 
   birpc@2.9.0:
     resolution: {integrity: sha512-KrayHS5pBi69Xi9JmvoqrIgYGDkD6mcSe/i6YKi3w5kekCLzrX4+nawcXqrj2tIp50Kw/mT/s3p+GVK0A0sKxw==}
+
+  bluefish-js@0.0.38:
+    resolution: {integrity: sha512-KaO6cVulgpUhE+nsEA5EpV1F29uS7aNVec16pKCiP42qdmetBfzR7YWtOqsgRM4Sr4P/8Z+lobPicDIpK8PaOQ==}
 
   bluefish-solid@0.0.38:
     resolution: {integrity: sha512-xP0orRT9As5sDpT7+55/Imu3+RgLHPr7drUSWosWLDEHCrRnakFo2EyfRl+xaG36FdrK5rbwK8VWP7zBUqxTQg==}
@@ -3600,6 +3602,14 @@ snapshots:
   binary-extensions@2.3.0: {}
 
   birpc@2.9.0: {}
+
+  bluefish-js@0.0.38(tsx@4.21.0)(yaml@2.8.3):
+    dependencies:
+      bluefish-solid: 0.0.38(solid-js@1.9.12)(tsx@4.21.0)(yaml@2.8.3)
+      solid-js: 1.9.12
+    transitivePeerDependencies:
+      - tsx
+      - yaml
 
   bluefish-solid@0.0.38(solid-js@1.9.12)(tsx@4.21.0)(yaml@2.8.3):
     dependencies:

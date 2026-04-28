@@ -26,4 +26,15 @@ export interface VisualizationExample extends BaseExample {
 
 export interface DiagramExample extends BaseExample {
   domain: 'diagram';
+  toolkit: 'bluefish';
+  /** DiagramSpec passed to olliDiagram for the accessible tree. */
+  spec: unknown;
+  /** Async: returns bluefish-js hyperscript children passed to mountBluefish. Dynamic import defers bluefish-js loading to browser context. */
+  children: () => Promise<unknown[]>;
+}
+
+/** Returned by mountBluefish — kept here so DiagramRenderer can type its teardown state. */
+export interface DiagramMount {
+  svgElement: SVGSVGElement;
+  destroy: () => void;
 }

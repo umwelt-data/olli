@@ -1,4 +1,5 @@
 import type { GalleryExample } from './types.js';
+import { pulley } from './bluefish/pulley.js';
 import { barChart } from './vega-lite/bar-chart.js';
 import { aggregateBarChart } from './vega-lite/aggregate-bar-chart.js';
 import { groupedBarChart } from './vega-lite/grouped-bar-chart.js';
@@ -41,6 +42,7 @@ export const examples: GalleryExample[] = [
   facetedChart,
   layeredChart,
   concatChart,
+  pulley,
 ];
 
 export function findExample(id: string): GalleryExample | undefined {
