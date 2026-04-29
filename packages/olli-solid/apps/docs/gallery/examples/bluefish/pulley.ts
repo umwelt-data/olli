@@ -1,13 +1,12 @@
-import { pulleySpec } from 'olli-diagram';
+import { BluefishAdapter } from 'olli-adapters';
+import type { BluefishKit } from 'olli-adapters';
 import type { DiagramExample } from '../types.js';
+import { BluefishSpecFn } from 'olli-adapters/src/BluefishAdapter.js';
 
 const r = 25;
 const w2jut = 10;
 
-async function pulleyChildren(): Promise<unknown[]> {
-  const { Align, Circle, Distribute, Group, Line, Path, Rect, Ref, StackH, Text } =
-    await import('bluefish-js');
-
+const pulleySpec: BluefishSpecFn = ({ Align, Circle, Distribute, Group, Line, Path, Rect, Ref, StackH, Text }: BluefishKit) => {
   function pulleyCircle(name: string) {
     return Align({ name, alignment: 'center' }, [
       Circle({ r, stroke: '#828282', 'stroke-width': 3, fill: '#C1C1C1' }),
@@ -167,6 +166,6 @@ export const pulley: DiagramExample = {
   toolkit: 'bluefish',
   tags: ['diagram', 'physics'],
   description: 'A compound pulley system with three pulleys, seven ropes, and two boxes.',
-  spec: pulleySpec,
-  children: pulleyChildren,
+  spec: BluefishAdapter(pulleySpec),
+  children: async () => pulleySpec(await import('bluefish-js') as unknown as BluefishKit),
 };

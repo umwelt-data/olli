@@ -12,7 +12,8 @@
     "build": "tsc -b"
   },
   "dependencies": {
-    "olli-vis": "workspace:*"
+    "olli-vis": "workspace:*",
+    "olli-diagram": "workspace:*"
   },
   "peerDependencies": {
     "vega": "^5.0.0",
