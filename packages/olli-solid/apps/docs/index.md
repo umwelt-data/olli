@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: Olli
-  text: An accessible tree view for data visualizations
-  tagline: Screen-reader navigation and keyboard exploration over any Vega-Lite chart, diagram, or custom visualization.
+  text: Accessible structured navigation for data visualizations
+  tagline: Screen-reader navigation and keyboard exploration over charts, diagrams, or custom graph structures.
   actions:
     - theme: brand
       text: Guide
@@ -23,6 +23,8 @@ Check out the [example gallery](/gallery/) for examples of accessible charts and
 
 ## Contributors
 
+The development of Olli is led by members of the [Data & Design Group at CU Boulder](https://data-and-design.org/) and the [MIT Visualization Group](https://vis.mit.edu/).
+
 Point of contact:
 - [Jonathan Zong](mailto:jzong@colorado.edu)
 
@@ -39,4 +41,9 @@ Contributors:
 
 ## Research
 
-Learn more about the [research behind Olli](https://data-and-design.org/projects/olli/).
+Olli is based on [award-winning research](https://vis.csail.mit.edu/pubs/rich-screen-reader-vis-experiences/) involving participatory co-design led by blind and low-vision collaborators and research participants. Learn more about the [research behind Olli](https://data-and-design.org/projects/olli/).
+
+
+## Support our work
+
+To support the development of Olli, consider [making a contribution](https://giveto.colorado.edu/campaigns/50178/donations/new?amt=50.00&designation=D-0036197&comments=Data%20%26%20Design%20Group%20%E2%80%94%20Olli) the the Data & Design Group's development fund. [Learn more about our mission.](https://data-and-design.org/support)

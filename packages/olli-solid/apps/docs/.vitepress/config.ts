@@ -15,6 +15,7 @@ export default defineConfig({
   lastUpdated: true,
   lang: 'en-US',
   srcExclude: ['**/README.md','**/CLAUDE.md'],
+  appearance: false,
 
   ignoreDeadLinks: [
     // Dynamic gallery routes are generated at build time from [id].paths.ts;

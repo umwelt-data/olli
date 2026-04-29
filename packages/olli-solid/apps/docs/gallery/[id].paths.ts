@@ -1,8 +1,8 @@
-import { examples } from './examples/index.js';
+import { galleryPathsMetadata } from './examples/paths-metadata.js';
 
 export default {
   paths() {
-    return examples.map((example) => ({
+    return galleryPathsMetadata.map((example) => ({
       params: {
         id: example.id,
         title: example.title,

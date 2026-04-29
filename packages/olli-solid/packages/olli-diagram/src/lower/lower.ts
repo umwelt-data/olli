@@ -7,22 +7,61 @@ import type {
   DiagramSpec,
 } from '../spec/types.js';
 
+const STRUCTURAL_KINDS = new Set(['grouping', 'containment']);
+
+function isStructural(rel: DiagramRelation): boolean {
+  return STRUCTURAL_KINDS.has(rel.kind);
+}
+
 export function lowerDiagramSpec(spec: DiagramSpec): Hypergraph<DiagramPayload> {
   const elementsById = new Map<string, DiagramElement>();
   for (const el of spec.elements) {
     elementsById.set(el.id, el);
   }
 
-  const relationMembership = new Map<string, string[]>();
+  // structural membership: elementId → structural relation IDs containing it
+  const structuralMembership = new Map<string, string[]>();
   for (const rel of spec.relations) {
-    const memberIds = getMemberIds(rel);
-    for (const id of memberIds) {
-      let list = relationMembership.get(id);
-      if (!list) {
-        list = [];
-        relationMembership.set(id, list);
-      }
+    if (!isStructural(rel)) continue;
+    for (const id of getMemberIds(rel)) {
+      let list = structuralMembership.get(id);
+      if (!list) { list = []; structuralMembership.set(id, list); }
       list.push(rel.id);
+    }
+  }
+
+  // referential membership: elementId → referential relation IDs containing it
+  const referentialMembership = new Map<string, string[]>();
+  for (const rel of spec.relations) {
+    if (isStructural(rel)) continue;
+    for (const id of getMemberIds(rel)) {
+      let list = referentialMembership.get(id);
+      if (!list) { list = []; referentialMembership.set(id, list); }
+      list.push(rel.id);
+    }
+  }
+
+  // For each referential relation, compute parents (structural groups or root)
+  const referentialParents = new Map<string, string[]>();
+  for (const rel of spec.relations) {
+    if (isStructural(rel)) continue;
+    const groupParents = new Set<string>();
+    for (const id of getMemberIds(rel)) {
+      for (const gid of (structuralMembership.get(id) ?? [])) {
+        groupParents.add(gid);
+      }
+    }
+    referentialParents.set(rel.id, groupParents.size > 0 ? [...groupParents] : ['root']);
+  }
+
+  // For each structural relation, collect which referential relations nest under it
+  const structuralRefChildren = new Map<string, string[]>();
+  for (const [relId, parents] of referentialParents) {
+    for (const parentId of parents) {
+      if (parentId === 'root') continue;
+      let list = structuralRefChildren.get(parentId);
+      if (!list) { list = []; structuralRefChildren.set(parentId, list); }
+      list.push(relId);
     }
   }
 
@@ -30,13 +69,18 @@ export function lowerDiagramSpec(spec: DiagramSpec): Hypergraph<DiagramPayload> 
 
   for (const rel of spec.relations) {
     const memberIds = getMemberIds(rel);
+    const children = isStructural(rel)
+      ? [...memberIds, ...(structuralRefChildren.get(rel.id) ?? [])]
+      : memberIds;
+    const parents = isStructural(rel) ? ['root'] : referentialParents.get(rel.id)!;
+
     const edge: Hyperedge<DiagramPayload> = {
       id: rel.id,
       displayName: generateDisplayName(rel, elementsById),
       description: `Contains ${memberIds.length} objects.`,
       role: rel.kind,
-      children: memberIds,
-      parents: ['root'],
+      children,
+      parents,
       payload: { sourceRelation: rel },
     };
     edges.push(edge);
@@ -45,9 +89,10 @@ export function lowerDiagramSpec(spec: DiagramSpec): Hypergraph<DiagramPayload> 
   const orphanIds: string[] = [];
 
   for (const el of spec.elements) {
-    const parentRelations = relationMembership.get(el.id) ?? [];
-    const isOrphan = parentRelations.length === 0;
-    const parents = isOrphan ? ['root'] : [...parentRelations];
+    const sp = structuralMembership.get(el.id) ?? [];
+    const rp = referentialMembership.get(el.id) ?? [];
+    const isOrphan = sp.length === 0;
+    const parents = isOrphan ? ['root', ...rp] : [...sp, ...rp];
 
     const edge: Hyperedge<DiagramPayload> = {
       id: el.id,
@@ -62,9 +107,14 @@ export function lowerDiagramSpec(spec: DiagramSpec): Hypergraph<DiagramPayload> 
     if (isOrphan) orphanIds.push(el.id);
   }
 
+  const rootRefChildren = [...referentialParents.entries()]
+    .filter(([, parents]) => parents.includes('root'))
+    .map(([id]) => id);
+
   const rootChildren = [
-    ...spec.relations.map((r) => r.id),
+    ...spec.relations.filter(r => isStructural(r)).map(r => r.id),
     ...orphanIds,
+    ...rootRefChildren,
   ];
 
   const root: Hyperedge<DiagramPayload> = {

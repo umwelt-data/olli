@@ -11,6 +11,21 @@ import type { DiagramAdapter } from './types.js';
 
 // === Types ===
 
+export interface OlliCustomData {
+  kind?: string;
+  label?: string;
+  semantic?: string;
+  directed?: boolean;
+  skip?: boolean;
+}
+
+function getOlliMeta(node: RecordedNode): OlliCustomData {
+  const cd = node.props.customData;
+  if (cd && typeof cd === 'object' && 'olli' in (cd as object))
+    return (cd as { olli: OlliCustomData }).olli;
+  return {};
+}
+
 interface RecordedNode {
   _recorded: true;
   type: string;
@@ -121,14 +136,18 @@ function extractElementFromInline(
   const name = node.props.name as string | undefined;
   if (!name || isCopyName(name)) return;
   if (elements.has(name)) return;
+  const olli = getOlliMeta(node);
+  if (olli.skip) return;
 
   if (node.type === 'Text') {
-    const label = stringChildren(node)[0] ?? name;
-    elements.set(name, { id: name, label, kind: 'text' });
+    const label = olli.label ?? stringChildren(node)[0] ?? name;
+    elements.set(name, { id: name, label, kind: olli.kind ?? 'text' });
   } else {
-    elements.set(name, { id: name, label: name, kind: node.type.toLowerCase() });
+    elements.set(name, { id: name, label: olli.label ?? name, kind: olli.kind ?? node.type.toLowerCase() });
   }
 }
+
+const LAYOUT_TYPES = new Set(['Align', 'Distribute', 'StackH', 'StackV']);
 
 function processNode(
   node: RecordedNode,
@@ -138,6 +157,7 @@ function processNode(
 ): void {
   const name = node.props.name as string | undefined;
   const type = node.type;
+  const olli = getOlliMeta(node);
 
   // Skip copy elements entirely
   if (name && isCopyName(name)) return;
@@ -148,17 +168,19 @@ function processNode(
 
   // Named primitive → element, no recursion needed
   if (PRIMITIVES.has(type) && name) {
+    if (olli.skip) return;
     if (!elements.has(name)) {
-      elements.set(name, { id: name, label: name, kind: type.toLowerCase() });
+      elements.set(name, { id: name, label: olli.label ?? name, kind: olli.kind ?? type.toLowerCase() });
     }
     return;
   }
 
   // Named Text → element with string child as label
   if (type === 'Text' && name) {
+    if (olli.skip) return;
     if (!elements.has(name)) {
-      const label = stringChildren(node)[0] ?? name;
-      elements.set(name, { id: name, label, kind: 'text' });
+      const label = olli.label ?? stringChildren(node)[0] ?? name;
+      elements.set(name, { id: name, label, kind: olli.kind ?? 'text' });
     }
     return;
   }
@@ -168,8 +190,9 @@ function processNode(
 
   // Named Line/Arrow → element (id=name) + connection (id=endpoint-based to avoid collision)
   if ((isLine || isArrow) && name) {
+    if (olli.skip) return;
     if (!elements.has(name)) {
-      elements.set(name, { id: name, label: name, kind: isLine ? 'line' : 'arrow' });
+      elements.set(name, { id: name, label: olli.label ?? name, kind: olli.kind ?? (isLine ? 'line' : 'arrow') });
     }
     if (refKids.length >= 2) {
       const ep0 = refKids[0]!.props.select as string;
@@ -181,7 +204,8 @@ function processNode(
           id: connId,
           endpoints: [ep0, ep1],
         };
-        if (isArrow) conn.directed = true;
+        if (olli.directed ?? isArrow) conn.directed = true;
+        if (olli.semantic) conn.semantic = olli.semantic;
         relations.push(conn);
       }
     }
@@ -199,7 +223,8 @@ function processNode(
         id,
         endpoints: [ep0, ep1],
       };
-      if (isArrow) conn.directed = true;
+      if (olli.directed ?? isArrow) conn.directed = true;
+      if (olli.semantic) conn.semantic = olli.semantic;
       relations.push(conn);
     }
     return;
@@ -207,8 +232,9 @@ function processNode(
 
   // Named composite with only inline children (no Refs) → single element, don't recurse
   if (name && refKids.length === 0 && inlineKids.length > 0) {
+    if (olli.skip) return;
     if (!elements.has(name)) {
-      elements.set(name, { id: name, label: name, kind: type.toLowerCase() });
+      elements.set(name, { id: name, label: olli.label ?? name, kind: olli.kind ?? type.toLowerCase() });
     }
     return;
   }
@@ -223,9 +249,12 @@ function processNode(
 
   for (const inlineChild of inlineKids) {
     const childName = inlineChild.props.name as string | undefined;
+    const childOlli = getOlliMeta(inlineChild);
     if (childName && !isCopyName(childName)) {
-      extractElementFromInline(inlineChild, elements);
-      memberIds.push(childName);
+      if (!childOlli.skip) {
+        extractElementFromInline(inlineChild, elements);
+        memberIds.push(childName);
+      }
     } else if (!childName) {
       processNode(inlineChild, elements, relations, idCounters);
     }
@@ -234,42 +263,36 @@ function processNode(
   if (memberIds.length < 2) return;
 
   const relId = name ?? generateId(type, memberIds, idCounters);
+  const hasOlliMeta = Object.keys(olli).length > 0;
 
   if (type === 'Group') {
     const rel: GroupingRelation = { kind: 'grouping', id: relId, members: memberIds };
+    if (olli.label) rel.label = olli.label;
     relations.push(rel);
-  } else if (type === 'Align') {
-    const rel: AlignmentRelation = {
-      kind: 'alignment',
-      id: relId,
-      members: memberIds,
-      axis: inferAlignmentAxis(node.props.alignment),
-    };
-    relations.push(rel);
-  } else if (type === 'Distribute') {
-    const rel: DistributionRelation = {
-      kind: 'distribution',
-      id: relId,
-      members: memberIds,
-      direction: (node.props.direction as 'horizontal' | 'vertical') ?? 'horizontal',
-    };
-    relations.push(rel);
-  } else if (type === 'StackH') {
-    const rel: DistributionRelation = {
-      kind: 'distribution',
-      id: relId,
-      members: memberIds,
-      direction: 'horizontal',
-    };
-    relations.push(rel);
-  } else if (type === 'StackV') {
-    const rel: DistributionRelation = {
-      kind: 'distribution',
-      id: relId,
-      members: memberIds,
-      direction: 'vertical',
-    };
-    relations.push(rel);
+  } else if (LAYOUT_TYPES.has(type)) {
+    // Layout relations are suppressed unless the author opts in via customData.olli
+    if (!hasOlliMeta) return;
+    if (type === 'Align') {
+      const rel: AlignmentRelation = {
+        kind: 'alignment',
+        id: relId,
+        members: memberIds,
+        axis: inferAlignmentAxis(node.props.alignment),
+      };
+      if (olli.label) rel.label = olli.label;
+      relations.push(rel);
+    } else {
+      const rel: DistributionRelation = {
+        kind: 'distribution',
+        id: relId,
+        members: memberIds,
+        direction: type === 'StackV' ? 'vertical'
+          : type === 'StackH' ? 'horizontal'
+          : (node.props.direction as 'horizontal' | 'vertical') ?? 'horizontal',
+      };
+      if (olli.label) rel.label = olli.label;
+      relations.push(rel);
+    }
   }
 }
 
