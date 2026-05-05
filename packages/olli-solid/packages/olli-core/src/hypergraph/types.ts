@@ -8,6 +8,7 @@ export interface Hyperedge<P = unknown> {
   children: HyperedgeId[];
   parents: HyperedgeId[];
   payload?: P;
+  contextOnly?: boolean;
 }
 
 export interface Hypergraph<P = unknown> {

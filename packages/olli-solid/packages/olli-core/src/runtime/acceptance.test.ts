@@ -18,8 +18,8 @@ function pulleySubset() {
   return buildHypergraph([
     edge('0', 'Pulley diagram', ['1', '18', '4'], []),
     edge('1', 'Pulley System A', ['12'], ['0']),
-    edge('12', 'Rope q', [], ['1']),
-    edge('18', 'Box B1 hangs from Rope q', ['4'], ['0']),
+    edge('12', 'Rope p', [], ['1']),
+    edge('18', 'Box B1 hangs from Rope p', ['4'], ['0']),
     edge('4', 'Box B1', [], ['0', '18']),
   ]);
 }

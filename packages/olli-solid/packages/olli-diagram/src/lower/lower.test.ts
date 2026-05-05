@@ -5,6 +5,7 @@ import {
   registerDomain,
   isVirtualNavId,
   VIRTUAL_SUFFIX,
+  buildNavTree,
   type MoveDirection,
   type NavigationRuntime,
 } from 'olli-core';
@@ -16,89 +17,143 @@ import { lowerDiagramSpec } from './lower.js';
 describe('lowerDiagramSpec', () => {
   it('lowers the pulley spec to a valid hypergraph', () => {
     const g = lowerDiagramSpec(pulleySpec);
-    expect(g.roots).toEqual(['root']);
-    // 1 root + 11 relations + 13 elements = 25 edges
-    expect(g.edges.size).toBe(25);
+    // root + 8 connection roots (parentless) = 9 roots
+    expect(g.roots).toEqual([
+      'root',
+      'h-b1-p', 'h-A-q', 'h-C-t', 'h-b2-u',
+      'h-q-ceiling', 'h-t-ceiling', 'a-B-v', 'a-v-floor',
+    ]);
+    // 1 root + 3 groupings + 8 connections + 14 elements = 26 edges
+    expect(g.edges.size).toBe(26);
   });
 
-  it('root has structural relations + orphan elements + orphan-endpoint connections as children', () => {
+  it('root has structural groupings + orphan non-connector elements as children (connections excluded)', () => {
     const g = lowerDiagramSpec(pulleySpec);
     const root = g.edges.get('root')!;
     expect(root.displayName).toBe('Pulley diagram');
     expect(root.description).toBe(
-      'A compound pulley system with three pulleys, seven ropes, and two boxes.',
+      'A mechanical system consisting of pulleys, ropes, and boxes.',
     );
-    // 3 structural groupings, 4 structural orphans, 1 all-orphan connection
+    // 3 structural groupings + 4 orphan non-connector elements (ceiling,floor,b1,b2) = 7 children
     expect(root.children).toEqual([
-      'sysB', 'sysA', 'sysC',
-      'rect', 'l0', 'w1', 'w2',
-      'h-l0-rect',
+      'sysA', 'sysB', 'sysC',
+      'ceiling', 'floor', 'b1', 'b2',
     ]);
   });
 
-  it('relation hyperedges have correct structure', () => {
+  it('group children are members only (no nested connections)', () => {
     const g = lowerDiagramSpec(pulleySpec);
 
+    const sysA = g.edges.get('sysA')!;
+    expect(sysA.displayName).toBe('Pulley System A');
+    expect(sysA.description).toBe('Contains 3 objects.');
+    expect(sysA.role).toBe('grouping');
+    expect(sysA.children).toEqual(['p', 'A', 'r']);
+    expect(sysA.parents).toEqual(['root']);
+
     const sysB = g.edges.get('sysB')!;
-    expect(sysB.displayName).toBe('Pulley System B');
-    expect(sysB.description).toBe('Contains 3 objects.');
-    expect(sysB.role).toBe('grouping');
-    // members + connections nested under sysB
-    expect(sysB.children).toEqual(['B', 'l1', 'l2', 'h-B-l0', 'h-A-l1', 'h-C-l2']);
-    expect(sysB.parents).toEqual(['root']);
+    expect(sysB.children).toEqual(['r', 'B', 's']);
 
-    const hBl0 = g.edges.get('h-B-l0')!;
-    expect(hBl0.displayName).toBe('Pulley B hangs from Axle rope');
-    expect(hBl0.description).toBe('Contains 2 objects.');
-    expect(hBl0.role).toBe('connection');
-    expect(hBl0.children).toEqual(['B', 'l0']);
-    // B is in sysB → h-B-l0 nested under sysB
-    expect(hBl0.parents).toEqual(['sysB']);
+    const sysC = g.edges.get('sysC')!;
+    expect(sysC.children).toEqual(['s', 'C', 'u']);
+  });
 
-    const hLl0Rect = g.edges.get('h-l0-rect')!;
-    expect(hLl0Rect.children).toEqual(['l0', 'rect']);
-    // both endpoints are structural orphans → stays at root
-    expect(hLl0Rect.parents).toEqual(['root']);
+  it('all connection relations are parentless roots with contextOnly: true', () => {
+    const g = lowerDiagramSpec(pulleySpec);
+    for (const id of ['h-b1-p', 'h-A-q', 'h-C-t', 'h-b2-u', 'h-q-ceiling', 'h-t-ceiling', 'a-B-v', 'a-v-floor']) {
+      expect(g.edges.get(id)!.parents).toEqual([]);
+      expect(g.roots).toContain(id);
+      expect(g.edges.get(id)!.contextOnly).toBe(true);
+    }
+  });
+
+  it('NavTree from lowered pulley has single primary root and 8 contextRoots', () => {
+    const g = lowerDiagramSpec(pulleySpec);
+    const tree = buildNavTree(g);
+    expect(tree.roots).toEqual(['root']);
+    expect(tree.contextRoots).toEqual([
+      'h-b1-p', 'h-A-q', 'h-C-t', 'h-b2-u',
+      'h-q-ceiling', 'h-t-ceiling', 'a-B-v', 'a-v-floor',
+    ]);
+  });
+
+  it('connection hyperedges have correct structure', () => {
+    const g = lowerDiagramSpec(pulleySpec);
+
+    const hAq = g.edges.get('h-A-q')!;
+    expect(hAq.displayName).toBe('Pulley A hangs from Rope q');
+    expect(hAq.description).toBe('Contains 2 objects.');
+    expect(hAq.role).toBe('connection');
+    expect(hAq.children).toEqual(['A', 'q']);
+    expect(hAq.parents).toEqual([]);
+
+    const aBv = g.edges.get('a-B-v')!;
+    expect(aBv.displayName).toBe('Pulley B is anchored to Rope v');
+    expect(aBv.children).toEqual(['B', 'v']);
+    expect(aBv.parents).toEqual([]);
   });
 
   it('element hyperedges have correct structure', () => {
     const g = lowerDiagramSpec(pulleySpec);
 
-    const B = g.edges.get('B')!;
-    expect(B.displayName).toBe('Pulley B');
-    expect(B.role).toBe('element');
-    expect(B.children).toEqual([]);
-    expect(B.payload?.sourceElement?.kind).toBe('pulley');
+    const A = g.edges.get('A')!;
+    expect(A.displayName).toBe('Pulley A');
+    expect(A.role).toBe('element');
+    expect(A.children).toEqual([]);
+    expect(A.payload?.sourceElement?.kind).toBe('pulley');
 
-    const rect = g.edges.get('rect')!;
-    expect(rect.displayName).toBe('Ceiling');
-    expect(rect.role).toBe('element');
+    const ceiling = g.edges.get('ceiling')!;
+    expect(ceiling.displayName).toBe('Ceiling');
+    expect(ceiling.role).toBe('element');
   });
 
   it('element parents: structural members get structural + referential parents', () => {
     const g = lowerDiagramSpec(pulleySpec);
 
-    // Pulley B: structural parent sysB + connection h-B-l0
-    expect(g.edges.get('B')!.parents).toEqual(['sysB', 'h-B-l0']);
+    // Pulley A: structural parent sysA + connection h-A-q
+    expect(g.edges.get('A')!.parents).toEqual(['sysA', 'h-A-q']);
 
-    // Rope x (l1): structural parent sysB + connection h-A-l1
-    expect(g.edges.get('l1')!.parents).toEqual(['sysB', 'h-A-l1']);
+    // Rope p: structural parent sysA + connection h-b1-p
+    expect(g.edges.get('p')!.parents).toEqual(['sysA', 'h-b1-p']);
+
+    // Rope r: structural parents sysA + sysB, no connections
+    expect(g.edges.get('r')!.parents).toEqual(['sysA', 'sysB']);
+
+    // Pulley B: structural parent sysB + connection a-B-v
+    expect(g.edges.get('B')!.parents).toEqual(['sysB', 'a-B-v']);
   });
 
   it('element parents: structural orphans get root + referential parents', () => {
     const g = lowerDiagramSpec(pulleySpec);
 
-    // Axle rope l0: orphan → root + connections h-B-l0 and h-l0-rect
-    expect(g.edges.get('l0')!.parents).toEqual(['root', 'h-B-l0', 'h-l0-rect']);
+    // Ceiling: orphan → root + h-q-ceiling + h-t-ceiling
+    expect(g.edges.get('ceiling')!.parents).toEqual(['root', 'h-q-ceiling', 'h-t-ceiling']);
 
-    // Ceiling: orphan → root + h-l0-rect and a-l3-rect
-    expect(g.edges.get('rect')!.parents).toEqual(['root', 'h-l0-rect', 'a-l3-rect']);
+    // Floor: orphan → root + a-v-floor
+    expect(g.edges.get('floor')!.parents).toEqual(['root', 'a-v-floor']);
 
-    // Box W2: orphan → root + h-w2-l5 and h-w2-l6
-    expect(g.edges.get('w2')!.parents).toEqual(['root', 'h-w2-l5', 'h-w2-l6']);
+    // Box B1: orphan → root + h-b1-p
+    expect(g.edges.get('b1')!.parents).toEqual(['root', 'h-b1-p']);
 
-    // Box W1: orphan → root + h-w1-l4
-    expect(g.edges.get('w1')!.parents).toEqual(['root', 'h-w1-l4']);
+    // Box B2: orphan → root + h-b2-u
+    expect(g.edges.get('b2')!.parents).toEqual(['root', 'h-b2-u']);
+  });
+
+  it('connector orphan elements are NOT root children (accessed through connections)', () => {
+    const g = lowerDiagramSpec(pulleySpec);
+    const root = g.edges.get('root')!;
+
+    // Ropes q, t, v are connector orphans (not in any group)
+    expect(root.children).not.toContain('q');
+    expect(root.children).not.toContain('t');
+    expect(root.children).not.toContain('v');
+
+    // q: parents are its connection edges only
+    expect(g.edges.get('q')!.parents).toEqual(['h-A-q', 'h-q-ceiling']);
+    // t: parents are its connection edges only
+    expect(g.edges.get('t')!.parents).toEqual(['h-C-t', 'h-t-ceiling']);
+    // v: parents are its connection edges only
+    expect(g.edges.get('v')!.parents).toEqual(['a-B-v', 'a-v-floor']);
   });
 
   it('payloads carry source data', () => {
@@ -141,7 +196,7 @@ describe('lowerDiagramSpec', () => {
     expect(g.edges.get('ct1')!.displayName).toBe('Node A contains 2 items');
   });
 
-  it('orphan elements become root children', () => {
+  it('non-connector orphan elements become root children', () => {
     const g = lowerDiagramSpec({
       elements: [
         { id: 'a', label: 'A' },
@@ -161,7 +216,27 @@ describe('lowerDiagramSpec', () => {
     expect(g.edges.get('a')!.parents).toEqual(['g1']);
   });
 
-  it('connection with both endpoints in groups is NOT a root child', () => {
+  it('connector orphan element does not appear at root, uses only connection parents', () => {
+    const g = lowerDiagramSpec({
+      elements: [
+        { id: 'a', label: 'A' },
+        { id: 'b', label: 'B' },
+        { id: 'rope', label: 'Rope', connector: true },
+      ],
+      relations: [
+        { kind: 'connection', id: 'conn-a-rope', endpoints: ['a', 'rope'] },
+        { kind: 'connection', id: 'conn-rope-b', endpoints: ['rope', 'b'] },
+      ],
+    });
+
+    const root = g.edges.get('root')!;
+    expect(root.children).not.toContain('rope');
+    expect(g.edges.get('rope')!.parents).toEqual(['conn-a-rope', 'conn-rope-b']);
+    expect(root.children).toContain('a');
+    expect(root.children).toContain('b');
+  });
+
+  it('connections are parentless roots, not nested under groups or root', () => {
     const g = lowerDiagramSpec({
       elements: [
         { id: 'a', label: 'A' },
@@ -175,45 +250,34 @@ describe('lowerDiagramSpec', () => {
     });
 
     const root = g.edges.get('root')!;
+    // connection is NOT a child of root
     expect(root.children).not.toContain('c1');
-    // c1 is nested under both g1 and g2
-    expect(g.edges.get('c1')!.parents).toEqual(['g1', 'g2']);
+    // connection is a parentless root
+    expect(g.edges.get('c1')!.parents).toEqual([]);
+    expect(g.roots).toContain('c1');
+    // groups do NOT contain the connection
+    expect(g.edges.get('g1')!.children).not.toContain('c1');
+    expect(g.edges.get('g2')!.children).not.toContain('c1');
   });
 
-  it('connection with one orphan endpoint is NOT a root child (nests under the group)', () => {
+  it('connection with all orphan endpoints is a parentless root', () => {
     const g = lowerDiagramSpec({
       elements: [
         { id: 'a', label: 'A' },
         { id: 'b', label: 'B' },
       ],
       relations: [
-        { kind: 'grouping', id: 'g1', members: ['a'] },
         { kind: 'connection', id: 'c1', endpoints: ['a', 'b'] },
       ],
     });
 
     const root = g.edges.get('root')!;
     expect(root.children).not.toContain('c1');
-    expect(g.edges.get('c1')!.parents).toEqual(['g1']);
-    // b is orphan → root child
+    expect(g.edges.get('c1')!.parents).toEqual([]);
+    expect(g.roots).toContain('c1');
+    // orphan non-connector elements still appear at root
+    expect(root.children).toContain('a');
     expect(root.children).toContain('b');
-    expect(g.edges.get('b')!.parents).toContain('root');
-  });
-
-  it('connection with all orphan endpoints IS a root child', () => {
-    const g = lowerDiagramSpec({
-      elements: [
-        { id: 'a', label: 'A' },
-        { id: 'b', label: 'B' },
-      ],
-      relations: [
-        { kind: 'connection', id: 'c1', endpoints: ['a', 'b'] },
-      ],
-    });
-
-    const root = g.edges.get('root')!;
-    expect(root.children).toContain('c1');
-    expect(g.edges.get('c1')!.parents).toEqual(['root']);
   });
 });
 
@@ -246,17 +310,17 @@ function moves(rt: NavigationRuntime<DiagramPayload>, dirs: MoveDirection[]): st
 }
 
 describe('pulley navigation — basic descent and ascent', () => {
-  it('root → sysB → B → (virtual) → sysB → root', () => {
+  it('root → sysA → p → (virtual) → sysA → root', () => {
     createRoot((dispose) => {
       const rt = makeRuntime();
       expect(rt.focusedNavId()).toBe('root');
       const trace = moves(rt, ['down', 'down', 'up', 'up', 'up']);
       expect(trace).toEqual([
         'root',
-        'root/sysB',
-        'root/sysB/B',
-        'root/sysB/B' + VIRTUAL_SUFFIX + '0',
-        'root/sysB',
+        'root/sysA',
+        'root/sysA/p',
+        'root/sysA/p' + VIRTUAL_SUFFIX + '0',
+        'root/sysA',
         'root',
       ]);
       dispose();
@@ -267,99 +331,85 @@ describe('pulley navigation — basic descent and ascent', () => {
     createRoot((dispose) => {
       const rt = makeRuntime();
       expect(rt.getDescriptionFor('root')()).toContain('Pulley diagram');
-      expect(rt.getDescriptionFor('root/sysB')()).toContain('Pulley System B');
-      expect(rt.getDescriptionFor('root/sysB')()).toContain('1 of 8');
-      expect(rt.getDescriptionFor('root/sysB/B')()).toContain('Pulley B');
-      expect(rt.getDescriptionFor('root/sysB/B')()).toContain('1 of 6');
+      expect(rt.getDescriptionFor('root/sysA')()).toContain('Pulley System A');
+      expect(rt.getDescriptionFor('root/sysA')()).toContain('1 of 7');
+      expect(rt.getDescriptionFor('root/sysA/p')()).toContain('Rope p');
+      expect(rt.getDescriptionFor('root/sysA/p')()).toContain('1 of 3');
       dispose();
     });
   });
 });
 
 describe('pulley navigation — multi-parent ascent', () => {
-  it('Pulley B has 2 virtual parents (sysB and h-B-l0)', () => {
+  it('Pulley A has 2 virtual parents (sysA and h-A-q)', () => {
     createRoot((dispose) => {
       const rt = makeRuntime();
-      rt.focus('root/sysB/B');
+      rt.focus('root/sysA/A');
       rt.moveFocus('up');
-      const ids = rt.virtualOptionsFor('root/sysB/B');
+      const ids = rt.virtualOptionsFor('root/sysA/A');
       expect(ids).toHaveLength(2);
       const d0 = rt.getDescriptionFor(ids[0]!)();
-      expect(d0).toContain('Pulley System B');
+      expect(d0).toContain('Pulley System A');
       expect(d0).toContain('(default)');
       const d1 = rt.getDescriptionFor(ids[1]!)();
-      expect(d1).toContain('Pulley B hangs from Axle rope');
+      expect(d1).toContain('Pulley A hangs from Rope q');
       dispose();
     });
   });
 
-  it('commit non-default parent moves to alternate context under sysB', () => {
+  it('commit non-default parent moves to connection at root level', () => {
     createRoot((dispose) => {
       const rt = makeRuntime();
-      rt.focus('root/sysB/B');
-      rt.moveFocus('up'); // → virtual sibling 0 (sysB, default)
-      rt.moveFocus('right'); // → virtual sibling 1 (h-B-l0)
-      expect(rt.focusedNavId()).toBe('root/sysB/B' + VIRTUAL_SUFFIX + '1');
-      rt.moveFocus('up'); // commit → h-B-l0 (nested under sysB)
-      expect(rt.focusedNavId()).toBe('root/sysB/h-B-l0');
+      rt.focus('root/sysA/A');
+      rt.moveFocus('up'); // → virtual sibling 0 (sysA, default)
+      rt.moveFocus('right'); // → virtual sibling 1 (h-A-q)
+      expect(rt.focusedNavId()).toBe('root/sysA/A' + VIRTUAL_SUFFIX + '1');
+      rt.moveFocus('up'); // commit → h-A-q (now a parentless root)
+      expect(rt.focusedNavId()).toBe('h-A-q');
+      // descend into h-A-q → see Pulley A
+      rt.moveFocus('down');
+      expect(rt.focusedNavId()).toBe('h-A-q/A');
       dispose();
     });
   });
 
-  it('Ceiling has 3 virtual parents (root, h-l0-rect, a-l3-rect)', () => {
+  it('Ceiling has 3 virtual parents (root, h-q-ceiling, h-t-ceiling)', () => {
     createRoot((dispose) => {
       const rt = makeRuntime();
-      rt.focus('root/h-l0-rect/rect');
+      rt.focus('root/ceiling');
       rt.moveFocus('up');
-      const ids = rt.virtualOptionsFor('root/h-l0-rect/rect');
+      const ids = rt.virtualOptionsFor('root/ceiling');
       expect(ids).toHaveLength(3);
       const allText = ids.map(id => rt.getDescriptionFor(id!)()).join(' ');
-      expect(allText).toContain('Axle rope hangs from Ceiling');
-      expect(allText).toContain('Rope z is anchored to Ceiling');
-      dispose();
-    });
-  });
-
-  it('Box W2 has 3 virtual parents (root, h-w2-l5, h-w2-l6)', () => {
-    createRoot((dispose) => {
-      const rt = makeRuntime();
-      rt.focus('root/w2');
-      rt.moveFocus('up');
-      const ids = rt.virtualOptionsFor('root/w2');
-      expect(ids).toHaveLength(3);
-      const descriptions = ids.map(id => rt.getDescriptionFor(id!)());
-      expect(descriptions[0]).toContain('(default)');
-      // second and third options are h-w2-l5 and h-w2-l6 (order follows sysA/sysC nesting)
-      const allText = descriptions.join(' ');
-      expect(allText).toContain('Box W2 hangs from Rope q');
-      expect(allText).toContain('Box W2 hangs from Rope s');
+      expect(allText).toContain('Rope q hangs from Ceiling');
+      expect(allText).toContain('Rope t hangs from Ceiling');
       dispose();
     });
   });
 });
 
 describe('pulley navigation — cross-system traversal', () => {
-  it('descend into sysB, navigate to Rope x, ascend to h-A-l1 (nested in sysB)', () => {
+  it('descend into sysA, navigate to Rope r, ascend to sysB', () => {
     createRoot((dispose) => {
       const rt = makeRuntime();
-      rt.focus('root/sysB');
-      rt.moveFocus('down'); // → B
-      rt.moveFocus('right'); // → l1 (Rope x)
-      expect(rt.focusedNavId()).toBe('root/sysB/l1');
-      rt.moveFocus('up'); // virtual siblings
-      const ids = rt.virtualOptionsFor('root/sysB/l1');
+      rt.focus('root/sysA');
+      rt.moveFocus('down'); // → p (first child of sysA)
+      rt.moveFocus('right'); // → A
+      rt.moveFocus('right'); // → r (third child)
+      expect(rt.focusedNavId()).toBe('root/sysA/r');
+      rt.moveFocus('up');
+      const ids = rt.virtualOptionsFor('root/sysA/r');
       expect(ids).toHaveLength(2);
       const d0 = rt.getDescriptionFor(ids[0]!)();
-      expect(d0).toContain('Pulley System B');
+      expect(d0).toContain('Pulley System A');
       const d1 = rt.getDescriptionFor(ids[1]!)();
-      expect(d1).toContain('Pulley A hangs from Rope x');
-      // commit to h-A-l1 (nested under sysB since l1 is in sysB)
+      expect(d1).toContain('Pulley System B');
+      // commit to sysB
       rt.moveFocus('right');
       rt.moveFocus('up');
-      expect(rt.focusedNavId()).toBe('root/sysB/h-A-l1');
-      // descend into h-A-l1 → see Pulley A
+      expect(rt.focusedNavId()).toBe('root/sysB');
       rt.moveFocus('down');
-      expect(rt.focusedNavId()).toBe('root/sysB/h-A-l1/A');
+      expect(rt.focusedNavId()).toBe('root/sysB/r');
       dispose();
     });
   });
@@ -378,11 +428,11 @@ describe('pulley navigation — edge cases', () => {
   it('down on default virtual returns to original source', () => {
     createRoot((dispose) => {
       const rt = makeRuntime();
-      rt.focus('root/sysB/B');
+      rt.focus('root/sysA/p');
       rt.moveFocus('up');
-      expect(rt.focusedNavId()).toBe('root/sysB/B' + VIRTUAL_SUFFIX + '0');
+      expect(rt.focusedNavId()).toBe('root/sysA/p' + VIRTUAL_SUFFIX + '0');
       rt.moveFocus('down');
-      expect(rt.focusedNavId()).toBe('root/sysB/B');
+      expect(rt.focusedNavId()).toBe('root/sysA/p');
       dispose();
     });
   });

@@ -53,4 +53,18 @@ describe('buildNavTree', () => {
     const tree = buildNavTree(g);
     expect(tree.roots).toEqual(['a', 'b']);
   });
+
+  it('contextOnly roots go into contextRoots, not roots, but are fully materialized', () => {
+    const g = buildHypergraph([
+      { id: 'main', displayName: 'main', children: ['x'], parents: [] },
+      { id: 'x', displayName: 'x', children: [], parents: ['main', 'ctx'] },
+      { id: 'ctx', displayName: 'ctx', children: ['x'], parents: [], contextOnly: true },
+    ]);
+    const tree = buildNavTree(g);
+    expect(tree.roots).toEqual(['main']);
+    expect(tree.contextRoots).toEqual(['ctx']);
+    expect(tree.byNavId.has('ctx')).toBe(true);
+    expect(tree.hyperedgeToNavIds.get('ctx')).toEqual(['ctx']);
+    expect(tree.byNavId.has('ctx/x')).toBe(true);
+  });
 });

@@ -4,6 +4,7 @@ export interface DiagramElement {
   id: string;
   label: string;
   kind?: string;
+  connector?: boolean;
 }
 
 // === Relations ===

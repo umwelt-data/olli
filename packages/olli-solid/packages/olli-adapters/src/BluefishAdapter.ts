@@ -17,6 +17,7 @@ export interface OlliCustomData {
   semantic?: string;
   directed?: boolean;
   skip?: boolean;
+  alias?: string;
 }
 
 function getOlliMeta(node: RecordedNode): OlliCustomData {
@@ -154,6 +155,7 @@ function processNode(
   elements: Map<string, DiagramElement>,
   relations: DiagramRelation[],
   idCounters: Map<string, number>,
+  aliasMap: Map<string, string>,
 ): void {
   const name = node.props.name as string | undefined;
   const type = node.type;
@@ -168,7 +170,10 @@ function processNode(
 
   // Named primitive → element, no recursion needed
   if (PRIMITIVES.has(type) && name) {
-    if (olli.skip) return;
+    if (olli.skip) {
+      if (olli.alias) aliasMap.set(name, olli.alias);
+      return;
+    }
     if (!elements.has(name)) {
       elements.set(name, { id: name, label: olli.label ?? name, kind: olli.kind ?? type.toLowerCase() });
     }
@@ -177,7 +182,10 @@ function processNode(
 
   // Named Text → element with string child as label
   if (type === 'Text' && name) {
-    if (olli.skip) return;
+    if (olli.skip) {
+      if (olli.alias) aliasMap.set(name, olli.alias);
+      return;
+    }
     if (!elements.has(name)) {
       const label = olli.label ?? stringChildren(node)[0] ?? name;
       elements.set(name, { id: name, label, kind: olli.kind ?? 'text' });
@@ -188,25 +196,33 @@ function processNode(
   const isLine = type === 'Line';
   const isArrow = type === 'Arrow';
 
-  // Named Line/Arrow → element (id=name) + connection (id=endpoint-based to avoid collision)
+  // Named Line/Arrow → connector element + two endpoint connections
   if ((isLine || isArrow) && name) {
     if (olli.skip) return;
     if (!elements.has(name)) {
-      elements.set(name, { id: name, label: olli.label ?? name, kind: olli.kind ?? (isLine ? 'line' : 'arrow') });
+      elements.set(name, { id: name, label: olli.label ?? name, kind: olli.kind ?? (isLine ? 'line' : 'arrow'), connector: true });
     }
     if (refKids.length >= 2) {
-      const ep0 = refKids[0]!.props.select as string;
-      const ep1 = refKids[1]!.props.select as string;
+      const ep0 = aliasMap.get(refKids[0]!.props.select as string) ?? (refKids[0]!.props.select as string);
+      const ep1 = aliasMap.get(refKids[1]!.props.select as string) ?? (refKids[1]!.props.select as string);
       if (!isCopyName(ep0) && !isCopyName(ep1)) {
-        const connId = generateId('connection', [ep0, ep1], idCounters);
-        const conn: ConnectionRelation = {
+        const conn0: ConnectionRelation = {
           kind: 'connection',
-          id: connId,
-          endpoints: [ep0, ep1],
+          id: generateId('connection', [ep0, name], idCounters),
+          endpoints: [ep0, name],
         };
-        if (olli.directed ?? isArrow) conn.directed = true;
-        if (olli.semantic) conn.semantic = olli.semantic;
-        relations.push(conn);
+        if (olli.directed ?? isArrow) conn0.directed = true;
+        if (olli.semantic) conn0.semantic = olli.semantic;
+        relations.push(conn0);
+
+        const conn1: ConnectionRelation = {
+          kind: 'connection',
+          id: generateId('connection', [name, ep1], idCounters),
+          endpoints: [name, ep1],
+        };
+        if (olli.directed ?? isArrow) conn1.directed = true;
+        if (olli.semantic) conn1.semantic = olli.semantic;
+        relations.push(conn1);
       }
     }
     return;
@@ -214,8 +230,8 @@ function processNode(
 
   // Unnamed Line/Arrow with ref children → connection with auto id
   if ((isLine || isArrow) && refKids.length >= 2) {
-    const ep0 = refKids[0]!.props.select as string;
-    const ep1 = refKids[1]!.props.select as string;
+    const ep0 = aliasMap.get(refKids[0]!.props.select as string) ?? (refKids[0]!.props.select as string);
+    const ep1 = aliasMap.get(refKids[1]!.props.select as string) ?? (refKids[1]!.props.select as string);
     if (!isCopyName(ep0) && !isCopyName(ep1)) {
       const id = generateId(type, [ep0, ep1], idCounters);
       const conn: ConnectionRelation = {
@@ -235,6 +251,14 @@ function processNode(
     if (olli.skip) return;
     if (!elements.has(name)) {
       elements.set(name, { id: name, label: olli.label ?? name, kind: olli.kind ?? type.toLowerCase() });
+    }
+    // Register aliases from named inline children that are skipped
+    for (const kid of inlineKids) {
+      const kidName = kid.props.name as string | undefined;
+      const kidOlli = getOlliMeta(kid);
+      if (kidName && kidOlli.skip && kidOlli.alias) {
+        aliasMap.set(kidName, kidOlli.alias);
+      }
     }
     return;
   }
@@ -256,7 +280,7 @@ function processNode(
         memberIds.push(childName);
       }
     } else if (!childName) {
-      processNode(inlineChild, elements, relations, idCounters);
+      processNode(inlineChild, elements, relations, idCounters, aliasMap);
     }
   }
 
@@ -316,12 +340,35 @@ function filterToElementMembers(
 
 function walkTree(nodes: RecordedNode[]): DiagramSpec {
   const elements = new Map<string, DiagramElement>();
-  const relations: DiagramRelation[] = [];
+  let relations: DiagramRelation[] = [];
   const idCounters = new Map<string, number>();
+  const aliasMap = new Map<string, string>();
 
   for (const node of nodes) {
-    processNode(node, elements, relations, idCounters);
+    processNode(node, elements, relations, idCounters, aliasMap);
   }
+
+  // Suppress connections where both endpoints share a structural group
+  const groupMembership = new Map<string, Set<string>>();
+  for (const rel of relations) {
+    if (rel.kind === 'grouping') {
+      for (const m of rel.members) {
+        if (!groupMembership.has(m)) groupMembership.set(m, new Set());
+        groupMembership.get(m)!.add(rel.id);
+      }
+    }
+  }
+  relations = relations.filter(rel => {
+    if (rel.kind !== 'connection') return true;
+    const [a, b] = rel.endpoints;
+    const groupsA = groupMembership.get(a);
+    const groupsB = groupMembership.get(b);
+    if (!groupsA || !groupsB) return true;
+    for (const g of groupsA) {
+      if (groupsB.has(g)) return false;
+    }
+    return true;
+  });
 
   const elementIds = new Set(elements.keys());
   const filteredRelations = relations

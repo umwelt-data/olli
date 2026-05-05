@@ -15,6 +15,7 @@ export interface NavNode {
 
 export interface NavTree {
   roots: readonly NavNodeId[];
+  contextRoots: readonly NavNodeId[];
   byNavId: ReadonlyMap<NavNodeId, NavNode>;
   /** Reverse index: for each hyperedge, the NavNodeIds where it appears. Ordered by nav-tree walk order. */
   hyperedgeToNavIds: ReadonlyMap<HyperedgeId, readonly NavNodeId[]>;
@@ -28,6 +29,7 @@ export function buildNavTree<P>(graph: Hypergraph<P>): NavTree {
   const byNavId = new Map<NavNodeId, NavNode>();
   const hyperedgeToNavIds = new Map<HyperedgeId, NavNodeId[]>();
   const rootIds: NavNodeId[] = [];
+  const contextRootIds: NavNodeId[] = [];
 
   for (const rootEdgeId of graph.roots) {
     const rootNavId = rootEdgeId;
@@ -41,11 +43,16 @@ export function buildNavTree<P>(graph: Hypergraph<P>): NavTree {
     };
     byNavId.set(rootNavId, rootNode);
     indexNode(hyperedgeToNavIds, rootEdgeId, rootNavId);
-    rootIds.push(rootNavId);
+    const edge = graph.edges.get(rootEdgeId);
+    if (edge?.contextOnly) {
+      contextRootIds.push(rootNavId);
+    } else {
+      rootIds.push(rootNavId);
+    }
     expandChildren(rootNode, graph, byNavId, hyperedgeToNavIds);
   }
 
-  return { roots: rootIds, byNavId, hyperedgeToNavIds };
+  return { roots: rootIds, contextRoots: contextRootIds, byNavId, hyperedgeToNavIds };
 }
 
 function expandChildren<P>(

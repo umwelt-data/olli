@@ -54,6 +54,40 @@ describe('element extraction', () => {
   });
 });
 
+// === Unit tests: alias support ===
+
+describe('alias support', () => {
+  it('skipped primitive with alias resolves endpoint in Line connections', () => {
+    const spec = BluefishAdapter(({ Circle, Rect, Line, Ref }) => [
+      Rect({ name: 'a' }),
+      Rect({ name: 'b' }),
+      Circle({ name: 'a-anchor', r: 1, customData: { olli: { skip: true, alias: 'a' } } }),
+      Line({ name: 'rope', stroke: 'black' }, [Ref({ select: 'a-anchor' }), Ref({ select: 'b' })]),
+    ]);
+    const connections = spec.relations.filter(r => r.kind === 'connection') as ConnectionRelation[];
+    expect(connections).toHaveLength(2);
+    expect(connections.find(c => c.endpoints[0] === 'a' && c.endpoints[1] === 'rope')).toBeDefined();
+    expect(connections.find(c => c.endpoints[0] === 'rope' && c.endpoints[1] === 'b')).toBeDefined();
+    expect(spec.elements.some(e => e.id === 'a-anchor')).toBe(false);
+  });
+
+  it('skipped inline child with alias in named composite resolves endpoint in Line connections', () => {
+    const spec = BluefishAdapter(({ Align, Circle, Rect, Line, Ref }) => [
+      Rect({ name: 'b' }),
+      Align({ name: 'A', alignment: 'center', customData: { olli: { kind: 'pulley', label: 'Pulley A' } } }, [
+        Circle({ r: 25 }),
+        Circle({ name: 'A-center', r: 5, customData: { olli: { skip: true, alias: 'A' } } }),
+      ]),
+      Line({ name: 'rope', stroke: 'black' }, [Ref({ select: 'b' }), Ref({ select: 'A-center' })]),
+    ]);
+    const connections = spec.relations.filter(r => r.kind === 'connection') as ConnectionRelation[];
+    expect(connections).toHaveLength(2);
+    expect(connections.find(c => c.endpoints[0] === 'b' && c.endpoints[1] === 'rope')).toBeDefined();
+    expect(connections.find(c => c.endpoints[0] === 'rope' && c.endpoints[1] === 'A')).toBeDefined();
+    expect(spec.elements.some(e => e.id === 'A-center')).toBe(false);
+  });
+});
+
 // === Unit tests: customData ===
 
 describe('customData.olli overrides', () => {
@@ -97,7 +131,7 @@ describe('customData.olli overrides', () => {
     expect(spec.relations).toHaveLength(0);
   });
 
-  it('adds semantic and directed to connection from named Line', () => {
+  it('adds semantic and directed to both endpoint connections from named Line', () => {
     const spec = BluefishAdapter(({ Rect, Line, Ref }) => [
       Rect({ name: 'a' }),
       Rect({ name: 'b' }),
@@ -106,9 +140,10 @@ describe('customData.olli overrides', () => {
         Ref({ select: 'b' }),
       ]),
     ]);
-    const conn = spec.relations.find(r => r.kind === 'connection') as ConnectionRelation;
-    expect(conn.semantic).toBe('flows-to');
-    expect(conn.directed).toBe(true);
+    const connections = spec.relations.filter(r => r.kind === 'connection') as ConnectionRelation[];
+    expect(connections).toHaveLength(2);
+    expect(connections.every(c => c.semantic === 'flows-to')).toBe(true);
+    expect(connections.every(c => c.directed === true)).toBe(true);
   });
 
   it('adds label to Group from customData', () => {
@@ -128,18 +163,61 @@ describe('customData.olli overrides', () => {
 // === Unit tests: relation extraction ===
 
 describe('connection relations', () => {
-  it('extracts named Line as element + connection', () => {
+  it('extracts named Line as connector element + two endpoint connections', () => {
     const spec = BluefishAdapter(({ Rect, Line, Ref }) => [
       Rect({ name: 'a' }),
       Rect({ name: 'b' }),
       Line({ name: 'l1', stroke: 'black' }, [Ref({ select: 'a' }), Ref({ select: 'b' })]),
     ]);
-    const conn = spec.relations.find(r => r.kind === 'connection') as ConnectionRelation;
-    expect(conn).toBeDefined();
-    expect(conn.id).toBe('connection-a-b');
-    expect(conn.endpoints).toEqual(['a', 'b']);
-    expect(conn.directed).toBeUndefined();
     expect(spec.elements.some(e => e.id === 'l1')).toBe(true);
+    expect(spec.elements.find(e => e.id === 'l1')?.connector).toBe(true);
+
+    const connections = spec.relations.filter(r => r.kind === 'connection') as ConnectionRelation[];
+    expect(connections).toHaveLength(2);
+    const conn0 = connections.find(c => c.endpoints[0] === 'a' && c.endpoints[1] === 'l1');
+    expect(conn0).toBeDefined();
+    expect(conn0?.id).toBe('connection-a-l1');
+    expect(conn0?.directed).toBeUndefined();
+    const conn1 = connections.find(c => c.endpoints[0] === 'l1' && c.endpoints[1] === 'b');
+    expect(conn1).toBeDefined();
+    expect(conn1?.id).toBe('connection-l1-b');
+  });
+
+  it('same-group suppression removes connections where both endpoints share a group', () => {
+    const spec = BluefishAdapter(({ Rect, Line, Group, Ref }) => [
+      Rect({ name: 'a' }),
+      Rect({ name: 'b' }),
+      Rect({ name: 'c' }),
+      Line({ name: 'rope', stroke: 'black' }, [Ref({ select: 'a' }), Ref({ select: 'b' })]),
+      Group({ name: 'sys' }, [Ref({ select: 'a' }), Ref({ select: 'rope' })]),
+    ]);
+    // (a, rope): both in sys → suppressed; (rope, b): rope in sys, b not → kept
+    const connections = spec.relations.filter(r => r.kind === 'connection') as ConnectionRelation[];
+    expect(connections).toHaveLength(1);
+    expect(connections[0]?.endpoints).toEqual(['rope', 'b']);
+  });
+
+  it('named Line with no group membership keeps both endpoint connections', () => {
+    const spec = BluefishAdapter(({ Rect, Line, Ref }) => [
+      Rect({ name: 'x' }),
+      Rect({ name: 'y' }),
+      Line({ name: 'rope', stroke: 'black' }, [Ref({ select: 'x' }), Ref({ select: 'y' })]),
+    ]);
+    const connections = spec.relations.filter(r => r.kind === 'connection') as ConnectionRelation[];
+    expect(connections).toHaveLength(2);
+    expect(connections.map(c => c.endpoints)).toContainEqual(['x', 'rope']);
+    expect(connections.map(c => c.endpoints)).toContainEqual(['rope', 'y']);
+  });
+
+  it('unnamed Line still creates single endpoint-to-endpoint connection (backward compat)', () => {
+    const spec = BluefishAdapter(({ Rect, Line, Ref }) => [
+      Rect({ name: 'a' }),
+      Rect({ name: 'b' }),
+      Line({ stroke: 'black' }, [Ref({ select: 'a' }), Ref({ select: 'b' })]),
+    ]);
+    const connections = spec.relations.filter(r => r.kind === 'connection') as ConnectionRelation[];
+    expect(connections).toHaveLength(1);
+    expect(connections[0]?.endpoints).toEqual(['a', 'b']);
   });
 
   it('extracts Arrow as directed connection', () => {
@@ -249,94 +327,56 @@ describe('mixed children (Ref + inline)', () => {
   });
 });
 
-// === Integration test: pulley ===
+// === Integration test: benthic pulley ===
 
-const r = 25;
-const w2jut = 10;
+const pr = 25;
 
-function pulleySpec({ Align, Circle, Distribute, Group, Line, Path, Rect, Ref, StackH, Text }: BluefishKit): unknown[] {
+function benthicPulleySpec({ Align, Circle, Distribute, Group, Line, Path, Rect, Ref, StackH, Text }: BluefishKit): unknown[] {
   function pulleyCircle(name: string, label: string) {
     return Align({ name, alignment: 'center', customData: { olli: { kind: 'pulley', label } } }, [
-      Circle({ r, stroke: '#828282', 'stroke-width': 3, fill: '#C1C1C1' }),
+      Circle({ r: pr, stroke: '#828282', 'stroke-width': 3, fill: '#C1C1C1' }),
       Circle({ r: 5, fill: '#555555' }),
     ]);
   }
-
-  function weight(width: number, height: number, label: string) {
-    return Align({ alignment: 'center' }, [
-      Path({
-        d: `M 10,0 l ${width - 20},0 l 10,${height} l ${-width},0 Z`,
-        fill: '#545454',
-        stroke: '#545454',
-      }),
-      Text({ 'font-size': '10' }, label),
+  function weightBox(name: string, label: string, wlabel: string) {
+    return StackH({ name, customData: { olli: { kind: 'box', label } } }, [
+      Align({ alignment: 'center' }, [
+        Path({ d: `M 10,0 l 20,0 l 10,30 l -40,0 Z`, fill: '#545454', stroke: '#545454' }),
+        Text({ 'font-size': '10' }, wlabel),
+      ]),
     ]);
   }
 
   return [
-    Rect({ name: 'rect', height: 20, width: 9 * r, fill: '#C9C9C9', 'stroke-width': 2, customData: { olli: { label: 'Ceiling' } } }),
+    Rect({ name: 'ceiling', height: 20, width: 12 * pr, fill: '#C9C9C9', 'stroke-width': 2, customData: { olli: { label: 'Ceiling' } } }),
+    Rect({ name: 'floor', height: 20, width: 4 * pr, fill: '#C9C9C9', 'stroke-width': 2, customData: { olli: { label: 'Floor' } } }),
 
     pulleyCircle('A', 'Pulley A'),
     pulleyCircle('B', 'Pulley B'),
     pulleyCircle('C', 'Pulley C'),
+    weightBox('b1', 'Box B1', 'B1'),
+    weightBox('b2', 'Box B2', 'B2'),
 
-    Distribute({ direction: 'horizontal', spacing: -r }, [Ref({ select: 'A' }), Ref({ select: 'B' })]),
-    Distribute({ direction: 'horizontal', spacing: 0 }, [Ref({ select: 'B' }), Ref({ select: 'C' })]),
-    Distribute({ direction: 'vertical', spacing: 40 }, [Ref({ select: 'rect' }), Ref({ select: 'B' })]),
-    Distribute({ direction: 'vertical', spacing: 30 }, [Ref({ select: 'B' }), Ref({ select: 'A' })]),
-    Distribute({ direction: 'vertical', spacing: 50 }, [Ref({ select: 'B' }), Ref({ select: 'C' })]),
+    Distribute({ direction: 'horizontal', spacing: 4 * pr }, [Ref({ select: 'A' }), Ref({ select: 'C' })]),
+    Distribute({ direction: 'vertical', spacing: 50 }, [Ref({ select: 'ceiling' }), Ref({ select: 'A' })]),
+    Distribute({ direction: 'vertical', spacing: 50 }, [Ref({ select: 'ceiling' }), Ref({ select: 'C' })]),
+    Distribute({ direction: 'horizontal', spacing: pr }, [Ref({ select: 'A' }), Ref({ select: 'B' })]),
+    Distribute({ direction: 'vertical', spacing: 50 }, [Ref({ select: 'A' }), Ref({ select: 'B' })]),
+    Distribute({ direction: 'vertical', spacing: 70 }, [Ref({ select: 'A' }), Ref({ select: 'b1' })]),
+    Distribute({ direction: 'vertical', spacing: 70 }, [Ref({ select: 'C' }), Ref({ select: 'b2' })]),
+    Distribute({ direction: 'vertical', spacing: 60 }, [Ref({ select: 'B' }), Ref({ select: 'floor' })]),
 
-    Group({ name: 'sysB', customData: { olli: { label: 'Pulley System B' } } }, [Ref({ select: 'B' }), Ref({ select: 'l1' }), Ref({ select: 'l2' })]),
-    Group({ name: 'sysA', customData: { olli: { label: 'Pulley System A' } } }, [Ref({ select: 'A' }), Ref({ select: 'l4' }), Ref({ select: 'l5' })]),
-    Group({ name: 'sysC', customData: { olli: { label: 'Pulley System C' } } }, [Ref({ select: 'C' }), Ref({ select: 'l3' }), Ref({ select: 'l6' })]),
+    Line({ name: 'q', stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope q', semantic: 'hangs-from', directed: true } } }, [Ref({ select: 'ceiling' }), Ref({ select: 'A' })]),
+    Line({ name: 't', stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope t', semantic: 'hangs-from', directed: true } } }, [Ref({ select: 'ceiling' }), Ref({ select: 'C' })]),
+    Line({ name: 'p', stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope p', semantic: 'hangs-from', directed: true } } }, [Ref({ select: 'A' }), Ref({ select: 'b1' })]),
+    Line({ name: 'r', stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope r' } } }, [Ref({ select: 'A' }), Ref({ select: 'B' })]),
+    Line({ name: 's', stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope s' } } }, [Ref({ select: 'B' }), Ref({ select: 'C' })]),
+    Line({ name: 'u', stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope u', semantic: 'hangs-from', directed: true } } }, [Ref({ select: 'C' }), Ref({ select: 'b2' })]),
+    Line({ name: 'v', stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope v', semantic: 'anchored-to', directed: true } } }, [Ref({ select: 'B' }), Ref({ select: 'floor' })]),
 
-    Align({ alignment: 'centerX' }, [Ref({ select: 'rect' }), Ref({ select: 'sysB' })]),
-
-    Align({ alignment: 'center' }, [Ref({ select: 'B' }), Text({ x: r, y: -r }, 'B')]),
-    Align({ alignment: 'center' }, [Ref({ select: 'A' }), Text({ x: -r, y: -r }, 'A')]),
-    Align({ alignment: 'center' }, [Ref({ select: 'C' }), Text({ x: r, y: r }, 'C')]),
-
-    Line({ source: [0, 0.5], target: [0.5, 0.5], name: 'l1', stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope x', semantic: 'hangs-from', directed: true } } }, [Ref({ select: 'B' }), Ref({ select: 'A' })]),
-    Line({ source: [1, 0.5], target: [0, 0.5], name: 'l2', stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope y', semantic: 'hangs-from', directed: true } } }, [Ref({ select: 'B' }), Ref({ select: 'C' })]),
-    Line({ target: [1, 0.5], name: 'l3', stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope z', semantic: 'anchored-to', directed: true } } }, [Ref({ select: 'rect' }), Ref({ select: 'C' })]),
-
-    StackH({ spacing: 5 }, [Ref({ select: 'l1' }), Text({ name: 't1', customData: { olli: { skip: true } } }, 'x')]),
-    Distribute({ spacing: 5, direction: 'horizontal' }, [Ref({ select: 'l2' }), Text({ name: 't2', customData: { olli: { skip: true } } }, 'y')]),
-    Distribute({ spacing: 5, direction: 'horizontal' }, [Ref({ select: 'l3' }), Text({ name: 't3', customData: { olli: { skip: true } } }, 'z')]),
-    Align({ alignment: 'centerY' }, [Ref({ select: 't1' }), Ref({ select: 't2' }), Ref({ select: 't3' })]),
-
-    StackH({ name: 'w1', customData: { olli: { kind: 'box', label: 'Box W1' } } }, [
-      weight(30, 30, 'W1'),
-      Rect({ fill: 'transparent', width: r * 2 - 10 }),
-    ]),
-    StackH({ name: 'w2', customData: { olli: { kind: 'box', label: 'Box W2' } } }, [
-      Rect({ fill: 'transparent', width: r + (r / 2 - 10) - w2jut / 2 }),
-      weight(r * 3 + w2jut, 30, 'W2'),
-    ]),
-    Distribute({ spacing: 50, direction: 'vertical' }, [Ref({ select: 'C' }), Ref({ select: 'w2' })]),
-    Align({ alignment: 'left' }, [Ref({ select: 'A' }), Ref({ select: 'w2' })]),
-    Align({ alignment: 'centerX' }, [Ref({ select: 'A' }), Ref({ select: 'w1' })]),
-    Align({ alignment: 'centerY' }, [Ref({ select: 'w1' }), Ref({ select: 'w2' })]),
-
-    Line({ source: [0, 0.5], name: 'l4', stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope p', semantic: 'hangs-from', directed: true } } }, [Ref({ select: 'A' }), Ref({ select: 'w1' })]),
-    Line({ source: [1, 0.5], name: 'l5', stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope q', semantic: 'hangs-from', directed: true } } }, [Ref({ select: 'A' }), Ref({ select: 'w2' })]),
-    Line({ source: [0.5, 0.5], name: 'l6', stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope s', semantic: 'hangs-from', directed: true } } }, [Ref({ select: 'C' }), Ref({ select: 'w2' })]),
-
-    Distribute({ spacing: 5, direction: 'horizontal' }, [Ref({ select: 'l4' }), Text({ name: 't4', customData: { olli: { skip: true } } }, 'p')]),
-    Distribute({ spacing: 5, direction: 'horizontal' }, [Ref({ select: 'l5' }), Text({ name: 't5', customData: { olli: { skip: true } } }, 'q')]),
-    StackH({ spacing: 5 }, [Ref({ select: 'l6' }), Text({ name: 't6', customData: { olli: { skip: true } } }, 's')]),
-    Align({ alignment: 'centerY' }, [Ref({ select: 't6' }), Ref({ select: 't5' }), Ref({ select: 't4' })]),
-
-    // Overdraws
-    pulleyCircle('Acopy', 'Pulley A'),
-    pulleyCircle('Ccopy', 'Pulley C'),
-    Align({ alignment: 'center' }, [Ref({ select: 'A' }), Ref({ select: 'Acopy' })]),
-    Align({ alignment: 'center' }, [Ref({ select: 'C' }), Ref({ select: 'Ccopy' })]),
-    Line({ source: [0, 0.5], target: [0.5, 0.5], name: 'l1copy', stroke: '#774e32' }, [Ref({ select: 'B' }), Ref({ select: 'A' })]),
-    pulleyCircle('Bcopy', 'Pulley B'),
-    Align({ alignment: 'center' }, [Ref({ select: 'B' }), Ref({ select: 'Bcopy' })]),
-    Line({ target: [0.5, 0.5], name: 'l0', stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Axle rope', semantic: 'hangs-from', directed: true } } }, [Ref({ select: 'rect' }), Ref({ select: 'B' })]),
-    Line({ source: [0.5, 0.5], name: 'l6copy', stroke: '#774e32' }, [Ref({ select: 'C' }), Ref({ select: 'w2' })]),
+    Group({ name: 'sysA', customData: { olli: { label: 'Pulley System A' } } }, [Ref({ select: 'A' }), Ref({ select: 'p' }), Ref({ select: 'r' })]),
+    Group({ name: 'sysB', customData: { olli: { label: 'Pulley System B' } } }, [Ref({ select: 'r' }), Ref({ select: 'B' }), Ref({ select: 's' })]),
+    Group({ name: 'sysC', customData: { olli: { label: 'Pulley System C' } } }, [Ref({ select: 's' }), Ref({ select: 'C' }), Ref({ select: 'u' })]),
   ];
 }
 
@@ -344,54 +384,39 @@ describe('pulley integration test', () => {
   let spec: DiagramSpec;
 
   beforeEach(() => {
-    spec = BluefishAdapter(pulleySpec);
+    spec = BluefishAdapter(benthicPulleySpec);
   });
 
-  it('extracts the 13 structural elements (no text labels)', () => {
+  it('extracts 14 elements (7 ropes as connectors, 3 pulleys, ceiling, floor, b1, b2)', () => {
+    expect(spec.elements).toHaveLength(14);
     const ids = spec.elements.map(e => e.id);
-    expect(ids).toContain('rect');
+    expect(ids).toContain('ceiling');
+    expect(ids).toContain('floor');
     expect(ids).toContain('A');
     expect(ids).toContain('B');
     expect(ids).toContain('C');
-    expect(ids).toContain('l0');
-    expect(ids).toContain('l1');
-    expect(ids).toContain('l2');
-    expect(ids).toContain('l3');
-    expect(ids).toContain('l4');
-    expect(ids).toContain('l5');
-    expect(ids).toContain('l6');
-    expect(ids).toContain('w1');
-    expect(ids).toContain('w2');
-    // skipped text labels not present
-    expect(ids).not.toContain('t1');
-    expect(ids).not.toContain('t4');
-    expect(spec.elements).toHaveLength(13);
+    expect(ids).toContain('p');
+    expect(ids).toContain('q');
+    expect(ids).toContain('r');
+    expect(ids).toContain('s');
+    expect(ids).toContain('t');
+    expect(ids).toContain('u');
+    expect(ids).toContain('v');
+    expect(ids).toContain('b1');
+    expect(ids).toContain('b2');
   });
 
-  it('does not include copy elements', () => {
-    const ids = spec.elements.map(e => e.id);
-    expect(ids).not.toContain('Acopy');
-    expect(ids).not.toContain('Bcopy');
-    expect(ids).not.toContain('Ccopy');
-    expect(ids).not.toContain('l1copy');
-    expect(ids).not.toContain('l6copy');
+  it('all rope elements have connector: true', () => {
+    for (const rope of ['p', 'q', 'r', 's', 't', 'u', 'v']) {
+      expect(spec.elements.find(e => e.id === rope)?.connector).toBe(true);
+    }
   });
 
   it('applies customData kind/label overrides', () => {
-    const A = spec.elements.find(e => e.id === 'A');
-    expect(A?.kind).toBe('pulley');
-    expect(A?.label).toBe('Pulley A');
-
-    const l1 = spec.elements.find(e => e.id === 'l1');
-    expect(l1?.kind).toBe('rope');
-    expect(l1?.label).toBe('Rope x');
-
-    const w1 = spec.elements.find(e => e.id === 'w1');
-    expect(w1?.kind).toBe('box');
-    expect(w1?.label).toBe('Box W1');
-
-    const rect = spec.elements.find(e => e.id === 'rect');
-    expect(rect?.label).toBe('Ceiling');
+    expect(spec.elements.find(e => e.id === 'A')).toMatchObject({ kind: 'pulley', label: 'Pulley A' });
+    expect(spec.elements.find(e => e.id === 'p')).toMatchObject({ kind: 'rope', label: 'Rope p' });
+    expect(spec.elements.find(e => e.id === 'b1')).toMatchObject({ kind: 'box', label: 'Box B1' });
+    expect(spec.elements.find(e => e.id === 'ceiling')).toMatchObject({ label: 'Ceiling' });
   });
 
   it('does not emit alignment or distribution relations', () => {
@@ -399,50 +424,60 @@ describe('pulley integration test', () => {
     expect(spec.relations.filter(r => r.kind === 'distribution')).toHaveLength(0);
   });
 
-  it('extracts connections for all named Lines (7 non-copy lines)', () => {
+  it('extracts exactly 8 connections after same-group suppression', () => {
     const connections = spec.relations.filter(r => r.kind === 'connection') as ConnectionRelation[];
-    expect(connections).toHaveLength(7);
-    const endpointPairs = connections.map(c => c.endpoints);
-    expect(endpointPairs).toContainEqual(['rect', 'B']); // l0
-    expect(endpointPairs).toContainEqual(['B', 'A']);     // l1
-    expect(endpointPairs).toContainEqual(['B', 'C']);     // l2
-    expect(endpointPairs).toContainEqual(['rect', 'C']); // l3
-    expect(endpointPairs).toContainEqual(['A', 'w1']);   // l4
-    expect(endpointPairs).toContainEqual(['A', 'w2']);   // l5
-    expect(endpointPairs).toContainEqual(['C', 'w2']);   // l6
+    expect(connections).toHaveLength(8);
+    const pairs = connections.map(c => c.endpoints);
+    expect(pairs).toContainEqual(['p', 'b1']);
+    expect(pairs).toContainEqual(['ceiling', 'q']);
+    expect(pairs).toContainEqual(['q', 'A']);
+    expect(pairs).toContainEqual(['ceiling', 't']);
+    expect(pairs).toContainEqual(['t', 'C']);
+    expect(pairs).toContainEqual(['u', 'b2']);
+    expect(pairs).toContainEqual(['B', 'v']);
+    expect(pairs).toContainEqual(['v', 'floor']);
+  });
+
+  it('suppresses intra-group connections (r and s have no connections)', () => {
+    const connections = spec.relations.filter(r => r.kind === 'connection') as ConnectionRelation[];
+    const pairs = connections.map(c => c.endpoints);
+    // r: A→B both suppressed; s: B→C both suppressed; p: A→p suppressed
+    expect(pairs.some(([a, b]) => a === 'r' || b === 'r')).toBe(false);
+    expect(pairs.some(([a, b]) => a === 's' || b === 's')).toBe(false);
+    expect(pairs.some(([a, b]) => (a === 'A' && b === 'p') || (a === 'p' && b === 'A'))).toBe(false);
   });
 
   it('connections carry semantic and directed from customData', () => {
     const connections = spec.relations.filter(r => r.kind === 'connection') as ConnectionRelation[];
-    expect(connections.every(c => c.directed === true)).toBe(true);
-    const l1conn = connections.find(c => c.endpoints[0] === 'B' && c.endpoints[1] === 'A');
-    expect(l1conn?.semantic).toBe('hangs-from');
-    const l3conn = connections.find(c => c.endpoints[0] === 'rect' && c.endpoints[1] === 'C');
-    expect(l3conn?.semantic).toBe('anchored-to');
+    const qConn = connections.find(c => c.endpoints[0] === 'q' && c.endpoints[1] === 'A');
+    expect(qConn?.semantic).toBe('hangs-from');
+    expect(qConn?.directed).toBe(true);
+    const vConn = connections.find(c => c.endpoints[0] === 'B' && c.endpoints[1] === 'v');
+    expect(vConn?.semantic).toBe('anchored-to');
   });
 
   it('connection ids are endpoint-based and unique', () => {
     const connections = spec.relations.filter(r => r.kind === 'connection') as ConnectionRelation[];
     const connIds = connections.map(c => c.id);
     expect(new Set(connIds).size).toBe(connIds.length);
-    expect(connIds).toContain('connection-B-A');
-    expect(connIds).toContain('connection-A-w1');
+    expect(connIds).toContain('connection-ceiling-q');
+    expect(connIds).toContain('connection-p-b1');
   });
 
-  it('extracts the three pulley system groupings with labels', () => {
+  it('extracts the three pulley system groupings with labels and correct members', () => {
     const groups = spec.relations.filter(r => r.kind === 'grouping') as GroupingRelation[];
     expect(groups).toHaveLength(3);
 
-    const sysB = groups.find(g => g.id === 'sysB');
-    expect(sysB?.members).toEqual(['B', 'l1', 'l2']);
-    expect(sysB?.label).toBe('Pulley System B');
-
     const sysA = groups.find(g => g.id === 'sysA');
-    expect(sysA?.members).toEqual(['A', 'l4', 'l5']);
+    expect(sysA?.members).toEqual(['A', 'p', 'r']);
     expect(sysA?.label).toBe('Pulley System A');
 
+    const sysB = groups.find(g => g.id === 'sysB');
+    expect(sysB?.members).toEqual(['r', 'B', 's']);
+    expect(sysB?.label).toBe('Pulley System B');
+
     const sysC = groups.find(g => g.id === 'sysC');
-    expect(sysC?.members).toEqual(['C', 'l3', 'l6']);
+    expect(sysC?.members).toEqual(['s', 'C', 'u']);
     expect(sysC?.label).toBe('Pulley System C');
   });
 });
@@ -486,5 +521,94 @@ describe('flowchart integration test', () => {
   it('produces no grouping relations', () => {
     const spec = BluefishAdapter(flowchartSpec);
     expect(spec.relations.filter(r => r.kind === 'grouping')).toHaveLength(0);
+  });
+});
+
+// === Integration test: anchor-based pulley ===
+
+const apr = 25;
+
+function anchorPulleySpec({ Align, Circle, Distribute, Group, Line, Rect, Ref }: BluefishKit): unknown[] {
+  function pulleyCircle(name: string, label: string) {
+    return Align({ name, alignment: 'center', customData: { olli: { kind: 'pulley', label } } }, [
+      Circle({ r: apr }),
+      Circle({ name: `${name}-center`, r: 5, customData: { olli: { skip: true, alias: name } } }),
+    ]);
+  }
+  function weightBox(name: string, label: string) {
+    return Align({ name, alignment: 'center', customData: { olli: { kind: 'box', label } } }, [
+      Rect({ width: 40, height: 40 }),
+    ]);
+  }
+  return [
+    Rect({ name: 'ceiling', customData: { olli: { label: 'Ceiling' } } }),
+    Rect({ name: 'floor', customData: { olli: { label: 'Floor' } } }),
+    pulleyCircle('A', 'Pulley A'),
+    pulleyCircle('B', 'Pulley B'),
+    pulleyCircle('C', 'Pulley C'),
+    weightBox('b1', 'Box B1'),
+    weightBox('b2', 'Box B2'),
+    Circle({ name: 'ceil-A', r: 0.5, customData: { olli: { skip: true, alias: 'ceiling' } } }),
+    Circle({ name: 'ceil-C', r: 0.5, customData: { olli: { skip: true, alias: 'ceiling' } } }),
+    Circle({ name: 'floor-B', r: 0.5, customData: { olli: { skip: true, alias: 'floor' } } }),
+    Line({ name: 'q', customData: { olli: { kind: 'rope', label: 'Rope q', semantic: 'hangs-from', directed: true } } }, [Ref({ select: 'A-center' }), Ref({ select: 'ceil-A' })]),
+    Line({ name: 't', customData: { olli: { kind: 'rope', label: 'Rope t', semantic: 'hangs-from', directed: true } } }, [Ref({ select: 'C-center' }), Ref({ select: 'ceil-C' })]),
+    Line({ name: 'p', customData: { olli: { kind: 'rope', label: 'Rope p', semantic: 'hangs-from', directed: true } } }, [Ref({ select: 'b1' }), Ref({ select: 'A-center' })]),
+    Line({ name: 'r', customData: { olli: { kind: 'rope', label: 'Rope r' } } }, [Ref({ select: 'A-center' }), Ref({ select: 'B-center' })]),
+    Line({ name: 's', customData: { olli: { kind: 'rope', label: 'Rope s' } } }, [Ref({ select: 'B-center' }), Ref({ select: 'C-center' })]),
+    Line({ name: 'u', customData: { olli: { kind: 'rope', label: 'Rope u', semantic: 'hangs-from', directed: true } } }, [Ref({ select: 'b2' }), Ref({ select: 'C-center' })]),
+    Line({ name: 'v', customData: { olli: { kind: 'rope', label: 'Rope v', semantic: 'anchored-to', directed: true } } }, [Ref({ select: 'B-center' }), Ref({ select: 'floor-B' })]),
+    Group({ name: 'sysA', customData: { olli: { label: 'Pulley System A' } } }, [Ref({ select: 'A' }), Ref({ select: 'p' }), Ref({ select: 'r' })]),
+    Group({ name: 'sysB', customData: { olli: { label: 'Pulley System B' } } }, [Ref({ select: 'r' }), Ref({ select: 'B' }), Ref({ select: 's' })]),
+    Group({ name: 'sysC', customData: { olli: { label: 'Pulley System C' } } }, [Ref({ select: 's' }), Ref({ select: 'C' }), Ref({ select: 'u' })]),
+  ];
+}
+
+describe('anchor-based pulley integration test', () => {
+  let spec: DiagramSpec;
+
+  beforeEach(() => {
+    spec = BluefishAdapter(anchorPulleySpec);
+  });
+
+  it('produces exactly 8 connections with semantically correct endpoint ordering', () => {
+    const connections = spec.relations.filter(r => r.kind === 'connection') as ConnectionRelation[];
+    expect(connections).toHaveLength(8);
+    const pairs = connections.map(c => c.endpoints);
+    expect(pairs).toContainEqual(['A', 'q']);
+    expect(pairs).toContainEqual(['q', 'ceiling']);
+    expect(pairs).toContainEqual(['C', 't']);
+    expect(pairs).toContainEqual(['t', 'ceiling']);
+    expect(pairs).toContainEqual(['b1', 'p']);
+    expect(pairs).toContainEqual(['b2', 'u']);
+    expect(pairs).toContainEqual(['B', 'v']);
+    expect(pairs).toContainEqual(['v', 'floor']);
+  });
+
+  it('anchor elements are not included in elements', () => {
+    const ids = spec.elements.map(e => e.id);
+    expect(ids).not.toContain('A-center');
+    expect(ids).not.toContain('B-center');
+    expect(ids).not.toContain('C-center');
+    expect(ids).not.toContain('ceil-A');
+    expect(ids).not.toContain('ceil-C');
+    expect(ids).not.toContain('floor-B');
+  });
+
+  it('connections carry semantic and directed from customData after alias resolution', () => {
+    const connections = spec.relations.filter(r => r.kind === 'connection') as ConnectionRelation[];
+    const aqConn = connections.find(c => c.endpoints[0] === 'A' && c.endpoints[1] === 'q');
+    expect(aqConn?.semantic).toBe('hangs-from');
+    expect(aqConn?.directed).toBe(true);
+    const bvConn = connections.find(c => c.endpoints[0] === 'B' && c.endpoints[1] === 'v');
+    expect(bvConn?.semantic).toBe('anchored-to');
+  });
+
+  it('intra-group connections are suppressed after alias resolution', () => {
+    const connections = spec.relations.filter(r => r.kind === 'connection') as ConnectionRelation[];
+    const pairs = connections.map(c => c.endpoints);
+    expect(pairs.some(([a, b]) => a === 'r' || b === 'r')).toBe(false);
+    expect(pairs.some(([a, b]) => a === 's' || b === 's')).toBe(false);
+    expect(pairs.some(([a, b]) => (a === 'A' && b === 'p') || (a === 'p' && b === 'A'))).toBe(false);
   });
 });

@@ -1,4 +1,4 @@
-import { For, createEffect } from 'solid-js';
+import { For, Show, createEffect, createMemo } from 'solid-js';
 import type { NavigationRuntime, NavNodeId } from 'olli-core';
 import { isVirtualNavId, sourceNavIdOfVirtual } from 'olli-core';
 import { TreeItem } from './TreeItem.jsx';
@@ -45,6 +45,15 @@ export function TreeView<P>(props: { runtime: NavigationRuntime<P> }) {
 
   const roots = () => props.runtime.navTree().roots;
 
+  const activeContextRoot = createMemo((): NavNodeId | null => {
+    const id = props.runtime.focusedNavId();
+    const resolvedId = isVirtualNavId(id) ? sourceNavIdOfVirtual(id) : id;
+    const contextRoots = props.runtime.navTree().contextRoots;
+    return contextRoots.find(rootId => resolvedId === rootId || resolvedId.startsWith(rootId + '/')) ?? null;
+  });
+
+  const totalSetSize = () => roots().length + (activeContextRoot() ? 1 : 0);
+
   return (
     <ul
       ref={treeEl}
@@ -59,10 +68,21 @@ export function TreeView<P>(props: { runtime: NavigationRuntime<P> }) {
             navId={rootId}
             level={1}
             posInSet={i() + 1}
-            setSize={roots().length}
+            setSize={totalSetSize()}
           />
         )}
       </For>
+      <Show when={activeContextRoot()}>
+        {(rootId) => (
+          <TreeItem
+            runtime={props.runtime}
+            navId={rootId()}
+            level={1}
+            posInSet={roots().length + 1}
+            setSize={totalSetSize()}
+          />
+        )}
+      </Show>
     </ul>
   );
 }
