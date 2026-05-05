@@ -8,7 +8,7 @@ const pulleySpec: BluefishSpecFn = ({ Align, Circle, Distribute, Group, Line, Re
   function pulleyCircle(name: string, label: string) {
     return Align({ name, alignment: 'center', customData: { olli: { kind: 'pulley', label } } }, [
       Circle({ r, stroke: '#828282', 'stroke-width': 3, fill: '#C1C1C1' }),
-      Circle({ name: `${name}-center`, r: 5, fill: '#555555', customData: { olli: { skip: true, alias: name } } }),
+      Circle({ r: 5, fill: '#555555', customData: { olli: { skip: true } } }),
     ]);
   }
 
@@ -30,67 +30,82 @@ const pulleySpec: BluefishSpecFn = ({ Align, Circle, Distribute, Group, Line, Re
     weightBox('b1', 'Box B1', 'B1'),
     weightBox('b2', 'Box B2', 'B2'),
 
-    // Ceiling/floor anchor points (skip: invisible, alias: resolves to ceiling/floor in connections)
-    Circle({ name: 'ceil-A', r: 0.5, fill: 'none', stroke: 'none', customData: { olli: { skip: true, alias: 'ceiling' } } }),
-    Circle({ name: 'ceil-C', r: 0.5, fill: 'none', stroke: 'none', customData: { olli: { skip: true, alias: 'ceiling' } } }),
-    Circle({ name: 'floor-B', r: 0.5, fill: 'none', stroke: 'none', customData: { olli: { skip: true, alias: 'floor' } } }),
-
     // Layout positioning
-    Distribute({ direction: 'horizontal', spacing: 4 * r }, [Ref({ select: 'A' }), Ref({ select: 'C' })]),
-    Distribute({ direction: 'horizontal', spacing: r }, [Ref({ select: 'A' }), Ref({ select: 'B' })]),
+    Distribute({ direction: 'horizontal', spacing: 0 }, [Ref({ select: 'A' }), Ref({ select: 'B' })]),
+    Distribute({ direction: 'horizontal', spacing: 0 }, [Ref({ select: 'B' }), Ref({ select: 'C' })]),
     Distribute({ direction: 'vertical', spacing: 60 }, [Ref({ select: 'ceiling' }), Ref({ select: 'A' })]),
     Distribute({ direction: 'vertical', spacing: 60 }, [Ref({ select: 'ceiling' }), Ref({ select: 'C' })]),
     Distribute({ direction: 'vertical', spacing: 50 }, [Ref({ select: 'A' }), Ref({ select: 'B' })]),
-    Distribute({ direction: 'vertical', spacing: 80 }, [Ref({ select: 'A' }), Ref({ select: 'b1' })]),
-    Distribute({ direction: 'vertical', spacing: 80 }, [Ref({ select: 'C' }), Ref({ select: 'b2' })]),
+    Align({ alignment: 'top' }, [Ref({ select: 'B' }), Ref({ select: 'b1' }), Ref({ select: 'b2' })]),
     Distribute({ direction: 'vertical', spacing: 60 }, [Ref({ select: 'B' }), Ref({ select: 'floor' })]),
     Align({ alignment: 'centerX' }, [Ref({ select: 'ceiling' }), Ref({ select: 'B' })]),
-    Align({ alignment: 'centerX' }, [Ref({ select: 'A' }), Ref({ select: 'b1' })]),
-    Align({ alignment: 'centerX' }, [Ref({ select: 'C' }), Ref({ select: 'b2' })]),
+    Distribute({ direction: 'horizontal', spacing: -20 }, [Ref({ select: 'b1' }), Ref({ select: 'A' })]),
+    Distribute({ direction: 'horizontal', spacing: -20 }, [Ref({ select: 'C' }), Ref({ select: 'b2' })]),
     Align({ alignment: 'centerX' }, [Ref({ select: 'B' }), Ref({ select: 'floor' })]),
-
-    // Position ceiling/floor anchors
-    Align({ alignment: 'centerX' }, [Ref({ select: 'A' }), Ref({ select: 'ceil-A' })]),
-    Align({ alignment: 'centerY' }, [Ref({ select: 'ceiling' }), Ref({ select: 'ceil-A' })]),
-    Align({ alignment: 'centerX' }, [Ref({ select: 'C' }), Ref({ select: 'ceil-C' })]),
-    Align({ alignment: 'centerY' }, [Ref({ select: 'ceiling' }), Ref({ select: 'ceil-C' })]),
-    Align({ alignment: 'centerX' }, [Ref({ select: 'B' }), Ref({ select: 'floor-B' })]),
-    Align({ alignment: 'centerY' }, [Ref({ select: 'floor' }), Ref({ select: 'floor-B' })]),
 
     // Pulley labels (skipped from olli tree)
     Align({ alignment: 'center' }, [Ref({ select: 'A' }), Text({ x: -r, y: -r, customData: { olli: { skip: true } } }, 'A')]),
-    Align({ alignment: 'center' }, [Ref({ select: 'B' }), Text({ x: r, y: -r, customData: { olli: { skip: true } } }, 'B')]),
-    Align({ alignment: 'center' }, [Ref({ select: 'C' }), Text({ x: r, y: r, customData: { olli: { skip: true } } }, 'C')]),
+    Align({ alignment: 'center' }, [Ref({ select: 'B' }), Text({ x: r, y: r, customData: { olli: { skip: true } } }, 'B')]),
+    Align({ alignment: 'center' }, [Ref({ select: 'C' }), Text({ x: r, y: -r, customData: { olli: { skip: true } } }, 'C')]),
 
     // Ropes: Ref ordering determines semantic direction (ep0 {semantic} rope, rope {semantic} ep1)
     // q: Pulley A hangs from Rope q; Rope q hangs from Ceiling
-    Line({ name: 'q', stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope q', semantic: 'hangs-from', directed: true } } }, [
-      Ref({ select: 'A-center' }), Ref({ select: 'ceil-A' }),
+    Line({ name: 'q', source: [0.5, 0], stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope q', semantic: 'hangs-from', directed: true } } }, [
+      Ref({ select: 'A' }), Ref({ select: 'ceiling' }),
     ]),
     // t: Pulley C hangs from Rope t; Rope t hangs from Ceiling
-    Line({ name: 't', stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope t', semantic: 'hangs-from', directed: true } } }, [
-      Ref({ select: 'C-center' }), Ref({ select: 'ceil-C' }),
+    Line({ name: 't', source: [0.5, 0], stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope t', semantic: 'hangs-from', directed: true } } }, [
+      Ref({ select: 'C' }), Ref({ select: 'ceiling' }),
     ]),
     // p: Box B1 hangs from Rope p; (p→A suppressed, both in sysA)
-    Line({ name: 'p', stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope p', semantic: 'hangs-from', directed: true } } }, [
-      Ref({ select: 'b1' }), Ref({ select: 'A-center' }),
+    Line({ name: 'p', source: [0.5, 0], target: [0, 0.5], stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope p', semantic: 'hangs-from', directed: true } } }, [
+      Ref({ select: 'b1' }), Ref({ select: 'A' }),
     ]),
     // r: A→B both suppressed (sysA and sysB)
-    Line({ name: 'r', stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope r' } } }, [
-      Ref({ select: 'A-center' }), Ref({ select: 'B-center' }),
+    Line({ name: 'r', source: [1, 0.5], target: [0, 0.5], stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope r' } } }, [
+      Ref({ select: 'A' }), Ref({ select: 'B' }),
     ]),
     // s: B→C both suppressed (sysB and sysC)
-    Line({ name: 's', stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope s' } } }, [
-      Ref({ select: 'B-center' }), Ref({ select: 'C-center' }),
+    Line({ name: 's', source: [1, 0.5], target: [0, 0.5], stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope s' } } }, [
+      Ref({ select: 'B' }), Ref({ select: 'C' }),
     ]),
     // u: Box B2 hangs from Rope u; (u→C suppressed, both in sysC)
-    Line({ name: 'u', stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope u', semantic: 'hangs-from', directed: true } } }, [
-      Ref({ select: 'b2' }), Ref({ select: 'C-center' }),
+    Line({ name: 'u', source: [0.5, 0], target: [1, 0.5], stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope u', semantic: 'hangs-from', directed: true } } }, [
+      Ref({ select: 'b2' }), Ref({ select: 'C' }),
     ]),
     // v: Pulley B anchored to Rope v; Rope v anchored to Floor
-    Line({ name: 'v', stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope v', semantic: 'anchored-to', directed: true } } }, [
-      Ref({ select: 'B-center' }), Ref({ select: 'floor-B' }),
+    Line({ name: 'v', source: [0.5, 1], stroke: '#774e32', customData: { olli: { kind: 'rope', label: 'Rope v', semantic: 'anchored-to', directed: true } } }, [
+      Ref({ select: 'B' }), Ref({ select: 'floor' }),
     ]),
+
+    // Rope labels
+    Text({ name: 'p-label', customData: { olli: { skip: true } } }, 'p'),
+    Distribute({ direction: 'horizontal', spacing: 3 }, [Ref({ select: 'p' }), Ref({ select: 'p-label' })]),
+    Align({ alignment: 'centerY' }, [Ref({ select: 'p' }), Ref({ select: 'p-label' })]),
+
+    Text({ name: 'q-label', customData: { olli: { skip: true } } }, 'q'),
+    Distribute({ direction: 'horizontal', spacing: 3 }, [Ref({ select: 'q' }), Ref({ select: 'q-label' })]),
+    Align({ alignment: 'centerY' }, [Ref({ select: 'q' }), Ref({ select: 'q-label' })]),
+
+    Text({ name: 'r-label', customData: { olli: { skip: true } } }, 'r'),
+    Distribute({ direction: 'horizontal', spacing: 3 }, [Ref({ select: 'r' }), Ref({ select: 'r-label' })]),
+    Align({ alignment: 'centerY' }, [Ref({ select: 'r' }), Ref({ select: 'r-label' })]),
+
+    Text({ name: 's-label', customData: { olli: { skip: true } } }, 's'),
+    Distribute({ direction: 'horizontal', spacing: 3 }, [Ref({ select: 's-label' }), Ref({ select: 's' })]),
+    Align({ alignment: 'centerY' }, [Ref({ select: 's' }), Ref({ select: 's-label' })]),
+
+    Text({ name: 't-label', customData: { olli: { skip: true } } }, 't'),
+    Distribute({ direction: 'horizontal', spacing: 3 }, [Ref({ select: 't-label' }), Ref({ select: 't' })]),
+    Align({ alignment: 'centerY' }, [Ref({ select: 't' }), Ref({ select: 't-label' })]),
+
+    Text({ name: 'u-label', customData: { olli: { skip: true } } }, 'u'),
+    Distribute({ direction: 'horizontal', spacing: 3 }, [Ref({ select: 'u' }), Ref({ select: 'u-label' })]),
+    Align({ alignment: 'centerY' }, [Ref({ select: 'u' }), Ref({ select: 'u-label' })]),
+
+    Text({ name: 'v-label', customData: { olli: { skip: true } } }, 'v'),
+    Distribute({ direction: 'horizontal', spacing: 3 }, [Ref({ select: 'v-label' }), Ref({ select: 'v' })]),
+    Align({ alignment: 'centerY' }, [Ref({ select: 'v' }), Ref({ select: 'v-label' })]),
 
     // Pulley systems
     Group({ name: 'sysA', customData: { olli: { label: 'Pulley System A' } } }, [

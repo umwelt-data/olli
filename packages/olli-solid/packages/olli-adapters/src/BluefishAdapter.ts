@@ -17,7 +17,6 @@ export interface OlliCustomData {
   semantic?: string;
   directed?: boolean;
   skip?: boolean;
-  alias?: string;
 }
 
 function getOlliMeta(node: RecordedNode): OlliCustomData {
@@ -155,7 +154,6 @@ function processNode(
   elements: Map<string, DiagramElement>,
   relations: DiagramRelation[],
   idCounters: Map<string, number>,
-  aliasMap: Map<string, string>,
 ): void {
   const name = node.props.name as string | undefined;
   const type = node.type;
@@ -171,7 +169,6 @@ function processNode(
   // Named primitive → element, no recursion needed
   if (PRIMITIVES.has(type) && name) {
     if (olli.skip) {
-      if (olli.alias) aliasMap.set(name, olli.alias);
       return;
     }
     if (!elements.has(name)) {
@@ -183,7 +180,6 @@ function processNode(
   // Named Text → element with string child as label
   if (type === 'Text' && name) {
     if (olli.skip) {
-      if (olli.alias) aliasMap.set(name, olli.alias);
       return;
     }
     if (!elements.has(name)) {
@@ -203,8 +199,8 @@ function processNode(
       elements.set(name, { id: name, label: olli.label ?? name, kind: olli.kind ?? (isLine ? 'line' : 'arrow'), connector: true });
     }
     if (refKids.length >= 2) {
-      const ep0 = aliasMap.get(refKids[0]!.props.select as string) ?? (refKids[0]!.props.select as string);
-      const ep1 = aliasMap.get(refKids[1]!.props.select as string) ?? (refKids[1]!.props.select as string);
+      const ep0 = refKids[0]!.props.select as string;
+      const ep1 = refKids[1]!.props.select as string;
       if (!isCopyName(ep0) && !isCopyName(ep1)) {
         const conn0: ConnectionRelation = {
           kind: 'connection',
@@ -230,8 +226,8 @@ function processNode(
 
   // Unnamed Line/Arrow with ref children → connection with auto id
   if ((isLine || isArrow) && refKids.length >= 2) {
-    const ep0 = aliasMap.get(refKids[0]!.props.select as string) ?? (refKids[0]!.props.select as string);
-    const ep1 = aliasMap.get(refKids[1]!.props.select as string) ?? (refKids[1]!.props.select as string);
+    const ep0 = refKids[0]!.props.select as string;
+    const ep1 = refKids[1]!.props.select as string;
     if (!isCopyName(ep0) && !isCopyName(ep1)) {
       const id = generateId(type, [ep0, ep1], idCounters);
       const conn: ConnectionRelation = {
@@ -251,14 +247,6 @@ function processNode(
     if (olli.skip) return;
     if (!elements.has(name)) {
       elements.set(name, { id: name, label: olli.label ?? name, kind: olli.kind ?? type.toLowerCase() });
-    }
-    // Register aliases from named inline children that are skipped
-    for (const kid of inlineKids) {
-      const kidName = kid.props.name as string | undefined;
-      const kidOlli = getOlliMeta(kid);
-      if (kidName && kidOlli.skip && kidOlli.alias) {
-        aliasMap.set(kidName, kidOlli.alias);
-      }
     }
     return;
   }
@@ -280,7 +268,7 @@ function processNode(
         memberIds.push(childName);
       }
     } else if (!childName) {
-      processNode(inlineChild, elements, relations, idCounters, aliasMap);
+      processNode(inlineChild, elements, relations, idCounters);
     }
   }
 
@@ -342,10 +330,9 @@ function walkTree(nodes: RecordedNode[]): DiagramSpec {
   const elements = new Map<string, DiagramElement>();
   let relations: DiagramRelation[] = [];
   const idCounters = new Map<string, number>();
-  const aliasMap = new Map<string, string>();
 
   for (const node of nodes) {
-    processNode(node, elements, relations, idCounters, aliasMap);
+    processNode(node, elements, relations, idCounters);
   }
 
   // Suppress connections where both endpoints share a structural group

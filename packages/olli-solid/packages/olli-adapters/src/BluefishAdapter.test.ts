@@ -54,37 +54,35 @@ describe('element extraction', () => {
   });
 });
 
-// === Unit tests: alias support ===
+// === Unit tests: skipped elements ===
 
-describe('alias support', () => {
-  it('skipped primitive with alias resolves endpoint in Line connections', () => {
+describe('skipped elements', () => {
+  it('skipped primitive is excluded from elements and connections are dropped', () => {
     const spec = BluefishAdapter(({ Circle, Rect, Line, Ref }) => [
       Rect({ name: 'a' }),
       Rect({ name: 'b' }),
-      Circle({ name: 'a-anchor', r: 1, customData: { olli: { skip: true, alias: 'a' } } }),
+      Circle({ name: 'a-anchor', r: 1, customData: { olli: { skip: true } } }),
       Line({ name: 'rope', stroke: 'black' }, [Ref({ select: 'a-anchor' }), Ref({ select: 'b' })]),
     ]);
-    const connections = spec.relations.filter(r => r.kind === 'connection') as ConnectionRelation[];
-    expect(connections).toHaveLength(2);
-    expect(connections.find(c => c.endpoints[0] === 'a' && c.endpoints[1] === 'rope')).toBeDefined();
-    expect(connections.find(c => c.endpoints[0] === 'rope' && c.endpoints[1] === 'b')).toBeDefined();
     expect(spec.elements.some(e => e.id === 'a-anchor')).toBe(false);
+    // connection to skipped endpoint is filtered out
+    const connections = spec.relations.filter(r => r.kind === 'connection') as ConnectionRelation[];
+    expect(connections.every(c => !c.endpoints.includes('a-anchor'))).toBe(true);
   });
 
-  it('skipped inline child with alias in named composite resolves endpoint in Line connections', () => {
+  it('skipped inner circle in named composite is excluded from elements', () => {
     const spec = BluefishAdapter(({ Align, Circle, Rect, Line, Ref }) => [
       Rect({ name: 'b' }),
       Align({ name: 'A', alignment: 'center', customData: { olli: { kind: 'pulley', label: 'Pulley A' } } }, [
         Circle({ r: 25 }),
-        Circle({ name: 'A-center', r: 5, customData: { olli: { skip: true, alias: 'A' } } }),
+        Circle({ r: 5, customData: { olli: { skip: true } } }),
       ]),
-      Line({ name: 'rope', stroke: 'black' }, [Ref({ select: 'b' }), Ref({ select: 'A-center' })]),
+      Line({ name: 'rope', stroke: 'black' }, [Ref({ select: 'b' }), Ref({ select: 'A' })]),
     ]);
     const connections = spec.relations.filter(r => r.kind === 'connection') as ConnectionRelation[];
     expect(connections).toHaveLength(2);
     expect(connections.find(c => c.endpoints[0] === 'b' && c.endpoints[1] === 'rope')).toBeDefined();
     expect(connections.find(c => c.endpoints[0] === 'rope' && c.endpoints[1] === 'A')).toBeDefined();
-    expect(spec.elements.some(e => e.id === 'A-center')).toBe(false);
   });
 });
 
@@ -524,15 +522,15 @@ describe('flowchart integration test', () => {
   });
 });
 
-// === Integration test: anchor-based pulley ===
+// === Integration test: pulley diagram ===
 
 const apr = 25;
 
-function anchorPulleySpec({ Align, Circle, Distribute, Group, Line, Rect, Ref }: BluefishKit): unknown[] {
+function pulleySpec({ Align, Circle, Group, Line, Rect, Ref }: BluefishKit): unknown[] {
   function pulleyCircle(name: string, label: string) {
     return Align({ name, alignment: 'center', customData: { olli: { kind: 'pulley', label } } }, [
       Circle({ r: apr }),
-      Circle({ name: `${name}-center`, r: 5, customData: { olli: { skip: true, alias: name } } }),
+      Circle({ r: 5, customData: { olli: { skip: true } } }),
     ]);
   }
   function weightBox(name: string, label: string) {
@@ -548,27 +546,24 @@ function anchorPulleySpec({ Align, Circle, Distribute, Group, Line, Rect, Ref }:
     pulleyCircle('C', 'Pulley C'),
     weightBox('b1', 'Box B1'),
     weightBox('b2', 'Box B2'),
-    Circle({ name: 'ceil-A', r: 0.5, customData: { olli: { skip: true, alias: 'ceiling' } } }),
-    Circle({ name: 'ceil-C', r: 0.5, customData: { olli: { skip: true, alias: 'ceiling' } } }),
-    Circle({ name: 'floor-B', r: 0.5, customData: { olli: { skip: true, alias: 'floor' } } }),
-    Line({ name: 'q', customData: { olli: { kind: 'rope', label: 'Rope q', semantic: 'hangs-from', directed: true } } }, [Ref({ select: 'A-center' }), Ref({ select: 'ceil-A' })]),
-    Line({ name: 't', customData: { olli: { kind: 'rope', label: 'Rope t', semantic: 'hangs-from', directed: true } } }, [Ref({ select: 'C-center' }), Ref({ select: 'ceil-C' })]),
-    Line({ name: 'p', customData: { olli: { kind: 'rope', label: 'Rope p', semantic: 'hangs-from', directed: true } } }, [Ref({ select: 'b1' }), Ref({ select: 'A-center' })]),
-    Line({ name: 'r', customData: { olli: { kind: 'rope', label: 'Rope r' } } }, [Ref({ select: 'A-center' }), Ref({ select: 'B-center' })]),
-    Line({ name: 's', customData: { olli: { kind: 'rope', label: 'Rope s' } } }, [Ref({ select: 'B-center' }), Ref({ select: 'C-center' })]),
-    Line({ name: 'u', customData: { olli: { kind: 'rope', label: 'Rope u', semantic: 'hangs-from', directed: true } } }, [Ref({ select: 'b2' }), Ref({ select: 'C-center' })]),
-    Line({ name: 'v', customData: { olli: { kind: 'rope', label: 'Rope v', semantic: 'anchored-to', directed: true } } }, [Ref({ select: 'B-center' }), Ref({ select: 'floor-B' })]),
+    Line({ name: 'q', customData: { olli: { kind: 'rope', label: 'Rope q', semantic: 'hangs-from', directed: true } } }, [Ref({ select: 'A' }), Ref({ select: 'ceiling' })]),
+    Line({ name: 't', customData: { olli: { kind: 'rope', label: 'Rope t', semantic: 'hangs-from', directed: true } } }, [Ref({ select: 'C' }), Ref({ select: 'ceiling' })]),
+    Line({ name: 'p', customData: { olli: { kind: 'rope', label: 'Rope p', semantic: 'hangs-from', directed: true } } }, [Ref({ select: 'b1' }), Ref({ select: 'A' })]),
+    Line({ name: 'r', customData: { olli: { kind: 'rope', label: 'Rope r' } } }, [Ref({ select: 'A' }), Ref({ select: 'B' })]),
+    Line({ name: 's', customData: { olli: { kind: 'rope', label: 'Rope s' } } }, [Ref({ select: 'B' }), Ref({ select: 'C' })]),
+    Line({ name: 'u', customData: { olli: { kind: 'rope', label: 'Rope u', semantic: 'hangs-from', directed: true } } }, [Ref({ select: 'b2' }), Ref({ select: 'C' })]),
+    Line({ name: 'v', customData: { olli: { kind: 'rope', label: 'Rope v', semantic: 'anchored-to', directed: true } } }, [Ref({ select: 'B' }), Ref({ select: 'floor' })]),
     Group({ name: 'sysA', customData: { olli: { label: 'Pulley System A' } } }, [Ref({ select: 'A' }), Ref({ select: 'p' }), Ref({ select: 'r' })]),
     Group({ name: 'sysB', customData: { olli: { label: 'Pulley System B' } } }, [Ref({ select: 'r' }), Ref({ select: 'B' }), Ref({ select: 's' })]),
     Group({ name: 'sysC', customData: { olli: { label: 'Pulley System C' } } }, [Ref({ select: 's' }), Ref({ select: 'C' }), Ref({ select: 'u' })]),
   ];
 }
 
-describe('anchor-based pulley integration test', () => {
+describe('pulley diagram integration test', () => {
   let spec: DiagramSpec;
 
   beforeEach(() => {
-    spec = BluefishAdapter(anchorPulleySpec);
+    spec = BluefishAdapter(pulleySpec);
   });
 
   it('produces exactly 8 connections with semantically correct endpoint ordering', () => {
@@ -585,17 +580,14 @@ describe('anchor-based pulley integration test', () => {
     expect(pairs).toContainEqual(['v', 'floor']);
   });
 
-  it('anchor elements are not included in elements', () => {
+  it('inner dot circles are not included in elements', () => {
     const ids = spec.elements.map(e => e.id);
     expect(ids).not.toContain('A-center');
     expect(ids).not.toContain('B-center');
     expect(ids).not.toContain('C-center');
-    expect(ids).not.toContain('ceil-A');
-    expect(ids).not.toContain('ceil-C');
-    expect(ids).not.toContain('floor-B');
   });
 
-  it('connections carry semantic and directed from customData after alias resolution', () => {
+  it('connections carry semantic and directed from customData', () => {
     const connections = spec.relations.filter(r => r.kind === 'connection') as ConnectionRelation[];
     const aqConn = connections.find(c => c.endpoints[0] === 'A' && c.endpoints[1] === 'q');
     expect(aqConn?.semantic).toBe('hangs-from');
@@ -604,7 +596,7 @@ describe('anchor-based pulley integration test', () => {
     expect(bvConn?.semantic).toBe('anchored-to');
   });
 
-  it('intra-group connections are suppressed after alias resolution', () => {
+  it('intra-group connections are suppressed', () => {
     const connections = spec.relations.filter(r => r.kind === 'connection') as ConnectionRelation[];
     const pairs = connections.map(c => c.endpoints);
     expect(pairs.some(([a, b]) => a === 'r' || b === 'r')).toBe(false);
