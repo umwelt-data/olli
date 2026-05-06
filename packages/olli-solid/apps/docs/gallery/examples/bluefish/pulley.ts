@@ -97,19 +97,16 @@ const pulleySpec: BluefishSpecFn = ({ Align, Circle, Distribute, Group, Line, Re
     // Rope labels for p, r, s, u
     Text({ name: 'p-label', customData: { olli: { skip: true } } }, 'p'),
     Distribute({ direction: 'horizontal', spacing: 3 }, [Ref({ select: 'p-label' }), Ref({ select: 'p' })]),
-    Align({ alignment: 'centerY' }, [Ref({ select: 'p' }), Ref({ select: 'p-label' })]),
 
     Text({ name: 'r-label', customData: { olli: { skip: true } } }, 'r'),
     Distribute({ direction: 'horizontal', spacing: 3 }, [Ref({ select: 'r' }), Ref({ select: 'r-label' })]),
-    Align({ alignment: 'centerY' }, [Ref({ select: 'r' }), Ref({ select: 'r-label' })]),
 
     Text({ name: 's-label', customData: { olli: { skip: true } } }, 's'),
     Distribute({ direction: 'horizontal', spacing: 3 }, [Ref({ select: 's-label' }), Ref({ select: 's' })]),
-    Align({ alignment: 'centerY' }, [Ref({ select: 's' }), Ref({ select: 's-label' })]),
 
     Text({ name: 'u-label', customData: { olli: { skip: true } } }, 'u'),
     Distribute({ direction: 'horizontal', spacing: 3 }, [Ref({ select: 'u' }), Ref({ select: 'u-label' })]),
-    Align({ alignment: 'centerY' }, [Ref({ select: 'u' }), Ref({ select: 'u-label' })]),
+    Align({ alignment: 'centerY' }, [Ref({ select: 'r' }), Ref({ select: 'p-label' }), Ref({ select: 'r-label' }), Ref({ select: 's-label' }), Ref({ select: 'u-label' })]),
 
     // ============================================================
     // COSMETIC OVERDRAWS — visual layering only, no semantic effect.
@@ -148,15 +145,15 @@ const pulleySpec: BluefishSpecFn = ({ Align, Circle, Distribute, Group, Line, Re
     // Rope labels for q, t, v
     Text({ name: 'q-label', customData: { olli: { skip: true } } }, 'q'),
     Distribute({ direction: 'horizontal', spacing: 3 }, [Ref({ select: 'q' }), Ref({ select: 'q-label' })]),
-    Align({ alignment: 'centerY' }, [Ref({ select: 'q' }), Ref({ select: 'q-label' })]),
+    Distribute({ direction: 'vertical', spacing: 20 }, [Ref({ select: 'ceiling' }), Ref({ select: 'q-label' })]),
 
     Text({ name: 't-label', customData: { olli: { skip: true } } }, 't'),
     Distribute({ direction: 'horizontal', spacing: 3 }, [Ref({ select: 't-label' }), Ref({ select: 't' })]),
-    Align({ alignment: 'centerY' }, [Ref({ select: 't' }), Ref({ select: 't-label' })]),
+    Align({ alignment: 'centerY' }, [Ref({ select: 'q-label' }), Ref({ select: 't-label' })]),
 
     Text({ name: 'v-label', customData: { olli: { skip: true } } }, 'v'),
     Distribute({ direction: 'horizontal', spacing: 3 }, [Ref({ select: 'v-label' }), Ref({ select: 'v' })]),
-    Align({ alignment: 'centerY' }, [Ref({ select: 'v' }), Ref({ select: 'v-label' })]),
+    Distribute({ direction: 'vertical', spacing: 20 }, [Ref({ select: 'B' }), Ref({ select: 'v-label' })]),
 
     // Layer 2: Pulley center dots above ropes q, t, v
     pulleyDotCopy('Adot-copy'),
