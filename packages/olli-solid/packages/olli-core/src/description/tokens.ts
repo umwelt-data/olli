@@ -1,6 +1,6 @@
 import type { Hyperedge, Hypergraph } from '../hypergraph/types.js';
 import type { Selection } from '../predicate/types.js';
-import { optionIndexOfVirtual, type NavNode } from '../runtime/navtree.js';
+import { optionIndexOfVirtual, sourceNavIdOfVirtual, type NavNode } from '../runtime/navtree.js';
 import type { NavigationRuntime } from '../runtime/runtime.js';
 
 export type TokenName = string;
@@ -148,7 +148,9 @@ export function parentContextToken<P>(): DescriptionToken<P> {
     applicableRoles: [VIRTUAL_ROLE],
     compute: ({ navNode, runtime, hypergraph }) => {
       if (navNode.kind !== 'virtualParentContext') return { short: '', long: '' };
-      const sourceEdgeId = navNode.path[navNode.path.length - 1];
+      const sourceNavId = sourceNavIdOfVirtual(navNode.navId);
+      const sourceNode = runtime.getNavNode(sourceNavId);
+      const sourceEdgeId = sourceNode?.hyperedgeId ?? null;
       const sourceName = sourceEdgeId
         ? hypergraph.edges.get(sourceEdgeId)?.displayName ?? ''
         : '';

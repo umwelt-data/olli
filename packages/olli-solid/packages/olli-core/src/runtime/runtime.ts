@@ -173,12 +173,14 @@ export function createNavigationRuntime<P>(initialGraph: Hypergraph<P>): Navigat
     if (!source) return undefined;
     const parents = parentOptionsForSource(source);
     const i = optionIndexOfVirtual(virtualNavId);
-    if (i < 0 || i >= parents.length) return undefined;
+    const parentNavId = parents[i];
+    if (i < 0 || !parentNavId) return undefined;
+    const parentNode = getRealNavNode(parentNavId);
     return {
       navId: virtualNavId,
       kind: 'virtualParentContext',
       hyperedgeId: null,
-      path: source.path,
+      path: parentNode ? parentNode.path : source.path,
       parentNavId: source.parentNavId ?? source.navId,
       childNavIds: [],
     };

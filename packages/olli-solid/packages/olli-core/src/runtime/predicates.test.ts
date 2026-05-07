@@ -49,7 +49,7 @@ describe('fullPredicate', () => {
     });
   });
 
-  it('virtual node inherits predicate of its source child', () => {
+  it('virtual node emits predicate of its parent context', () => {
     createRoot((dispose) => {
       const g = buildHypergraph<Payload>([
         edge('r', ['a', 'hangs']),
@@ -65,7 +65,6 @@ describe('fullPredicate', () => {
       expect(rt.fullPredicate(virtualId)).toEqual({
         and: [
           { field: 'g', equal: 'hangs' },
-          { field: 'id', equal: 1 },
         ],
       });
       dispose();
