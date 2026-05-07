@@ -374,6 +374,50 @@ describe('<TreeView /> — reactivity', () => {
     expect(labelOf(container, 'root/a')).toContain('sel=1');
   });
 
+  it('context root label updates when navigating between context roots via virtual commit', () => {
+    // Regression: without keyed <Show>, Solid reuses the context root TreeItem
+    // and the NodeLabel desc memo stays bound to the old navId.
+    function contextRootGraph() {
+      return buildHypergraph([
+        edge('root', 'Diagram', ['grp'], []),
+        edge('grp', 'Group', ['x'], ['root']),
+        // Two context-only roots that both parent x
+        { id: 'ctx-a', displayName: 'Context A', children: ['x'], parents: [], contextOnly: true },
+        { id: 'ctx-b', displayName: 'Context B', children: ['x'], parents: [], contextOnly: true },
+        // x has three parents: grp (structural), ctx-a, ctx-b
+        edge('x', 'Node X', [], ['grp', 'ctx-a', 'ctx-b']),
+      ]);
+    }
+
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(contextRootGraph()),
+    );
+    const tree = container.querySelector('[role="tree"]')!;
+
+    // Navigate to x under grp
+    runtime.focus('root/grp/x');
+
+    // UP → virtual (multi-parent), then RIGHT twice to ctx-b option
+    fireEvent.keyDown(tree, { key: 'ArrowUp' });
+    // ^0 = grp (descent parent), ^1 = ctx-a, ^2 = ctx-b
+    fireEvent.keyDown(tree, { key: 'ArrowRight' }); // → ^1 (ctx-a)
+    fireEvent.keyDown(tree, { key: 'ArrowDown' }); // commit into ctx-a context
+    expect(runtime.focusedNavId()).toBe('ctx-a/x');
+
+    // Context root ctx-a should now be visible with correct label
+    expect(labelOf(container, 'ctx-a')).toContain('Context A');
+
+    // Now UP from ctx-a/x → virtual, RIGHT past default (ctx-a) and grp to ctx-b
+    fireEvent.keyDown(tree, { key: 'ArrowUp' });  // ^0 (ctx-a)
+    fireEvent.keyDown(tree, { key: 'ArrowRight' }); // ^1 (grp)
+    fireEvent.keyDown(tree, { key: 'ArrowRight' }); // ^2 (ctx-b)
+    fireEvent.keyDown(tree, { key: 'ArrowDown' }); // commit into ctx-b context
+    expect(runtime.focusedNavId()).toBe('ctx-b/x');
+
+    // BUG FIX: context root label must update to Context B, not stay as Context A
+    expect(labelOf(container, 'ctx-b')).toContain('Context B');
+  });
+
   it('virtual role uses default virtual recipe independent of role customization', () => {
     const { runtime, container } = renderWith(() => {
       const rt = createNavigationRuntime(

@@ -72,11 +72,11 @@ export function TreeView<P>(props: { runtime: NavigationRuntime<P> }) {
           />
         )}
       </For>
-      <Show when={activeContextRoot()}>
+      <Show when={activeContextRoot()} keyed>
         {(rootId) => (
           <TreeItem
             runtime={props.runtime}
-            navId={rootId()}
+            navId={rootId}
             level={1}
             posInSet={roots().length + 1}
             setSize={totalSetSize()}
