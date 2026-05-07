@@ -57,9 +57,9 @@ const pulleySpec: BluefishSpecFn = ({ Align, Circle, Distribute, Group, Line, Re
     Align({ alignment: 'centerX' }, [Ref({ select: 'B' }), Ref({ select: 'floor' })]),
 
     // Pulley labels (skipped from olli tree)
-    Align({ alignment: 'center' }, [Ref({ select: 'A' }), Text({ x: -r, y: -r, customData: { olli: { skip: true } } }, 'A')]),
-    Align({ alignment: 'center' }, [Ref({ select: 'B' }), Text({ x: r, y: r, customData: { olli: { skip: true } } }, 'B')]),
-    Align({ alignment: 'center' }, [Ref({ select: 'C' }), Text({ x: r, y: -r, customData: { olli: { skip: true } } }, 'C')]),
+    Align({ alignment: 'center' }, [Ref({ select: 'A' }), Text({ name: 'A-label', x: -r, y: -r, customData: { olli: { skip: true } } }, 'A')]),
+    Align({ alignment: 'center' }, [Ref({ select: 'B' }), Text({ name: 'B-label', x: r, y: r, customData: { olli: { skip: true } } }, 'B')]),
+    Align({ alignment: 'center' }, [Ref({ select: 'C' }), Text({ name: 'C-label', x: r, y: -r, customData: { olli: { skip: true } } }, 'C')]),
 
     // ================================================================
     // ROPES — split into two groups for visual layering.

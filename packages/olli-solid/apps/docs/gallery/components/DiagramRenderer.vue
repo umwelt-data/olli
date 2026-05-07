@@ -22,7 +22,7 @@ async function mountDiagram() {
     import('olli-js'),
   ]);
 
-  const { svgElement, scenegraph, destroy } = await utils.mountBluefish(
+  const { svgElement, destroy } = await utils.mountBluefish(
     chartContainer.value,
     props.example.children,
   );
@@ -34,12 +34,12 @@ async function mountDiagram() {
     treeContainer.value,
   );
 
-  const bridge = utils.createBluefishBridge({ handle, scenegraph, svgElement });
+  const bridge = utils.createBluefishBridge({ handle, svgElement });
   disposeBridge = bridge.destroy;
 
   if (import.meta.env.DEV) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).__olliGallery = { handle, scenegraph, svgElement, spec: props.example.spec };
+    (window as any).__olliGallery = { handle, svgElement, spec: props.example.spec };
   }
 }
 
