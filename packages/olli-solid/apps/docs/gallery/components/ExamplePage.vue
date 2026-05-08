@@ -57,5 +57,6 @@ const example = computed(() => findExample(props.id));
   border-radius: 999px;
   background: var(--vp-c-bg-soft);
   color: var(--vp-c-text-2);
+  margin: 0;
 }
 </style>
