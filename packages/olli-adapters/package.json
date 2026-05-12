@@ -1,0 +1,28 @@
+{
+  "name": "olli-adapters",
+  "version": "3.0.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "dependencies": {
+    "olli-vis": "workspace:*",
+    "olli-diagram": "workspace:*"
+  },
+  "peerDependencies": {
+    "vega": "^5.0.0",
+    "vega-lite": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "vega": { "optional": true },
+    "vega-lite": { "optional": true }
+  }
+}

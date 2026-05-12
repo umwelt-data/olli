@@ -1,13 +1,5 @@
 .DS_Store
 node_modules/
-RenderTest/
-docs/_site
-docs/.sass-cache
-docs/.jekyll-cache
-docs/.jekyll-metadata
-docs/vendor
-docs/.ruby-version
-docs/olli/*-dev.js
-build-testing/
 dist/
+*.tsbuildinfo
 secrets/

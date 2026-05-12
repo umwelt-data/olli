@@ -1,28 +1,11 @@
 {
-  "exclude": [
-    "node_modules",
-    "dist"
-  ],
-  "compilerOptions": {
-    "target": "ES2015",
-    "module": "esnext",
-    "moduleResolution": "node",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext",
-      "es2015"
-    ],
-    "allowJs": true,
-    "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "declaration": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "composite": true
-  }
+  "files": [],
+  "references": [
+    { "path": "./packages/olli-core" },
+    { "path": "./packages/olli-render-solid" },
+    { "path": "./packages/olli-vis" },
+    { "path": "./packages/olli-diagram" },
+    { "path": "./packages/olli-adapters" },
+    { "path": "./packages/olli" }
+  ]
 }
