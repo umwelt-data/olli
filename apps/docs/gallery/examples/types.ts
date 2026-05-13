@@ -29,8 +29,9 @@ export interface DiagramExample extends BaseExample {
   toolkit: 'bluefish';
   /** DiagramSpec passed to olliDiagram for the accessible tree. */
   spec: unknown;
-  /** Async: returns bluefish-js hyperscript children passed to mountBluefish. Dynamic import defers bluefish-js loading to browser context. */
-  children: () => Promise<unknown[]>;
+  /** Async: returns bluefish-js render + elements from the same module instance to avoid duplicate runtimes. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  children: () => Promise<{ render: (code: () => any, element: any) => () => void; elements: unknown[] }>;
 }
 
 /** Returned by mountBluefish — kept here so DiagramRenderer can type its teardown state. */

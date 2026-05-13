@@ -5,6 +5,7 @@ import type { VisPayload } from '../spec/types.js';
 export function targetedNavDialog(): DialogContribution<VisPayload> {
   return {
     id: 'targetedNav',
+    label: 'targeted navigation',
     triggerKey: 'r',
     render: (runtime: NavigationRuntime<VisPayload>, _navNode: NavNode) => {
       const tree = runtime.navTree();

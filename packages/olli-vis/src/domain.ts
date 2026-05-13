@@ -8,6 +8,7 @@ import { visPresets } from './presets/index.js';
 import { tableDialog } from './dialogs/table.jsx';
 import { filterDialog } from './dialogs/filter.jsx';
 import { targetedNavDialog } from './dialogs/targetedNav.jsx';
+import { descriptionSettingsDialog } from './dialogs/descriptionSettings.jsx';
 
 export const visDomain: OlliDomain<OlliVisSpec, VisPayload> = {
   name: 'olli-vis',
@@ -16,5 +17,5 @@ export const visDomain: OlliDomain<OlliVisSpec, VisPayload> = {
   predicateProviders: [visPredicateProvider()],
   keybindings: visKeybindings(),
   presets: visPresets(),
-  dialogs: [tableDialog(), filterDialog(), targetedNavDialog()],
+  dialogs: [tableDialog(), filterDialog(), targetedNavDialog(), descriptionSettingsDialog()],
 };

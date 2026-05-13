@@ -331,6 +331,159 @@ describe('<TreeView /> — virtual parent-context siblings', () => {
   });
 });
 
+describe('<TreeView /> — dialogs', () => {
+  it('pressing a dialog trigger key opens the dialog', () => {
+    const { container } = renderWith(() => {
+      const rt = createNavigationRuntime(smallGraph());
+      rt.registerDialog({
+        id: 'test-dialog',
+        label: 'test',
+        triggerKey: 'd',
+        render: () => <div class="test-dialog-content">Hello</div>,
+      });
+      return rt;
+    });
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'd' });
+    expect(container.querySelector('[role="dialog"]')).toBeTruthy();
+    expect(container.querySelector('.test-dialog-content')).toBeTruthy();
+  });
+
+  it('dialog has a close button as the first focusable element', () => {
+    const { container } = renderWith(() => {
+      const rt = createNavigationRuntime(smallGraph());
+      rt.registerDialog({
+        id: 'test-dialog',
+        label: 'test',
+        triggerKey: 'd',
+        render: () => <div>Hello</div>,
+      });
+      return rt;
+    });
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'd' });
+    const closeBtn = container.querySelector<HTMLButtonElement>('.olli-dialog-close')!;
+    expect(closeBtn).toBeTruthy();
+    expect(closeBtn.textContent).toBe('Close test');
+  });
+
+  it('Escape closes an open dialog', () => {
+    const { container } = renderWith(() => {
+      const rt = createNavigationRuntime(smallGraph());
+      rt.registerDialog({
+        id: 'test-dialog',
+        label: 'test',
+        triggerKey: 'd',
+        render: () => <div>Hello</div>,
+      });
+      return rt;
+    });
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'd' });
+    const dialog = container.querySelector('[role="dialog"]')!;
+    fireEvent.keyDown(dialog, { key: 'Escape' });
+    expect(container.querySelector('[role="dialog"]')).toBeNull();
+  });
+
+  it('close button closes the dialog', () => {
+    const { container } = renderWith(() => {
+      const rt = createNavigationRuntime(smallGraph());
+      rt.registerDialog({
+        id: 'test-dialog',
+        label: 'test',
+        triggerKey: 'd',
+        render: () => <div>Hello</div>,
+      });
+      return rt;
+    });
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'd' });
+    const closeBtn = container.querySelector<HTMLButtonElement>('.olli-dialog-close')!;
+    fireEvent.click(closeBtn);
+    expect(container.querySelector('[role="dialog"]')).toBeNull();
+  });
+
+  it('focus returns to the tree item after dialog closes', async () => {
+    const { runtime, container } = renderWith(() => {
+      const rt = createNavigationRuntime(smallGraph());
+      rt.registerDialog({
+        id: 'test-dialog',
+        label: 'test',
+        triggerKey: 'd',
+        render: () => <div>Hello</div>,
+      });
+      return rt;
+    });
+    runtime.focus('root/a');
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'd' });
+    expect(container.querySelector('[role="dialog"]')).toBeTruthy();
+    const dialog = container.querySelector('[role="dialog"]')!;
+    fireEvent.keyDown(dialog, { key: 'Escape' });
+    await new Promise<void>((r) => queueMicrotask(r));
+    const item = container.querySelector<HTMLElement>('[data-nav-id="root/a"]')!;
+    expect(document.activeElement).toBe(item);
+  });
+
+  it('navigation keys do not move focus while dialog is open', () => {
+    const { runtime, container } = renderWith(() => {
+      const rt = createNavigationRuntime(smallGraph());
+      rt.registerDialog({
+        id: 'test-dialog',
+        label: 'test',
+        triggerKey: 'd',
+        render: () => <div>Hello</div>,
+      });
+      return rt;
+    });
+    const initialFocus = runtime.focusedNavId();
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'd' });
+    fireEvent.keyDown(tree, { key: 'ArrowDown' });
+    expect(runtime.focusedNavId()).toBe(initialFocus);
+  });
+
+  it('dialog render receives the focused nav node at time of trigger', () => {
+    let capturedNode: any = null;
+    const { runtime, container } = renderWith(() => {
+      const rt = createNavigationRuntime(smallGraph());
+      rt.registerDialog({
+        id: 'test-dialog',
+        label: 'test',
+        triggerKey: 'd',
+        render: (_rt, node) => {
+          capturedNode = node;
+          return <div>Dialog</div>;
+        },
+      });
+      return rt;
+    });
+    runtime.focus('root/a');
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'd' });
+    expect(capturedNode).toBeTruthy();
+    expect(capturedNode.navId).toBe('root/a');
+  });
+
+  it('trigger key is ignored while a dialog is already open', () => {
+    const { container } = renderWith(() => {
+      const rt = createNavigationRuntime(smallGraph());
+      rt.registerDialog({
+        id: 'test-dialog',
+        label: 'test',
+        triggerKey: 'd',
+        render: () => <div>Hello</div>,
+      });
+      return rt;
+    });
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'd' });
+    expect(container.querySelectorAll('[role="dialog"]').length).toBe(1);
+    fireEvent.keyDown(tree, { key: 'd' });
+    expect(container.querySelectorAll('[role="dialog"]').length).toBe(1);
+  });
+});
+
 describe('<TreeView /> — reactivity', () => {
   it('label updates when the recipe changes at runtime', () => {
     const { runtime, container } = renderWith(() =>

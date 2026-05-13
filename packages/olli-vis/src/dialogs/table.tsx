@@ -9,6 +9,7 @@ import { predicateToDescription } from '../lower/describe.js';
 export function tableDialog(): DialogContribution<VisPayload> {
   return {
     id: 'table',
+    label: 'table',
     applicableRoles: ['filteredData', 'other'],
     triggerKey: 't',
     render: (runtime: NavigationRuntime<VisPayload>, navNode: NavNode) => {

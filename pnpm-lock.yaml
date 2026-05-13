@@ -176,6 +176,12 @@ importers:
       olli-core:
         specifier: workspace:*
         version: link:../olli-core
+      olli-render-solid:
+        specifier: workspace:*
+        version: link:../olli-render-solid
+      solid-js:
+        specifier: ^1.9.3
+        version: 1.9.12
 
   packages/olli-render-solid:
     dependencies:

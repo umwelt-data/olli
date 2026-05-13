@@ -29,6 +29,7 @@ function conditionToPredicate(c: Condition, fields: OlliFieldDef[]): FieldPredic
 export function filterDialog(): DialogContribution<VisPayload> {
   return {
     id: 'filter',
+    label: 'filter menu',
     triggerKey: 'f',
     render: (runtime: NavigationRuntime<VisPayload>, navNode: NavNode) => {
       const edge = navNode.hyperedgeId

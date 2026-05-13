@@ -184,5 +184,8 @@ export const pulley: DiagramExample = {
   tags: ['diagram', 'physics'],
   description: 'A mechanical system consisting of pulleys, ropes, and boxes.',
   spec: BluefishAdapter(pulleySpec),
-  children: async () => pulleySpec(await import('bluefish-js') as unknown as BluefishKit),
+  children: async () => {
+    const bf = await import('bluefish-js');
+    return { render: bf.render, elements: pulleySpec(bf as unknown as BluefishKit) };
+  },
 };

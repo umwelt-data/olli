@@ -7,6 +7,7 @@ export function Dialog(
   props: ParentProps<{
     open: boolean;
     onClose: () => void;
+    closeLabel: string;
     titleId?: string;
   }>,
 ) {
@@ -65,6 +66,9 @@ export function Dialog(
           onKeyDown={handleKeyDown}
           onClick={(e) => e.stopPropagation()}
         >
+          <button class="olli-dialog-close" onClick={() => props.onClose()}>
+            {props.closeLabel}
+          </button>
           {props.children}
         </div>
       </div>

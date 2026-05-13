@@ -3,6 +3,7 @@ import type { NavNode } from './navtree.js';
 
 export interface DialogContribution<P> {
   id: string;
+  label: string;
   applicableRoles?: readonly string[];
   triggerKey?: string;
   /** Domain-specific renderer supplied by L3/L4; core does not inspect. */

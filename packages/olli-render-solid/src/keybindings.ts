@@ -2,6 +2,22 @@ import type { NavigationRuntime } from 'olli-core';
 
 const registered = new WeakSet<object>();
 
+export function registerDialogKeybindings<P>(
+  runtime: NavigationRuntime<P>,
+  onOpenDialog: (dialogId: string) => void,
+): void {
+  for (const dialog of runtime.dialogs.list()) {
+    if (!dialog.triggerKey) continue;
+    runtime.registerKeybinding({
+      key: dialog.triggerKey,
+      handler: () => {
+        onOpenDialog(dialog.id);
+        return true;
+      },
+    });
+  }
+}
+
 export function registerDefaultKeybindings<P>(runtime: NavigationRuntime<P>): void {
   if (registered.has(runtime as unknown as object)) return;
   registered.add(runtime as unknown as object);

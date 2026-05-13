@@ -22,6 +22,7 @@ export interface CustomizationStore {
   registerPreset(name: string, customizations: readonly Customization[]): void;
   applyPreset(name: string): void;
   activePresetName(): string | null;
+  listPresets(): ReadonlyArray<{ name: string; customizations: readonly Customization[] }>;
 }
 
 export const DEFAULT_RECIPE: readonly RecipeEntry[] = [
@@ -80,6 +81,9 @@ export function createCustomizationStore(): CustomizationStore {
     },
     activePresetName() {
       return activePreset();
+    },
+    listPresets() {
+      return [...presets.entries()].map(([name, customizations]) => ({ name, customizations }));
     },
   };
 }
