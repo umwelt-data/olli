@@ -5,6 +5,10 @@
   --olli-virtual-style: italic;
 }
 
+.olli-vis * {
+  all: revert;
+}
+
 .olli-vis.olli-tree,
 .olli-vis .olli-tree-group {
   list-style: none;
@@ -61,4 +65,8 @@
   max-width: 90vw;
   max-height: 90vh;
   overflow: auto;
+}
+
+.olli-dialog * {
+  all: revert;
 }
