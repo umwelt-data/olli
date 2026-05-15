@@ -21,6 +21,7 @@ export function createKeybindingRegistry<P>(): KeybindingRegistry<P> {
       return bindings;
     },
     dispatch(runtime, event) {
+      if (event.metaKey || event.ctrlKey || event.altKey) return false;
       for (const b of bindings) {
         if (b.key === event.key && b.handler(runtime, event)) return true;
       }
