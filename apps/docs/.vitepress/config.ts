@@ -3,7 +3,7 @@ import solidPlugin from 'vite-plugin-solid';
 
 export default defineConfig({
   vite: {
-    plugins: [solidPlugin()],
+    plugins: [solidPlugin({ ssr: true })],
     resolve: {
       conditions: ['development', 'browser'],
     },
