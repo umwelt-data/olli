@@ -8,12 +8,14 @@
     "build": "vite build"
   },
   "dependencies": {
-    "olli-core": "workspace:*",
-    "olli-diagram": "workspace:*",
+    "@umwelt-data/umwelt-utils": "link:../../../umwelt-utils",
+    "bluefish-js": "link:../../../bluefish/packages/bluefish-js",
     "olli": "workspace:*",
+    "olli-adapters": "workspace:*",
     "olli-render-solid": "workspace:*",
-    "olli-vis": "workspace:*",
-    "solid-js": "^1.9.3"
+    "solid-js": "^1.9.3",
+    "vega": "^5.30.0",
+    "vega-lite": "^5.19.0"
   },
   "devDependencies": {
     "vite": "^6.0.0",

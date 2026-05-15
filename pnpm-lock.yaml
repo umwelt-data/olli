@@ -79,24 +79,30 @@ importers:
 
   apps/playground:
     dependencies:
+      '@umwelt-data/umwelt-utils':
+        specifier: link:../../../umwelt-utils
+        version: link:../../../umwelt-utils
+      bluefish-js:
+        specifier: link:../../../bluefish/packages/bluefish-js
+        version: link:../../../bluefish/packages/bluefish-js
       olli:
         specifier: workspace:*
         version: link:../../packages/olli
-      olli-core:
+      olli-adapters:
         specifier: workspace:*
-        version: link:../../packages/olli-core
-      olli-diagram:
-        specifier: workspace:*
-        version: link:../../packages/olli-diagram
+        version: link:../../packages/olli-adapters
       olli-render-solid:
         specifier: workspace:*
         version: link:../../packages/olli-render-solid
-      olli-vis:
-        specifier: workspace:*
-        version: link:../../packages/olli-vis
       solid-js:
         specifier: ^1.9.3
         version: 1.9.12
+      vega:
+        specifier: ^5.30.0
+        version: 5.33.1
+      vega-lite:
+        specifier: ^5.19.0
+        version: 5.23.0(vega@5.33.1)
     devDependencies:
       vite:
         specifier: ^6.0.0
@@ -104,27 +110,6 @@ importers:
       vite-plugin-solid:
         specifier: ^2.11.0
         version: 2.11.12(@testing-library/jest-dom@6.9.1)(solid-js@1.9.12)(vite@6.4.2(jiti@1.21.7)(tsx@4.21.0)(yaml@2.8.3))
-
-  examples/bar-chart:
-    dependencies:
-      olli:
-        specifier: workspace:*
-        version: link:../../packages/olli
-
-  examples/solid-app:
-    dependencies:
-      olli-core:
-        specifier: workspace:*
-        version: link:../../packages/olli-core
-      olli-render-solid:
-        specifier: workspace:*
-        version: link:../../packages/olli-render-solid
-      olli-vis:
-        specifier: workspace:*
-        version: link:../../packages/olli-vis
-      solid-js:
-        specifier: ^1.9.3
-        version: 1.9.12
 
   packages/olli:
     dependencies:
