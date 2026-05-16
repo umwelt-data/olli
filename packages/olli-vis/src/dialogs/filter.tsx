@@ -1,5 +1,5 @@
-import { For, createSignal } from 'solid-js';
-import type { DialogContribution, NavigationRuntime, NavNode, FieldPredicate, FieldValue } from 'olli-core';
+import { For, Show, createSignal } from 'solid-js';
+import type { DialogContribution, DialogRenderResult, NavigationRuntime, NavNode, FieldPredicate, FieldValue } from 'olli-core';
 import type { VisPayload, OlliFieldDef } from '../spec/types.js';
 import { getFieldDef, getDomain } from '../util/data.js';
 import { serializeValue } from '../util/values.js';
@@ -31,11 +31,11 @@ export function filterDialog(): DialogContribution<VisPayload> {
     id: 'filter',
     label: 'filter menu',
     triggerKey: 'f',
-    render: (runtime: NavigationRuntime<VisPayload>, navNode: NavNode) => {
+    render: (runtime: NavigationRuntime<VisPayload>, navNode: NavNode): DialogRenderResult => {
       const edge = navNode.hyperedgeId
         ? runtime.hypergraph().edges.get(navNode.hyperedgeId)
         : undefined;
-      if (!edge?.payload) return null;
+      if (!edge?.payload) return { title: 'Filter Menu', content: null };
 
       const spec = edge.payload.spec;
       const fields = spec.fields ?? [];
@@ -76,82 +76,86 @@ export function filterDialog(): DialogContribution<VisPayload> {
         runtime.setSelection({ and: [] });
       };
 
-      return (
-        <div class="olli-filter-dialog">
-          <h2 id="olli-dialog-title">Filter Menu</h2>
-          <p>Define a custom filter.</p>
-          <div role="status">{conditions().length} condition{conditions().length !== 1 ? 's' : ''}</div>
-          <button onClick={addCondition}>Add condition</button>
-          <div>
-            <For each={conditions()}>
-              {(cond, i) => {
-                const ops = () => opsForField(cond.field);
-                const fd = () => getFieldDef(cond.field, fields);
-                const isNominal = () => fd().type === 'nominal' || fd().type === 'ordinal';
-                const domain = () => isNominal() && cond.op === '=' ? getDomain(fd(), spec.data) : [];
-                const inputType = () => fd().type === 'temporal' ? 'datetime-local' : 'number';
+      return {
+        title: 'Filter Menu',
+        description: 'Define a custom filter.',
+        content: (
+          <div class="olli-filter-dialog">
+            <div role="status">{conditions().length} condition{conditions().length !== 1 ? 's' : ''}</div>
+            <button onClick={addCondition}>Add condition</button>
+            <div>
+              <For each={conditions()}>
+                {(cond, i) => {
+                  const ops = () => opsForField(cond.field);
+                  const fd = () => getFieldDef(cond.field, fields);
+                  const isNominal = () => fd().type === 'nominal' || fd().type === 'ordinal';
+                  const domain = () => isNominal() && cond.op === '=' ? getDomain(fd(), spec.data) : [];
+                  const inputType = () => fd().type === 'temporal' ? 'datetime-local' : 'number';
 
-                return (
-                  <div class="olli-filter-condition">
-                    <select
-                      value={cond.field}
-                      onChange={(e) => {
-                        const newField = e.currentTarget.value;
-                        const newOps = opsForField(newField);
-                        updateCondition(i(), { field: newField, op: newOps[0]!, value: '', value2: '' });
-                      }}
-                    >
-                      <For each={fields}>
-                        {(fd) => <option value={fd.field}>{fd.field}</option>}
-                      </For>
-                    </select>
-                    <select
-                      value={cond.op}
-                      onChange={(e) => updateCondition(i(), { op: e.currentTarget.value, value: '', value2: '' })}
-                    >
-                      <For each={ops()}>
-                        {(op) => <option value={op}>{op}</option>}
-                      </For>
-                    </select>
-                    {isNominal() && cond.op === '=' ? (
+                  return (
+                    <div class="olli-filter-condition">
                       <select
-                        value={cond.value}
-                        onChange={(e) => updateCondition(i(), { value: e.currentTarget.value })}
+                        value={cond.field}
+                        onChange={(e) => {
+                          const newField = e.currentTarget.value;
+                          const newOps = opsForField(newField);
+                          updateCondition(i(), { field: newField, op: newOps[0]!, value: '', value2: '' });
+                        }}
                       >
-                        <For each={domain()}>
-                          {(v) => <option value={String(v)}>{String(v)}</option>}
+                        <For each={fields}>
+                          {(fd) => <option value={fd.field}>{fd.field}</option>}
                         </For>
                       </select>
-                    ) : cond.op === 'between' ? (
-                      <>
+                      <select
+                        value={cond.op}
+                        onChange={(e) => updateCondition(i(), { op: e.currentTarget.value, value: '', value2: '' })}
+                      >
+                        <For each={ops()}>
+                          {(op) => <option value={op}>{op}</option>}
+                        </For>
+                      </select>
+                      {isNominal() && cond.op === '=' ? (
+                        <select
+                          value={cond.value}
+                          onChange={(e) => updateCondition(i(), { value: e.currentTarget.value })}
+                        >
+                          <For each={domain()}>
+                            {(v) => <option value={String(v)}>{String(v)}</option>}
+                          </For>
+                        </select>
+                      ) : cond.op === 'between' ? (
+                        <>
+                          <input
+                            type={inputType()}
+                            value={cond.value}
+                            onInput={(e) => updateCondition(i(), { value: e.currentTarget.value })}
+                          />
+                          <input
+                            type={inputType()}
+                            value={cond.value2}
+                            onInput={(e) => updateCondition(i(), { value2: e.currentTarget.value })}
+                          />
+                        </>
+                      ) : (
                         <input
                           type={inputType()}
                           value={cond.value}
                           onInput={(e) => updateCondition(i(), { value: e.currentTarget.value })}
                         />
-                        <input
-                          type={inputType()}
-                          value={cond.value2}
-                          onInput={(e) => updateCondition(i(), { value2: e.currentTarget.value })}
-                        />
-                      </>
-                    ) : (
-                      <input
-                        type={inputType()}
-                        value={cond.value}
-                        onInput={(e) => updateCondition(i(), { value: e.currentTarget.value })}
-                      />
-                    )}
-                    <button onClick={() => removeCondition(i())}>Remove</button>
-                  </div>
-                );
-              }}
-            </For>
+                      )}
+                      <button onClick={() => removeCondition(i())}>Remove</button>
+                    </div>
+                  );
+                }}
+              </For>
+            </div>
+            <Show when={conditions().length > 1}>
+              <button onClick={clearFilter}>Clear conditions</button>
+            </Show>
           </div>
-          <button onClick={clearFilter}>Clear conditions</button>
-          <button onClick={applyFilter}>Ok</button>
-        </div>
-      );
+        ),
+        onSubmit: applyFilter,
+      };
     },
   };
 }

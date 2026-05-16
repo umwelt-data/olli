@@ -70,3 +70,26 @@
 .olli-dialog * {
   all: revert;
 }
+
+.olli-dialog-content {
+  max-height: 60vh;
+  overflow: auto;
+}
+
+#olli-dialog-title:has(+ #olli-dialog-description) {
+  margin-bottom: 0;
+}
+
+#olli-dialog-description {
+  margin-top: 0;
+}
+
+.olli-dialog table {
+  border-spacing: 2px;
+}
+
+.olli-dialog th,
+.olli-dialog td {
+  text-align: left;
+  padding-right: 5px;
+}

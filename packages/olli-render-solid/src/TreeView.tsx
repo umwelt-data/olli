@@ -123,21 +123,27 @@ export function TreeView<P>(props: { runtime: NavigationRuntime<P> }) {
         </Show>
       </ul>
       <Show when={activeDialog()} keyed>
-        {(active) => (
-          <Dialog
-            open={true}
-            onClose={closeDialog}
-            closeLabel={`Close ${active.dialog.label}`}
-            titleId="olli-dialog-title"
-          >
-            <ErrorBoundary fallback={() => {
-              queueMicrotask(closeDialog);
-              return null;
-            }}>
-              {active.dialog.render!(props.runtime, active.node) as JSX.Element}
-            </ErrorBoundary>
-          </Dialog>
-        )}
+        {(active) => {
+          const result = active.dialog.render!(props.runtime, active.node);
+          return (
+            <Dialog
+              open={true}
+              onClose={closeDialog}
+              {...(result.onSubmit ? { onSubmit: result.onSubmit } : {})}
+              title={result.title}
+              {...(result.description ? { description: result.description } : {})}
+              closeLabel={`Close ${active.dialog.label}`}
+              titleId="olli-dialog-title"
+            >
+              <ErrorBoundary fallback={() => {
+                queueMicrotask(closeDialog);
+                return null;
+              }}>
+                {result.content as JSX.Element}
+              </ErrorBoundary>
+            </Dialog>
+          );
+        }}
       </Show>
     </>
   );

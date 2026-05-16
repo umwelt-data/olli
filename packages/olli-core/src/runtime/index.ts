@@ -9,7 +9,7 @@ export {
 } from './navtree.js';
 export type { KeybindingContribution, KeybindingRegistry } from './keybindings.js';
 export { createKeybindingRegistry } from './keybindings.js';
-export type { DialogContribution, DialogRegistry } from './dialogs.js';
+export type { DialogContribution, DialogRegistry, DialogRenderResult } from './dialogs.js';
 export { createDialogRegistry } from './dialogs.js';
 export type { PredicateProvider, PredicateProviderRegistry } from './predicates.js';
 export { createPredicateProviderRegistry, composeAncestorPredicates } from './predicates.js';

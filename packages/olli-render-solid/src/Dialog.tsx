@@ -7,6 +7,9 @@ export function Dialog(
   props: ParentProps<{
     open: boolean;
     onClose: () => void;
+    onSubmit?: () => void;
+    title: string;
+    description?: string;
     closeLabel: string;
     titleId?: string;
   }>,
@@ -69,7 +72,21 @@ export function Dialog(
           <button class="olli-dialog-close" onClick={() => props.onClose()}>
             {props.closeLabel}
           </button>
-          {props.children}
+          <h2 id="olli-dialog-title">{props.title}</h2>
+          <Show when={props.description}>
+            {(desc) => <p id="olli-dialog-description">{desc()}</p>}
+          </Show>
+          <div class="olli-dialog-content">
+            {props.children}
+          </div>
+          <Show when={props.onSubmit}>
+            {(submit) => (
+              <div class="olli-dialog-actions">
+                <button onClick={() => props.onClose()}>Cancel</button>
+                <button onClick={() => { submit()(); props.onClose(); }}>Ok</button>
+              </div>
+            )}
+          </Show>
         </div>
       </div>
     </Show>

@@ -339,7 +339,7 @@ describe('<TreeView /> — dialogs', () => {
         id: 'test-dialog',
         label: 'test',
         triggerKey: 'd',
-        render: () => <div class="test-dialog-content">Hello</div>,
+        render: () => ({ title: 'Test', content: <div class="test-dialog-content">Hello</div> }),
       });
       return rt;
     });
@@ -356,7 +356,7 @@ describe('<TreeView /> — dialogs', () => {
         id: 'test-dialog',
         label: 'test',
         triggerKey: 'd',
-        render: () => <div>Hello</div>,
+        render: () => ({ title: 'Test', content: <div>Hello</div> }),
       });
       return rt;
     });
@@ -374,7 +374,7 @@ describe('<TreeView /> — dialogs', () => {
         id: 'test-dialog',
         label: 'test',
         triggerKey: 'd',
-        render: () => <div>Hello</div>,
+        render: () => ({ title: 'Test', content: <div>Hello</div> }),
       });
       return rt;
     });
@@ -392,7 +392,7 @@ describe('<TreeView /> — dialogs', () => {
         id: 'test-dialog',
         label: 'test',
         triggerKey: 'd',
-        render: () => <div>Hello</div>,
+        render: () => ({ title: 'Test', content: <div>Hello</div> }),
       });
       return rt;
     });
@@ -410,7 +410,7 @@ describe('<TreeView /> — dialogs', () => {
         id: 'test-dialog',
         label: 'test',
         triggerKey: 'd',
-        render: () => <div>Hello</div>,
+        render: () => ({ title: 'Test', content: <div>Hello</div> }),
       });
       return rt;
     });
@@ -432,7 +432,7 @@ describe('<TreeView /> — dialogs', () => {
         id: 'test-dialog',
         label: 'test',
         triggerKey: 'd',
-        render: () => <div>Hello</div>,
+        render: () => ({ title: 'Test', content: <div>Hello</div> }),
       });
       return rt;
     });
@@ -453,7 +453,7 @@ describe('<TreeView /> — dialogs', () => {
         triggerKey: 'd',
         render: (_rt, node) => {
           capturedNode = node;
-          return <div>Dialog</div>;
+          return { title: 'Test', content: <div>Dialog</div> };
         },
       });
       return rt;
@@ -472,7 +472,7 @@ describe('<TreeView /> — dialogs', () => {
         id: 'test-dialog',
         label: 'test',
         triggerKey: 'd',
-        render: () => <div>Hello</div>,
+        render: () => ({ title: 'Test', content: <div>Hello</div> }),
       });
       return rt;
     });

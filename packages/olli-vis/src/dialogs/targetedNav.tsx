@@ -1,5 +1,5 @@
 import { For, createSignal } from 'solid-js';
-import type { DialogContribution, NavigationRuntime, NavNode } from 'olli-core';
+import type { DialogContribution, DialogRenderResult, NavigationRuntime, NavNode } from 'olli-core';
 import type { VisPayload } from '../spec/types.js';
 
 export function targetedNavDialog(): DialogContribution<VisPayload> {
@@ -7,7 +7,7 @@ export function targetedNavDialog(): DialogContribution<VisPayload> {
     id: 'targetedNav',
     label: 'targeted navigation',
     triggerKey: 'r',
-    render: (runtime: NavigationRuntime<VisPayload>, _navNode: NavNode) => {
+    render: (runtime: NavigationRuntime<VisPayload>, _navNode: NavNode): DialogRenderResult => {
       const tree = runtime.navTree();
       const roots = tree.roots;
 
@@ -57,14 +57,16 @@ export function targetedNavDialog(): DialogContribution<VisPayload> {
         }
       };
 
-      return (
-        <div class="olli-targeted-nav-dialog">
-          <h2 id="olli-dialog-title">Targeted Navigation</h2>
-          <p>Jump to a location in this chart.</p>
-          {roots.length > 0 && buildSelectors(roots[0]!)}
-          <button onClick={goToSelected}>Ok</button>
-        </div>
-      );
+      return {
+        title: 'Targeted Navigation',
+        description: 'Jump to a location in this chart.',
+        content: (
+          <div class="olli-targeted-nav-dialog">
+            {roots.length > 0 && buildSelectors(roots[0]!)}
+          </div>
+        ),
+        onSubmit: goToSelected,
+      };
     },
   };
 }

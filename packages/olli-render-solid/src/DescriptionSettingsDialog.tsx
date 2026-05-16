@@ -1,6 +1,7 @@
 import { For, Show, createSignal, createMemo } from 'solid-js';
 import type {
   DialogContribution,
+  DialogRenderResult,
   NavigationRuntime,
   NavNode,
   Customization,
@@ -108,7 +109,7 @@ export function descriptionSettingsDialog<P>(
     id: 'descriptionSettings',
     label: 'description settings',
     triggerKey: 'd',
-    render: (runtime: NavigationRuntime<P>, navNode: NavNode) => {
+    render: (runtime: NavigationRuntime<P>, navNode: NavNode): DialogRenderResult => {
       const initialRole = config.roleForNode(runtime, navNode);
       const presets = runtime.customization.listPresets();
 
@@ -222,95 +223,96 @@ export function descriptionSettingsDialog<P>(
         setPreset('custom');
       };
 
-      return (
-        <div class="olli-description-settings-dialog">
-          <h2 id="olli-dialog-title">Description Settings</h2>
+      return {
+        title: 'Description Settings',
+        content: (
+          <div class="olli-description-settings-dialog">
+            <label>
+              Role:{' '}
+              <select
+                value={selectedRole()}
+                onChange={(e) => handleRoleChange(e.currentTarget.value)}
+              >
+                <For each={config.roles}>
+                  {(role) => <option value={role.value}>{role.label}</option>}
+                </For>
+              </select>
+            </label>
 
-          <label>
-            Role:{' '}
-            <select
-              value={selectedRole()}
-              onChange={(e) => handleRoleChange(e.currentTarget.value)}
-            >
-              <For each={config.roles}>
-                {(role) => <option value={role.value}>{role.label}</option>}
-              </For>
-            </select>
-          </label>
+            <div role="status" aria-live="polite" class="olli-description-preview">
+              Preview: {preview() || '(empty)'}
+            </div>
 
-          <div role="status" aria-live="polite" class="olli-description-preview">
-            Preview: {preview() || '(empty)'}
-          </div>
-
-          <fieldset>
-            <legend>Detail level</legend>
-            <For each={presetChoices()}>
-              {(choice) => (
-                <label>
-                  <input
-                    type="radio"
-                    name="preset"
-                    value={choice}
-                    checked={preset() === choice}
-                    onChange={() => handlePresetChange(choice)}
-                  />
-                  {' '}
-                  {choice.charAt(0).toUpperCase() + choice.slice(1)}
-                </label>
-              )}
-            </For>
-          </fieldset>
-
-          <Show when={preset() === 'custom' || showTokenEditor()}>
-            <fieldset class="olli-token-editor">
-              <legend>Customize tokens</legend>
-              <For each={entries()}>
-                {(entry, i) => (
-                  <div class="olli-token-row">
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={entry.included}
-                        onChange={() => toggleToken(i())}
-                      />
-                      {' '}
-                      {tokenLabel(entry.token, config.tokenLabels)}
-                    </label>
-                    <Show when={entry.included}>
-                      <select
-                        value={entry.brevity}
-                        onChange={(e) =>
-                          setBrevity(i(), e.currentTarget.value as Brevity)
-                        }
-                      >
-                        <option value="short">Short</option>
-                        <option value="long">Long</option>
-                      </select>
-                      <button
-                        onClick={() => moveToken(i(), -1)}
-                        disabled={i() === 0}
-                        aria-label={`Move ${tokenLabel(entry.token, config.tokenLabels)} up`}
-                      >
-                        Move up
-                      </button>
-                      <button
-                        onClick={() => moveToken(i(), 1)}
-                        disabled={i() === entries().length - 1}
-                        aria-label={`Move ${tokenLabel(entry.token, config.tokenLabels)} down`}
-                      >
-                        Move down
-                      </button>
-                    </Show>
-                  </div>
+            <fieldset>
+              <legend>Detail level</legend>
+              <For each={presetChoices()}>
+                {(choice) => (
+                  <label>
+                    <input
+                      type="radio"
+                      name="preset"
+                      value={choice}
+                      checked={preset() === choice}
+                      onChange={() => handlePresetChange(choice)}
+                    />
+                    {' '}
+                    {choice.charAt(0).toUpperCase() + choice.slice(1)}
+                  </label>
                 )}
               </For>
             </fieldset>
-          </Show>
 
-          <button onClick={resetToDefault}>Reset</button>
-          <button onClick={applyChanges}>Ok</button>
-        </div>
-      );
+            <Show when={preset() === 'custom' || showTokenEditor()}>
+              <fieldset class="olli-token-editor">
+                <legend>Customize tokens</legend>
+                <For each={entries()}>
+                  {(entry, i) => (
+                    <div class="olli-token-row">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={entry.included}
+                          onChange={() => toggleToken(i())}
+                        />
+                        {' '}
+                        {tokenLabel(entry.token, config.tokenLabels)}
+                      </label>
+                      <Show when={entry.included}>
+                        <select
+                          value={entry.brevity}
+                          onChange={(e) =>
+                            setBrevity(i(), e.currentTarget.value as Brevity)
+                          }
+                        >
+                          <option value="short">Short</option>
+                          <option value="long">Long</option>
+                        </select>
+                        <button
+                          onClick={() => moveToken(i(), -1)}
+                          disabled={i() === 0}
+                          aria-label={`Move ${tokenLabel(entry.token, config.tokenLabels)} up`}
+                        >
+                          Move up
+                        </button>
+                        <button
+                          onClick={() => moveToken(i(), 1)}
+                          disabled={i() === entries().length - 1}
+                          aria-label={`Move ${tokenLabel(entry.token, config.tokenLabels)} down`}
+                        >
+                          Move down
+                        </button>
+                      </Show>
+                    </div>
+                  )}
+                </For>
+              </fieldset>
+            </Show>
+
+            <button onClick={resetToDefault}>Reset</button>
+          </div>
+        ),
+        onSubmit: applyChanges,
+      };
     },
   };
 }

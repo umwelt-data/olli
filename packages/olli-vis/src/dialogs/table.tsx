@@ -1,5 +1,5 @@
 import { For } from 'solid-js';
-import type { DialogContribution, NavigationRuntime, NavNode } from 'olli-core';
+import type { DialogContribution, DialogRenderResult, NavigationRuntime, NavNode } from 'olli-core';
 import { selectionTest } from 'olli-core';
 import type { VisPayload } from '../spec/types.js';
 import { fmtValue } from '../util/values.js';
@@ -12,11 +12,11 @@ export function tableDialog(): DialogContribution<VisPayload> {
     label: 'table',
     applicableRoles: ['filteredData', 'other'],
     triggerKey: 't',
-    render: (runtime: NavigationRuntime<VisPayload>, navNode: NavNode) => {
+    render: (runtime: NavigationRuntime<VisPayload>, navNode: NavNode): DialogRenderResult => {
       const edge = navNode.hyperedgeId
         ? runtime.hypergraph().edges.get(navNode.hyperedgeId)
         : undefined;
-      if (!edge?.payload) return null;
+      if (!edge?.payload) return { title: 'Table View', content: null };
 
       const spec = edge.payload.spec;
       const fields = spec.fields ?? [];
@@ -25,35 +25,37 @@ export function tableDialog(): DialogContribution<VisPayload> {
       const rows = selectionTest(data, fullPred);
       const title = predicateToDescription(fullPred, fields);
 
-      return (
-        <div class="olli-table-dialog">
-          <h2 id="olli-dialog-title">Table View</h2>
-          <p>{title}</p>
-          <table>
-            <thead>
-              <tr>
-                <For each={fields}>
-                  {(fd) => <th scope="col">{fd.label ?? fd.field}</th>}
+      return {
+        title: 'Table View',
+        description: title,
+        content: (
+          <div class="olli-table-dialog">
+            <table>
+              <thead>
+                <tr>
+                  <For each={fields}>
+                    {(fd) => <th scope="col">{fd.label ?? fd.field}</th>}
+                  </For>
+                </tr>
+              </thead>
+              <tbody>
+                <For each={rows}>
+                  {(row) => (
+                    <tr>
+                      <For each={fields}>
+                        {(fd) => {
+                          const val = row[fd.field];
+                          return <td>{val !== undefined ? fmtValue(val, fd) : ''}</td>;
+                        }}
+                      </For>
+                    </tr>
+                  )}
                 </For>
-              </tr>
-            </thead>
-            <tbody>
-              <For each={rows}>
-                {(row) => (
-                  <tr>
-                    <For each={fields}>
-                      {(fd) => {
-                        const val = row[fd.field];
-                        return <td>{val !== undefined ? fmtValue(val, fd) : ''}</td>;
-                      }}
-                    </For>
-                  </tr>
-                )}
-              </For>
-            </tbody>
-          </table>
-        </div>
-      );
+              </tbody>
+            </table>
+          </div>
+        ),
+      };
     },
   };
 }
