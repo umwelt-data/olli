@@ -29,7 +29,7 @@ const CORE_TOKEN_LABELS: Record<string, string> = {
   level: 'Depth level',
   parent: 'Parent',
   children: 'Children',
-  parentContext: 'Parent context',
+  parentContext: 'Groupings',
 };
 
 const CORE_TOKEN_DESCRIPTIONS: Record<string, string> = {
@@ -38,7 +38,7 @@ const CORE_TOKEN_DESCRIPTIONS: Record<string, string> = {
   level: 'Depth in the navigation tree',
   parent: 'Name of the parent element',
   children: 'Number and names of child elements',
-  parentContext: 'Alternative parent paths for this element',
+  parentContext: 'Groupings this element belongs to',
 };
 
 function tokenLabel(name: string, labels?: Record<string, string>): string {
@@ -351,8 +351,8 @@ export function descriptionSettingsDialog<P>(
                           setBrevity(i(), e.currentTarget.value as Brevity)
                         }
                       >
-                        <option value="short">Brief</option>
-                        <option value="long">Detailed</option>
+                        <option value="short">Concise</option>
+                        <option value="long">Full</option>
                       </select>
                       <button
                         onClick={() => moveToken(i(), -1)}
