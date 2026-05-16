@@ -1,5 +1,5 @@
 import { For, Show, createSignal } from 'solid-js';
-import type { DialogContribution, DialogRenderResult, NavigationRuntime, NavNode, FieldPredicate, FieldValue } from 'olli-core';
+import type { DialogContribution, DialogRenderResult, NavigationRuntime, NavNode, FieldPredicate, FieldValue, Selection } from 'olli-core';
 import type { VisPayload, OlliFieldDef } from '../spec/types.js';
 import { getFieldDef, getDomain } from '../util/data.js';
 import { serializeValue } from '../util/values.js';
@@ -9,6 +9,23 @@ interface Condition {
   op: string;
   value: string;
   value2: string;
+}
+
+function predicateToCondition(p: FieldPredicate): Condition {
+  const field = p.field;
+  if ('equal' in p) return { field, op: '=', value: String(p.equal), value2: '' };
+  if ('lt' in p) return { field, op: '<', value: String(p.lt), value2: '' };
+  if ('lte' in p) return { field, op: '<=', value: String(p.lte), value2: '' };
+  if ('gt' in p) return { field, op: '>', value: String(p.gt), value2: '' };
+  if ('gte' in p) return { field, op: '>=', value: String(p.gte), value2: '' };
+  if ('range' in p) return { field, op: 'between', value: String(p.range[0]), value2: String(p.range[1]) };
+  return { field, op: '=', value: '', value2: '' };
+}
+
+function selectionToConditions(sel: Selection): Condition[] {
+  if ('and' in sel) return sel.and.filter((p): p is FieldPredicate => 'field' in p).map(predicateToCondition);
+  if ('field' in sel) return [predicateToCondition(sel as FieldPredicate)];
+  return [];
 }
 
 function conditionToPredicate(c: Condition, fields: OlliFieldDef[]): FieldPredicate | null {
@@ -39,7 +56,7 @@ export function filterDialog(): DialogContribution<VisPayload> {
 
       const spec = edge.payload.spec;
       const fields = spec.fields ?? [];
-      const [conditions, setConditions] = createSignal<Condition[]>([]);
+      const [conditions, setConditions] = createSignal<Condition[]>(selectionToConditions(runtime.selection()));
 
       const opsForField = (fieldName: string): string[] => {
         const fd = getFieldDef(fieldName, fields);
@@ -90,7 +107,29 @@ export function filterDialog(): DialogContribution<VisPayload> {
                   const fd = () => getFieldDef(cond.field, fields);
                   const isNominal = () => fd().type === 'nominal' || fd().type === 'ordinal';
                   const domain = () => isNominal() && cond.op === '=' ? getDomain(fd(), spec.data) : [];
-                  const inputType = () => fd().type === 'temporal' ? 'datetime-local' : 'number';
+                  const inputType = () => {
+                    const f = fd();
+                    if (f.type !== 'temporal') return 'number';
+                    if (f.timeUnit && /hours|minutes|seconds/.test(f.timeUnit)) return 'datetime-local';
+                    if (f.timeUnit) return 'date';
+                    const vals = getDomain(f, spec.data);
+                    const hasTime = vals.some((v) => v instanceof Date && (v.getHours() !== 0 || v.getMinutes() !== 0 || v.getSeconds() !== 0));
+                    return hasTime ? 'datetime-local' : 'date';
+                  };
+                  const bounds = () => {
+                    const f = fd();
+                    if (f.type !== 'quantitative' && f.type !== 'temporal') return { min: undefined, max: undefined };
+                    const vals = getDomain(f, spec.data);
+                    if (vals.length === 0) return { min: undefined, max: undefined };
+                    const lo = vals[0]!;
+                    const hi = vals[vals.length - 1]!;
+                    if (f.type === 'temporal') {
+                      const len = inputType() === 'date' ? 10 : 16;
+                      const fmt = (v: unknown) => v instanceof Date ? v.toISOString().slice(0, len) : String(v);
+                      return { min: fmt(lo), max: fmt(hi) };
+                    }
+                    return { min: String(lo), max: String(hi) };
+                  };
 
                   return (
                     <div class="olli-filter-condition">
@@ -127,11 +166,15 @@ export function filterDialog(): DialogContribution<VisPayload> {
                         <>
                           <input
                             type={inputType()}
+                            min={bounds().min}
+                            max={bounds().max}
                             value={cond.value}
                             onInput={(e) => updateCondition(i(), { value: e.currentTarget.value })}
                           />
                           <input
                             type={inputType()}
+                            min={bounds().min}
+                            max={bounds().max}
                             value={cond.value2}
                             onInput={(e) => updateCondition(i(), { value2: e.currentTarget.value })}
                           />
@@ -139,6 +182,8 @@ export function filterDialog(): DialogContribution<VisPayload> {
                       ) : (
                         <input
                           type={inputType()}
+                          min={bounds().min}
+                          max={bounds().max}
                           value={cond.value}
                           onInput={(e) => updateCondition(i(), { value: e.currentTarget.value })}
                         />
@@ -149,7 +194,7 @@ export function filterDialog(): DialogContribution<VisPayload> {
                 }}
               </For>
             </div>
-            <Show when={conditions().length > 1}>
+            <Show when={conditions().length > 0}>
               <button onClick={clearFilter}>Clear conditions</button>
             </Show>
           </div>
