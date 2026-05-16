@@ -29,13 +29,21 @@ function getChartType(spec: import('../spec/types.js').UnitOlliVisSpec): string 
   return `${spec.mark} chart`;
 }
 
-export function visNameToken(): DescriptionToken<VisPayload> {
+export function nameToken(): DescriptionToken<VisPayload> {
   return {
-    name: 'visName',
-    applicableRoles: roles('root', 'view', 'xAxis', 'yAxis', 'legend', 'guide', 'filteredData', 'annotations'),
+    name: 'name',
+    applicableRoles: '*' as const,
     compute: (ctx: Ctx) => {
+      if (ctx.navNode.kind === 'virtualParentContext') {
+        return { short: 'Parent context', long: 'Parent context' };
+      }
       const p = ctx.edge?.payload;
-      if (!p) return { short: '', long: '' };
+      if (!p) {
+        if (!ctx.edge) return { short: '', long: '' };
+        const short = ctx.edge.displayName;
+        const long = ctx.edge.description ? `${ctx.edge.displayName}. ${ctx.edge.description}` : short;
+        return { short, long };
+      }
       const spec = p.spec;
       switch (p.nodeType) {
         case 'root': {
@@ -70,8 +78,12 @@ export function visNameToken(): DescriptionToken<VisPayload> {
         }
         case 'annotations':
           return { short: 'Data highlights', long: 'Data highlights' };
-        default:
-          return { short: '', long: '' };
+        default: {
+          if (!ctx.edge) return { short: '', long: '' };
+          const short = ctx.edge.displayName;
+          const long = ctx.edge.description ? `${ctx.edge.displayName}. ${ctx.edge.description}` : short;
+          return { short, long };
+        }
       }
     },
   };
@@ -112,23 +124,32 @@ export function visTypeToken(): DescriptionToken<VisPayload> {
   };
 }
 
-export function visChildrenToken(): DescriptionToken<VisPayload> {
+export function childrenToken(): DescriptionToken<VisPayload> {
   return {
-    name: 'visChildren',
-    applicableRoles: roles('root', 'view'),
+    name: 'children',
+    applicableRoles: '*' as const,
     compute: (ctx: Ctx) => {
       const p = ctx.edge?.payload;
-      if (!p) return { short: '', long: '' };
-      const spec = p.spec;
-      const axes = spec.axes?.map((a) => {
-        const fd = getFieldDef(a.field, spec.fields ?? []);
-        return a.title ?? fd.label ?? a.field;
-      }).join(' and ');
-      if (axes && spec.axes && spec.axes.length > 0) {
-        const s = `with ${spec.axes.length > 1 ? 'axes' : 'axis'} ${axes}`;
-        return { short: s, long: s };
+      if (p && (p.nodeType === 'root' || p.nodeType === 'view')) {
+        const spec = p.spec;
+        const axes = spec.axes?.map((a) => {
+          const fd = getFieldDef(a.field, spec.fields ?? []);
+          return a.title ?? fd.label ?? a.field;
+        }).join(' and ');
+        if (axes && spec.axes && spec.axes.length > 0) {
+          const s = `with ${spec.axes.length > 1 ? 'axes' : 'axis'} ${axes}`;
+          return { short: s, long: s };
+        }
       }
-      return { short: '', long: '' };
+      const count = ctx.navNode.childNavIds.length;
+      if (count === 0) return { short: '', long: '' };
+      const short = `${count} ${count === 1 ? 'child' : 'children'}`;
+      const names = ctx.navNode.childNavIds
+        .map((id) => ctx.runtime.getNavNode(id))
+        .map((n) => (n && n.hyperedgeId ? ctx.hypergraph.edges.get(n.hyperedgeId)?.displayName : undefined))
+        .filter((s): s is string => !!s);
+      const long = names.length > 0 ? `${short}: ${names.join(', ')}` : short;
+      return { short, long };
     },
   };
 }
@@ -303,42 +324,48 @@ export function visInstructionsToken(): DescriptionToken<VisPayload> {
   };
 }
 
-export function visParentToken(): DescriptionToken<VisPayload> {
+export function parentToken(): DescriptionToken<VisPayload> {
   return {
-    name: 'visParent',
-    applicableRoles: roles('xAxis', 'yAxis', 'legend', 'guide', 'filteredData'),
+    name: 'parent',
+    applicableRoles: '*' as const,
     compute: (ctx: Ctx) => {
       const p = ctx.edge?.payload;
-      if (!p) return { short: '', long: '' };
-      const spec = p.spec;
-      // walk up to find enclosing view
-      let cur = ctx.navNode;
-      while (cur.parentNavId) {
-        const parent = ctx.runtime.getNavNode(cur.parentNavId);
-        if (!parent?.hyperedgeId) break;
-        const parentEdge = ctx.runtime.getHyperedge(parent.hyperedgeId);
-        if (parentEdge?.payload?.nodeType === 'view' && parentEdge.payload.predicate && 'equal' in parentEdge.payload.predicate) {
-          const fd = getFieldDef(parentEdge.payload.predicate.field, spec.fields ?? []);
-          const s = fmtValue(parentEdge.payload.predicate.equal as import('../spec/types.js').OlliValue, fd);
-          return { short: s, long: s };
+      if (p && (p.nodeType === 'xAxis' || p.nodeType === 'yAxis' || p.nodeType === 'legend' || p.nodeType === 'guide' || p.nodeType === 'filteredData')) {
+        const spec = p.spec;
+        let cur = ctx.navNode;
+        while (cur.parentNavId) {
+          const parent = ctx.runtime.getNavNode(cur.parentNavId);
+          if (!parent?.hyperedgeId) break;
+          const parentEdge = ctx.runtime.getHyperedge(parent.hyperedgeId);
+          if (parentEdge?.payload?.nodeType === 'view' && parentEdge.payload.predicate && 'equal' in parentEdge.payload.predicate) {
+            const fd = getFieldDef(parentEdge.payload.predicate.field, spec.fields ?? []);
+            const s = fmtValue(parentEdge.payload.predicate.equal as import('../spec/types.js').OlliValue, fd);
+            return { short: s, long: s };
+          }
+          cur = parent;
         }
-        cur = parent;
       }
-      return { short: '', long: '' };
+      if (!ctx.navNode.parentNavId) return { short: '', long: '' };
+      const parent = ctx.runtime.getNavNode(ctx.navNode.parentNavId);
+      if (!parent || parent.hyperedgeId === null) return { short: '', long: '' };
+      const parentEdge = ctx.hypergraph.edges.get(parent.hyperedgeId);
+      const name = parentEdge?.displayName ?? '';
+      if (!name) return { short: '', long: '' };
+      return { short: name, long: `parent: ${name}` };
     },
   };
 }
 
 export function allVisTokens(): DescriptionToken<VisPayload>[] {
   return [
-    visNameToken(),
+    nameToken(),
     visTypeToken(),
-    visChildrenToken(),
+    childrenToken(),
     visDataToken(),
     visSizeToken(),
     visAggregateToken(),
     visQuartileToken(),
-    visParentToken(),
+    parentToken(),
     visInstructionsToken(),
   ];
 }

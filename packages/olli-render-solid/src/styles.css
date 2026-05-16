@@ -93,3 +93,7 @@
   text-align: left;
   padding-right: 5px;
 }
+
+.olli-dialog .olli-token-description {
+  color: #666;
+}

@@ -19,11 +19,34 @@ interface TokenFormEntry {
 export interface DescriptionSettingsConfig {
   roles: ReadonlyArray<{ value: string; label: string }>;
   tokenLabels?: Record<string, string>;
+  tokenDescriptions?: Record<string, string>;
   roleForNode: (runtime: NavigationRuntime<any>, navNode: NavNode) => string;
 }
 
+const CORE_TOKEN_LABELS: Record<string, string> = {
+  name: 'Name',
+  index: 'Position',
+  level: 'Depth level',
+  parent: 'Parent',
+  children: 'Children',
+  parentContext: 'Parent context',
+};
+
+const CORE_TOKEN_DESCRIPTIONS: Record<string, string> = {
+  name: 'Title or label of this element',
+  index: 'Position among siblings (e.g., 1 of 5)',
+  level: 'Depth in the navigation tree',
+  parent: 'Name of the parent element',
+  children: 'Number and names of child elements',
+  parentContext: 'Alternative parent paths for this element',
+};
+
 function tokenLabel(name: string, labels?: Record<string, string>): string {
-  return labels?.[name] ?? name;
+  return labels?.[name] ?? CORE_TOKEN_LABELS[name] ?? name;
+}
+
+function tokenDescription(name: string, descriptions?: Record<string, string>): string | undefined {
+  return descriptions?.[name] ?? CORE_TOKEN_DESCRIPTIONS[name];
 }
 
 type PresetChoice = string | 'custom';
@@ -33,15 +56,17 @@ function detectPreset(
   role: string,
   entries: TokenFormEntry[],
 ): PresetChoice {
+  const availableTokens = new Set(entries.map((e) => e.token));
   for (const preset of presets) {
     const presetForRole = preset.customizations.find((c) => c.role === role);
     if (!presetForRole) continue;
+    const relevantRecipe = presetForRole.recipe.filter((e) => availableTokens.has(e.token));
     const included = entries.filter((e) => e.included);
-    if (included.length !== presetForRole.recipe.length) continue;
+    if (included.length !== relevantRecipe.length) continue;
     const matches = included.every(
       (e, i) =>
-        e.token === presetForRole.recipe[i]?.token &&
-        e.brevity === presetForRole.recipe[i]?.brevity,
+        e.token === relevantRecipe[i]?.token &&
+        e.brevity === relevantRecipe[i]?.brevity,
     );
     if (matches) return preset.name;
   }
@@ -51,20 +76,40 @@ function detectPreset(
 function buildFormEntries<P>(
   runtime: NavigationRuntime<P>,
   role: string,
+  navNode: NavNode,
 ): TokenFormEntry[] {
   const active = runtime.customization.activeFor(role)();
   const applicableTokens = runtime.tokens.applicableTo(role);
   const recipeMap = new Map(active.recipe.map((e) => [e.token, e.brevity]));
 
+  const edge = navNode.hyperedgeId
+    ? runtime.hypergraph().edges.get(navNode.hyperedgeId)
+    : undefined;
+  const ctx = {
+    navNode,
+    edge: edge ?? null,
+    hypergraph: runtime.hypergraph(),
+    runtime,
+    selection: runtime.selection(),
+    fullPredicate: runtime.fullPredicate(navNode.navId),
+  };
+
+  const hasOutput = (tokenName: string): boolean => {
+    const token = runtime.tokens.byName(tokenName);
+    if (!token) return false;
+    const value = token.compute(ctx);
+    return value.short !== '' || value.long !== '';
+  };
+
   const entries: TokenFormEntry[] = [];
   for (const entry of active.recipe) {
     const token = runtime.tokens.byName(entry.token);
-    if (token && isTokenApplicable(token, role)) {
+    if (token && isTokenApplicable(token, role) && hasOutput(entry.token)) {
       entries.push({ token: entry.token, included: true, brevity: entry.brevity });
     }
   }
   for (const token of applicableTokens) {
-    if (!recipeMap.has(token.name)) {
+    if (!recipeMap.has(token.name) && hasOutput(token.name)) {
       entries.push({ token: token.name, included: false, brevity: 'short' });
     }
   }
@@ -113,13 +158,12 @@ export function descriptionSettingsDialog<P>(
       const initialRole = config.roleForNode(runtime, navNode);
       const presets = runtime.customization.listPresets();
 
-      const initialEntries = buildFormEntries(runtime, initialRole);
+      const initialEntries = buildFormEntries(runtime, initialRole, navNode);
       const [selectedRole, setSelectedRole] = createSignal(initialRole);
       const [entries, setEntries] = createSignal<TokenFormEntry[]>(initialEntries);
       const [preset, setPreset] = createSignal<PresetChoice>(
         detectPreset(presets, initialRole, initialEntries),
       );
-      const [showTokenEditor, setShowTokenEditor] = createSignal(false);
 
       const preview = createMemo(() =>
         computePreview(runtime, navNode, selectedRole(), entries()),
@@ -127,10 +171,9 @@ export function descriptionSettingsDialog<P>(
 
       const handleRoleChange = (role: string) => {
         setSelectedRole(role);
-        const newEntries = buildFormEntries(runtime, role);
+        const newEntries = buildFormEntries(runtime, role, navNode);
         setEntries(newEntries);
         setPreset(detectPreset(presets, role, newEntries));
-        setShowTokenEditor(false);
       };
 
       const presetChoices = createMemo(() => [
@@ -138,12 +181,11 @@ export function descriptionSettingsDialog<P>(
         'custom',
       ]);
 
+      const hasPresets = presets.length > 0;
+
       const handlePresetChange = (choice: PresetChoice) => {
         setPreset(choice);
-        if (choice === 'custom') {
-          setShowTokenEditor(true);
-          return;
-        }
+        if (choice === 'custom') return;
         const role = selectedRole();
         const found = presets.find((p) => p.name === choice);
         if (!found) return;
@@ -154,10 +196,29 @@ export function descriptionSettingsDialog<P>(
           presetForRole.recipe.map((e) => [e.token, e.brevity]),
         );
         const applicableTokens = runtime.tokens.applicableTo(role);
+
+        const edge = navNode.hyperedgeId
+          ? runtime.hypergraph().edges.get(navNode.hyperedgeId)
+          : undefined;
+        const ctx = {
+          navNode,
+          edge: edge ?? null,
+          hypergraph: runtime.hypergraph(),
+          runtime,
+          selection: runtime.selection(),
+          fullPredicate: runtime.fullPredicate(navNode.navId),
+        };
+        const hasOutput = (tokenName: string): boolean => {
+          const token = runtime.tokens.byName(tokenName);
+          if (!token) return false;
+          const value = token.compute(ctx);
+          return value.short !== '' || value.long !== '';
+        };
+
         const newEntries: TokenFormEntry[] = [];
         for (const entry of presetForRole.recipe) {
           const token = runtime.tokens.byName(entry.token);
-          if (token && isTokenApplicable(token, role)) {
+          if (token && isTokenApplicable(token, role) && hasOutput(entry.token)) {
             newEntries.push({
               token: entry.token,
               included: true,
@@ -166,37 +227,37 @@ export function descriptionSettingsDialog<P>(
           }
         }
         for (const token of applicableTokens) {
-          if (!recipeMap.has(token.name)) {
+          if (!recipeMap.has(token.name) && hasOutput(token.name)) {
             newEntries.push({ token: token.name, included: false, brevity: 'short' });
           }
         }
         setEntries(newEntries);
-        setShowTokenEditor(false);
       };
 
       const toggleToken = (idx: number) => {
-        setEntries((prev) =>
-          prev.map((e, i) => (i === idx ? { ...e, included: !e.included } : e)),
+        const newEntries = entries().map((e, i) =>
+          i === idx ? { ...e, included: !e.included } : e,
         );
-        setPreset('custom');
+        setEntries(newEntries);
+        setPreset(detectPreset(presets, selectedRole(), newEntries));
       };
 
       const setBrevity = (idx: number, brevity: Brevity) => {
-        setEntries((prev) =>
-          prev.map((e, i) => (i === idx ? { ...e, brevity } : e)),
+        const newEntries = entries().map((e, i) =>
+          i === idx ? { ...e, brevity } : e,
         );
-        setPreset('custom');
+        setEntries(newEntries);
+        setPreset(detectPreset(presets, selectedRole(), newEntries));
       };
 
       const moveToken = (idx: number, direction: -1 | 1) => {
-        setEntries((prev) => {
-          const next = [...prev];
-          const targetIdx = idx + direction;
-          if (targetIdx < 0 || targetIdx >= next.length) return prev;
-          [next[idx], next[targetIdx]] = [next[targetIdx]!, next[idx]!];
-          return next;
-        });
-        setPreset('custom');
+        const prev = entries();
+        const next = [...prev];
+        const targetIdx = idx + direction;
+        if (targetIdx < 0 || targetIdx >= next.length) return;
+        [next[idx], next[targetIdx]] = [next[targetIdx]!, next[idx]!];
+        setEntries(next);
+        setPreset(detectPreset(presets, selectedRole(), next));
       };
 
       const applyChanges = () => {
@@ -219,8 +280,9 @@ export function descriptionSettingsDialog<P>(
       const resetToDefault = () => {
         const role = selectedRole();
         runtime.customization.resetFor(role);
-        setEntries(buildFormEntries(runtime, role));
-        setPreset('custom');
+        const newEntries = buildFormEntries(runtime, role, navNode);
+        setEntries(newEntries);
+        setPreset(detectPreset(presets, role, newEntries));
       };
 
       return {
@@ -243,70 +305,74 @@ export function descriptionSettingsDialog<P>(
               Preview: {preview() || '(empty)'}
             </div>
 
-            <fieldset>
-              <legend>Detail level</legend>
-              <For each={presetChoices()}>
-                {(choice) => (
-                  <label>
-                    <input
-                      type="radio"
-                      name="preset"
-                      value={choice}
-                      checked={preset() === choice}
-                      onChange={() => handlePresetChange(choice)}
-                    />
-                    {' '}
-                    {choice.charAt(0).toUpperCase() + choice.slice(1)}
-                  </label>
-                )}
-              </For>
-            </fieldset>
-
-            <Show when={preset() === 'custom' || showTokenEditor()}>
-              <fieldset class="olli-token-editor">
-                <legend>Customize tokens</legend>
-                <For each={entries()}>
-                  {(entry, i) => (
-                    <div class="olli-token-row">
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={entry.included}
-                          onChange={() => toggleToken(i())}
-                        />
-                        {' '}
-                        {tokenLabel(entry.token, config.tokenLabels)}
-                      </label>
-                      <Show when={entry.included}>
-                        <select
-                          value={entry.brevity}
-                          onChange={(e) =>
-                            setBrevity(i(), e.currentTarget.value as Brevity)
-                          }
-                        >
-                          <option value="short">Short</option>
-                          <option value="long">Long</option>
-                        </select>
-                        <button
-                          onClick={() => moveToken(i(), -1)}
-                          disabled={i() === 0}
-                          aria-label={`Move ${tokenLabel(entry.token, config.tokenLabels)} up`}
-                        >
-                          Move up
-                        </button>
-                        <button
-                          onClick={() => moveToken(i(), 1)}
-                          disabled={i() === entries().length - 1}
-                          aria-label={`Move ${tokenLabel(entry.token, config.tokenLabels)} down`}
-                        >
-                          Move down
-                        </button>
-                      </Show>
-                    </div>
+            <Show when={hasPresets}>
+              <fieldset>
+                <legend>Detail level</legend>
+                <For each={presetChoices()}>
+                  {(choice) => (
+                    <label>
+                      <input
+                        type="radio"
+                        name="preset"
+                        value={choice}
+                        checked={preset() === choice}
+                        onChange={() => handlePresetChange(choice)}
+                      />
+                      {' '}
+                      {choice.charAt(0).toUpperCase() + choice.slice(1)}
+                    </label>
                   )}
                 </For>
               </fieldset>
             </Show>
+
+            <fieldset class="olli-token-editor">
+              <legend>Customize tokens</legend>
+              <For each={entries()}>
+                {(entry, i) => (
+                  <div class="olli-token-row">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={entry.included}
+                        onChange={() => toggleToken(i())}
+                      />
+                      {' '}
+                      {tokenLabel(entry.token, config.tokenLabels)}
+                    </label>
+                    {(() => {
+                      const desc = tokenDescription(entry.token, config.tokenDescriptions);
+                      return desc ? <span class="olli-token-description">{'. '}{desc}{'. '}</span> : null;
+                    })()}
+                    <Show when={entry.included}>
+                      <select
+                        value={entry.brevity}
+                        onChange={(e) =>
+                          setBrevity(i(), e.currentTarget.value as Brevity)
+                        }
+                      >
+                        <option value="short">Brief</option>
+                        <option value="long">Detailed</option>
+                      </select>
+                      <button
+                        onClick={() => moveToken(i(), -1)}
+                        disabled={i() === 0}
+                        aria-label={`Move ${tokenLabel(entry.token, config.tokenLabels)} up`}
+                      >
+                        Move up
+                      </button>
+                      <button
+                        onClick={() => moveToken(i(), 1)}
+                        disabled={i() === entries().length - 1}
+                        aria-label={`Move ${tokenLabel(entry.token, config.tokenLabels)} down`}
+                      >
+                        Move down
+                      </button>
+                    </Show>
+                  </div>
+                )}
+              </For>
+            </fieldset>
 
             <button onClick={resetToDefault}>Reset</button>
           </div>

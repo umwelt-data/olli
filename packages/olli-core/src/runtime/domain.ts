@@ -16,6 +16,7 @@ export interface OlliDomain<Spec, Payload> {
   toHypergraph(spec: Spec): Hypergraph<Payload>;
   tokens?: ReadonlyArray<DescriptionToken<Payload>>;
   presets?: ReadonlyArray<{ name: string; customizations: Customization[] }>;
+  defaultPreset?: string;
   keybindings?: ReadonlyArray<KeybindingContribution<Payload>>;
   dialogs?: ReadonlyArray<DialogContribution<Payload>>;
   predicateProviders?: ReadonlyArray<PredicateProvider<Payload>>;
@@ -32,5 +33,8 @@ export function registerDomain<Spec, Payload>(
   for (const p of domain.predicateProviders ?? []) runtime.registerPredicateProvider(p);
   for (const preset of domain.presets ?? []) {
     runtime.customization.registerPreset(preset.name, preset.customizations);
+  }
+  if (domain.defaultPreset) {
+    runtime.customization.applyPreset(domain.defaultPreset);
   }
 }

@@ -52,7 +52,7 @@ export function VisualizationRenderer(props: { example: VisualizationExample }) 
           const olliSpec = await olliJs.VegaLiteAdapter(injected);
           if (cancelled) return;
 
-          handle = olliJs.olliVis(olliSpec, treeRef, { initialPreset: 'medium' });
+          handle = olliJs.olliVis(olliSpec, treeRef, { initialPreset: 'standard' });
           disposeBridge = utils.connectOlliToVegaLite(handle, view);
         })();
       },

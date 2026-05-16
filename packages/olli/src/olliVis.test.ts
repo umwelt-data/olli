@@ -94,10 +94,10 @@ describe('olliVis', () => {
     const h = setup();
     const rootId = h.getFocusedNavId();
 
-    h.applyPreset('low');
+    h.applyPreset('minimal');
     const lowDesc = h.getDescription(rootId);
 
-    h.applyPreset('high');
+    h.applyPreset('detailed');
     const highDesc = h.getDescription(rootId);
 
     expect(lowDesc.length).toBeLessThanOrEqual(highDesc.length);
@@ -112,7 +112,7 @@ describe('olliVis', () => {
   });
 
   it('accepts initialPreset option', () => {
-    const h = setup({ initialPreset: 'high' });
+    const h = setup({ initialPreset: 'detailed' });
     const desc = h.getDescription(h.getFocusedNavId());
     expect(desc.length).toBeGreaterThan(0);
   });

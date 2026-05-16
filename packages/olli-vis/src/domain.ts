@@ -17,5 +17,6 @@ export const visDomain: OlliDomain<OlliVisSpec, VisPayload> = {
   predicateProviders: [visPredicateProvider()],
   keybindings: visKeybindings(),
   presets: visPresets(),
+  defaultPreset: 'standard',
   dialogs: [tableDialog(), filterDialog(), targetedNavDialog(), descriptionSettingsDialog()],
 };

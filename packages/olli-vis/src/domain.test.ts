@@ -40,7 +40,7 @@ describe('visDomain', () => {
       registerDomain(runtime, visDomain);
       const allTokens = runtime.tokens.all();
       const visTokenNames = allTokens.map((t) => t.name);
-      expect(visTokenNames).toContain('visName');
+      expect(visTokenNames).toContain('name');
       expect(visTokenNames).toContain('visType');
       expect(visTokenNames).toContain('aggregate');
       dispose();
@@ -77,12 +77,12 @@ describe('visDomain', () => {
       const runtime = createNavigationRuntime<VisPayload>(graph);
       registerDomain(runtime, visDomain);
       // Applying preset should not throw
-      runtime.customization.applyPreset('high');
-      expect(runtime.customization.activePresetName()).toBe('high');
-      runtime.customization.applyPreset('medium');
-      expect(runtime.customization.activePresetName()).toBe('medium');
-      runtime.customization.applyPreset('low');
-      expect(runtime.customization.activePresetName()).toBe('low');
+      runtime.customization.applyPreset('detailed');
+      expect(runtime.customization.activePresetName()).toBe('detailed');
+      runtime.customization.applyPreset('standard');
+      expect(runtime.customization.activePresetName()).toBe('standard');
+      runtime.customization.applyPreset('minimal');
+      expect(runtime.customization.activePresetName()).toBe('minimal');
       dispose();
     });
   });

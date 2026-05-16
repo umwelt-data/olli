@@ -4,14 +4,14 @@ import type { OlliNodeType } from '../spec/types.js';
 type RoleTokens = Record<OlliNodeType, string[]>;
 
 const roleTokenMap: RoleTokens = {
-  root: ['visName', 'visType', 'visSizeToken', 'visChildren'],
-  view: ['visName', 'visType', 'visChildren'],
-  xAxis: ['visName', 'visType', 'visData', 'visParent', 'aggregate'],
-  yAxis: ['visName', 'visType', 'visData', 'visParent', 'aggregate'],
-  legend: ['visName', 'visType', 'visData', 'visParent', 'aggregate'],
-  guide: ['visName', 'visType', 'visData', 'visParent'],
-  filteredData: ['visData', 'visSize', 'visParent', 'aggregate', 'quartile', 'instructions'],
-  annotations: ['visName', 'visSize'],
+  root: ['name', 'visType', 'visSize', 'children'],
+  view: ['name', 'visType', 'children'],
+  xAxis: ['name', 'visType', 'visData', 'parent', 'aggregate'],
+  yAxis: ['name', 'visType', 'visData', 'parent', 'aggregate'],
+  legend: ['name', 'visType', 'visData', 'parent', 'aggregate'],
+  guide: ['name', 'visType', 'visData', 'parent'],
+  filteredData: ['visData', 'visSize', 'parent', 'aggregate', 'quartile', 'instructions'],
+  annotations: ['name', 'visSize'],
   other: ['visData', 'visSize', 'instructions'],
 };
 
@@ -37,46 +37,46 @@ function makePreset(
   return { name, customizations };
 }
 
-const highRoles: RoleTokens = {
-  root: ['visName', 'visType', 'visSize', 'visChildren'],
-  view: ['visName', 'visType', 'visChildren'],
-  xAxis: ['visName', 'visType', 'visData', 'visParent', 'aggregate'],
-  yAxis: ['visName', 'visType', 'visData', 'visParent', 'aggregate'],
-  legend: ['visName', 'visType', 'visData', 'visParent', 'aggregate'],
-  guide: ['visName', 'visType', 'visData', 'visParent'],
-  filteredData: ['visData', 'visSize', 'visParent', 'aggregate', 'quartile', 'instructions'],
-  annotations: ['visName', 'visSize'],
+const detailedRoles: RoleTokens = {
+  root: ['name', 'visType', 'visSize', 'children'],
+  view: ['name', 'visType', 'children'],
+  xAxis: ['name', 'visType', 'visData', 'parent', 'aggregate'],
+  yAxis: ['name', 'visType', 'visData', 'parent', 'aggregate'],
+  legend: ['name', 'visType', 'visData', 'parent', 'aggregate'],
+  guide: ['name', 'visType', 'visData', 'parent'],
+  filteredData: ['visData', 'visSize', 'parent', 'aggregate', 'quartile', 'instructions'],
+  annotations: ['name', 'visSize'],
   other: ['visData', 'visSize', 'instructions'],
 };
 
-const mediumRoles: RoleTokens = {
-  root: ['visName', 'visType', 'visChildren'],
-  view: ['visName', 'visType'],
-  xAxis: ['visName', 'visData', 'aggregate'],
-  yAxis: ['visName', 'visData', 'aggregate'],
-  legend: ['visName', 'visData', 'aggregate'],
-  guide: ['visName', 'visData'],
+const standardRoles: RoleTokens = {
+  root: ['name', 'visType', 'children'],
+  view: ['name', 'visType'],
+  xAxis: ['name', 'visData', 'aggregate'],
+  yAxis: ['name', 'visData', 'aggregate'],
+  legend: ['name', 'visData', 'aggregate'],
+  guide: ['name', 'visData'],
   filteredData: ['visData', 'visSize', 'aggregate', 'instructions'],
-  annotations: ['visName', 'visSize'],
+  annotations: ['name', 'visSize'],
   other: ['visData', 'visSize', 'instructions'],
 };
 
-const lowRoles: RoleTokens = {
-  root: ['visName', 'visType'],
-  view: ['visName'],
-  xAxis: ['visName', 'visData'],
-  yAxis: ['visName', 'visData'],
-  legend: ['visName', 'visData'],
-  guide: ['visName'],
+const minimalRoles: RoleTokens = {
+  root: ['name', 'visType'],
+  view: ['name'],
+  xAxis: ['name', 'visData'],
+  yAxis: ['name', 'visData'],
+  legend: ['name', 'visData'],
+  guide: ['name'],
   filteredData: ['visData', 'visSize'],
-  annotations: ['visName'],
+  annotations: ['name'],
   other: ['visData'],
 };
 
 export function visPresets(): { name: string; customizations: Customization[] }[] {
   return [
-    makePreset('high', highRoles, 'long'),
-    makePreset('medium', mediumRoles, 'short'),
-    makePreset('low', lowRoles, 'short'),
+    makePreset('detailed', detailedRoles, 'long'),
+    makePreset('standard', standardRoles, 'short'),
+    makePreset('minimal', minimalRoles, 'short'),
   ];
 }

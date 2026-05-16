@@ -86,7 +86,7 @@ describe('vis tokens', () => {
   it('aggregate token computes values for xAxis node', () => {
     createRoot((dispose) => {
       const runtime = setup();
-      runtime.customization.applyPreset('high');
+      runtime.customization.applyPreset('detailed');
       const rootId = runtime.navTree().roots[0]!;
       const rootNode = runtime.getNavNode(rootId)!;
       const xAxisNavId = rootNode.childNavIds.find((id) => {
