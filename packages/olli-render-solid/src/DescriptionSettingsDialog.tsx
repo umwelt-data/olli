@@ -147,6 +147,16 @@ function computePreview<P>(
   return parts.join('. ');
 }
 
+function findNavNodeForRole<P>(runtime: NavigationRuntime<P>, role: string): NavNode | undefined {
+  const navTree = runtime.navTree();
+  for (const [, node] of navTree.byNavId) {
+    if (node.hyperedgeId === null) continue;
+    const edge = runtime.hypergraph().edges.get(node.hyperedgeId);
+    if (edge?.role === role) return node;
+  }
+  return undefined;
+}
+
 export function descriptionSettingsDialog<P>(
   config: DescriptionSettingsConfig,
 ): DialogContribution<P> {
@@ -156,6 +166,11 @@ export function descriptionSettingsDialog<P>(
     triggerKey: 'd',
     render: (runtime: NavigationRuntime<P>, navNode: NavNode): DialogRenderResult => {
       const initialRole = config.roleForNode(runtime, navNode);
+      const presentRoles = new Set<string>();
+      for (const edge of runtime.hypergraph().edges.values()) {
+        if (edge.role) presentRoles.add(edge.role);
+      }
+      const filteredRoles = config.roles.filter((r) => presentRoles.has(r.value));
       const presets = runtime.customization.listPresets();
 
       const initialEntries = buildFormEntries(runtime, initialRole, navNode);
@@ -165,13 +180,20 @@ export function descriptionSettingsDialog<P>(
         detectPreset(presets, initialRole, initialEntries),
       );
 
+      const nodeForRole = createMemo(() => {
+        const role = selectedRole();
+        if (role === initialRole) return navNode;
+        return findNavNodeForRole(runtime, role) ?? navNode;
+      });
+
       const preview = createMemo(() =>
-        computePreview(runtime, navNode, selectedRole(), entries()),
+        computePreview(runtime, nodeForRole(), selectedRole(), entries()),
       );
 
       const handleRoleChange = (role: string) => {
         setSelectedRole(role);
-        const newEntries = buildFormEntries(runtime, role, navNode);
+        const repNode = role === initialRole ? navNode : (findNavNodeForRole(runtime, role) ?? navNode);
+        const newEntries = buildFormEntries(runtime, role, repNode);
         setEntries(newEntries);
         setPreset(detectPreset(presets, role, newEntries));
       };
@@ -197,16 +219,17 @@ export function descriptionSettingsDialog<P>(
         );
         const applicableTokens = runtime.tokens.applicableTo(role);
 
-        const edge = navNode.hyperedgeId
-          ? runtime.hypergraph().edges.get(navNode.hyperedgeId)
+        const currentNode = nodeForRole();
+        const edge = currentNode.hyperedgeId
+          ? runtime.hypergraph().edges.get(currentNode.hyperedgeId)
           : undefined;
         const ctx = {
-          navNode,
+          navNode: currentNode,
           edge: edge ?? null,
           hypergraph: runtime.hypergraph(),
           runtime,
           selection: runtime.selection(),
-          fullPredicate: runtime.fullPredicate(navNode.navId),
+          fullPredicate: runtime.fullPredicate(currentNode.navId),
         };
         const hasOutput = (tokenName: string): boolean => {
           const token = runtime.tokens.byName(tokenName);
@@ -280,7 +303,7 @@ export function descriptionSettingsDialog<P>(
       const resetToDefault = () => {
         const role = selectedRole();
         runtime.customization.resetFor(role);
-        const newEntries = buildFormEntries(runtime, role, navNode);
+        const newEntries = buildFormEntries(runtime, role, nodeForRole());
         setEntries(newEntries);
         setPreset(detectPreset(presets, role, newEntries));
       };
@@ -295,7 +318,7 @@ export function descriptionSettingsDialog<P>(
                 value={selectedRole()}
                 onChange={(e) => handleRoleChange(e.currentTarget.value)}
               >
-                <For each={config.roles}>
+                <For each={filteredRoles}>
                   {(role) => <option value={role.value}>{role.label}</option>}
                 </For>
               </select>
