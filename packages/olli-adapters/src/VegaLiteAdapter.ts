@@ -1,5 +1,6 @@
 import type { UnitOlliVisSpec, OlliVisSpec, OlliDataset, OlliAxis, OlliLegend, OlliMark } from 'olli-vis';
 import { typeInference } from 'olli-vis';
+import { typeCoerceData } from '@umwelt-data/umwelt-utils/data';
 import { getData, getVegaAxisTicks, getVegaScene, getVegaView } from './utils.js';
 import type { VisAdapter } from './types.js';
 
@@ -51,15 +52,10 @@ function getLabelFromEncoding(encoding: any): string {
   }${'timeUnit' in encoding && !(encoding.timeUnit === encoding.field.toLowerCase()) ? ` (${encoding.timeUnit})` : ''}`;
 }
 
-function typeCoerceData(olliSpec: UnitOlliVisSpec): void {
+function coerceData(olliSpec: UnitOlliVisSpec): void {
   if (!olliSpec.fields) return;
-  for (const fieldDef of olliSpec.fields) {
-    if (fieldDef.type === 'temporal') {
-      for (const datum of olliSpec.data) {
-        datum[fieldDef.field] = new Date(datum[fieldDef.field] as string | number);
-      }
-    }
-  }
+  const fieldSpecs = olliSpec.fields.map((f) => ({ name: f.field, type: f.type }));
+  olliSpec.data = typeCoerceData(olliSpec.data, fieldSpecs) as OlliDataset;
 }
 
 function adaptUnitSpec(scene: any, spec: any, data: OlliDataset): UnitOlliVisSpec {
@@ -135,7 +131,7 @@ function adaptUnitSpec(scene: any, spec: any, data: OlliDataset): UnitOlliVisSpe
     }
   }
 
-  typeCoerceData(olliSpec);
+  coerceData(olliSpec);
 
   return olliSpec;
 }
@@ -185,7 +181,7 @@ async function adaptMultiSpec(
     s.fields = s.fields!.filter((f, i, self) => self.findIndex((f2) => f2.field === f.field) === i);
     s.axes = s.axes!.filter((f, i, self) => self.findIndex((f2) => f2.field === f.field) === i);
     s.legends = s.legends!.filter((f, i, self) => self.findIndex((f2) => f2.field === f.field) === i);
-    typeCoerceData(s);
+    coerceData(s);
   }
 
   if (units.length === 1) {

@@ -137,6 +137,9 @@ importers:
       '@observablehq/plot':
         specifier: '>=0.6.0'
         version: 0.6.17
+      '@umwelt-data/umwelt-utils':
+        specifier: link:../../../umwelt-utils
+        version: link:../../../umwelt-utils
       olli-diagram:
         specifier: workspace:*
         version: link:../olli-diagram
