@@ -1,7 +1,8 @@
 import type { UnitOlliVisSpec, OlliVisSpec, OlliDataset, OlliAxis, OlliLegend, OlliMark } from 'olli-vis';
 import { typeInference } from 'olli-vis';
 import { typeCoerceData } from '@umwelt-data/umwelt-utils/data';
-import { getData, getVegaAxisTicks, getVegaScene, getVegaView } from './utils.js';
+import { getData, getVegaScene, getVegaView } from './utils.js';
+import { getVegaAxisTicks } from '@umwelt-data/umwelt-utils/vega';
 import type { VisAdapter } from './types.js';
 
 export const VegaLiteAdapter: VisAdapter<any> = async (spec: any): Promise<OlliVisSpec> => {

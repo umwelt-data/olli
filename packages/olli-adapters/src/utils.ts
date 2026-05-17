@@ -97,4 +97,3 @@ export function getData(scene: any): OlliDataset[] {
   }
 }
 
-export { getVegaAxisTicks } from '@umwelt-data/umwelt-utils/vega';
