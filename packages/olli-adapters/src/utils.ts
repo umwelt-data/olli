@@ -97,26 +97,4 @@ export function getData(scene: any): OlliDataset[] {
   }
 }
 
-export function getVegaAxisTicks(scene: any): any[] | null {
-  const axisTicks = findNodeByRole(scene, 'axis-tick');
-
-  if (axisTicks.length) {
-    const ticks = axisTicks.map((axis: any) => axis.items.map((n: any) => n.datum.value));
-    return ticks;
-  }
-
-  return null;
-}
-
-function findNodeByRole(node: any, role: string, found: any[] = []): any[] {
-  if ('role' in node) {
-    if (node.role === role) {
-      found.push(node);
-    }
-    return node.items.reduce((acc: any[], n: any) => findNodeByRole(n, role, acc), found);
-  }
-  if ('items' in node) {
-    return node.items.reduce((acc: any[], n: any) => findNodeByRole(n, role, acc), found);
-  }
-  return found;
-}
+export { getVegaAxisTicks } from '@umwelt-data/umwelt-utils/vega';

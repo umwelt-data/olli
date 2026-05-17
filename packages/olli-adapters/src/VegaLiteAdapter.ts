@@ -98,19 +98,14 @@ function adaptUnitSpec(scene: any, spec: any, data: OlliDataset): UnitOlliVisSpe
         olliSpec.facet = fieldDef.field;
       } else if (['x', 'y'].includes(channel)) {
         const ticks = getVegaAxisTicks(scene);
-        olliSpec.axes!.push({
+        const axisTicks = ticks?.[channel as 'x' | 'y'];
+        const axis: OlliAxis = {
           axisType: channel as 'x' | 'y',
           field: fieldDef.field,
           title: encoding.title,
-          ticks:
-            ticks && ticks.length
-              ? ticks.length === 1
-                ? ticks[0]
-                : ticks.length === 2 && channel === 'x'
-                  ? ticks[0]
-                  : ticks[1]
-              : undefined,
-        });
+        };
+        if (axisTicks) axis.ticks = axisTicks;
+        olliSpec.axes!.push(axis);
       } else if (['color', 'opacity', 'size'].includes(channel)) {
         olliSpec.legends!.push({
           channel: channel as 'color' | 'opacity' | 'size',
