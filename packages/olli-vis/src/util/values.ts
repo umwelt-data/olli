@@ -61,12 +61,14 @@ export function ordinalSuffix(i: number): string {
   return `${i}th`;
 }
 
-export function capitalizeFirst(s: string): string {
-  return s.slice(0, 1).toUpperCase() + s.slice(1);
+export { capitalizeFirst, removeFinalPeriod } from 'olli-core';
+
+export function wrapForMonospace(name: string): string {
+  return '`' + name + '`';
 }
 
-export function removeFinalPeriod(s: string): string {
-  return s.endsWith('.') ? s.slice(0, -1) : s;
+export function fmtDataValue(value: OlliValue, fieldDef: OlliFieldDef): string {
+  return wrapForMonospace(fmtValue(value, fieldDef));
 }
 
 export function averageValue(data: Record<string, unknown>[], field: string): number {

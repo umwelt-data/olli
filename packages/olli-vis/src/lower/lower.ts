@@ -2,8 +2,12 @@ import type { Hyperedge, Hypergraph } from 'olli-core';
 import { buildHypergraph, selectionTest } from 'olli-core';
 import type { FieldPredicate, LogicalAnd } from 'olli-core';
 import type {
+  OlliDataset,
+  OlliFieldDef,
+  OlliGroupNode,
   OlliNode,
   OlliNodeType,
+  OlliValue,
   OlliVisSpec,
   UnitOlliVisSpec,
   VisPayload,
@@ -127,7 +131,7 @@ function lowerNodes(
   specIndex: number | undefined,
   parentId: string,
   nodes: OlliNode[],
-  data: import('../spec/types.js').OlliDataset,
+  data: OlliDataset,
   edges: Hyperedge<VisPayload>[],
 ): string[] {
   const childIds: string[] = [];
@@ -203,7 +207,7 @@ function lowerGroupby(
   spec: UnitOlliVisSpec,
   specIndex: number | undefined,
   parentId: string,
-  node: import('../spec/types.js').OlliGroupNode,
+  node: OlliGroupNode,
   edges: Hyperedge<VisPayload>[],
 ): string[] {
   const data = spec.selection ? selectionTest(spec.data, spec.selection) : spec.data;
@@ -251,10 +255,10 @@ function nodeTypeFromGroupField(field: string, spec: UnitOlliVisSpec): OlliNodeT
 
 function predicateDisplayName(
   pred: FieldPredicate,
-  fd: import('../spec/types.js').OlliFieldDef,
+  fd: OlliFieldDef,
 ): string {
   if ('equal' in pred) {
-    return fmtValue(pred.equal as import('../spec/types.js').OlliValue, fd);
+    return fmtValue(pred.equal as OlliValue, fd);
   }
   if ('range' in pred) {
     const [lo, hi] = pred.range as [number, number];

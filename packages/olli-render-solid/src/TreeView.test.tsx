@@ -496,7 +496,7 @@ describe('<TreeView /> — reactivity', () => {
       recipe: [{ token: 'name', brevity: 'short' }],
       duration: 'persistent',
     });
-    expect(labelOf(container, 'root/a')).toBe('Group A');
+    expect(labelOf(container, 'root/a')).toBe('Group A.');
   });
 
   it('custom selection-dependent token updates after setSelection', () => {
@@ -522,9 +522,9 @@ describe('<TreeView /> — reactivity', () => {
       });
       return rt;
     });
-    expect(labelOf(container, 'root/a')).toContain('sel=0');
+    expect(labelOf(container, 'root/a')).toContain('Sel=0');
     runtime.setSelection({ and: [{ field: 'q', equal: 1 }] });
-    expect(labelOf(container, 'root/a')).toContain('sel=1');
+    expect(labelOf(container, 'root/a')).toContain('Sel=1');
   });
 
   it('context root label updates when navigating between context roots via virtual commit', () => {

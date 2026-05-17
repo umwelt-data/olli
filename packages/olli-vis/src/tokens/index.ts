@@ -1,8 +1,8 @@
-import type { DescriptionToken, TokenContext } from 'olli-core';
+import type { DescriptionToken, JoinHint, TokenContext } from 'olli-core';
 import { selectionTest } from 'olli-core';
-import type { VisPayload, OlliNodeType } from '../spec/types.js';
+import type { VisPayload, OlliNodeType, UnitOlliVisSpec, OlliValue } from '../spec/types.js';
 import { getFieldDef, getDomain, getBins } from '../util/data.js';
-import { fmtValue, pluralize, averageValue, ordinalSuffix } from '../util/values.js';
+import { fmtDataValue, wrapForMonospace, pluralize, averageValue, ordinalSuffix } from '../util/values.js';
 import { predicateToDescription } from '../lower/describe.js';
 
 type Ctx = TokenContext<VisPayload>;
@@ -11,7 +11,7 @@ function roles(...types: OlliNodeType[]): string[] {
   return types;
 }
 
-function getChartType(spec: import('../spec/types.js').UnitOlliVisSpec): string {
+function getChartType(spec: UnitOlliVisSpec): string {
   if (!spec.mark) return 'dataset';
   if (spec.mark === 'point' && spec.axes?.length === 2) {
     const allQuant = spec.axes.every(
@@ -53,7 +53,7 @@ export function nameToken(): DescriptionToken<VisPayload> {
         case 'view': {
           if (p.predicate && 'equal' in p.predicate) {
             const fd = getFieldDef(p.predicate.field, spec.fields ?? []);
-            const s = `titled ${fmtValue(p.predicate.equal as import('../spec/types.js').OlliValue, fd)}`;
+            const s = `titled ${fmtDataValue(p.predicate.equal as OlliValue, fd)}`;
             return { short: s, long: s };
           }
           return { short: '', long: '' };
@@ -73,7 +73,7 @@ export function nameToken(): DescriptionToken<VisPayload> {
             p.nodeType === 'legend' ? 'legend' :
             guide?.channel ?? 'guide';
           const label = guide?.title ?? fd.label ?? fd.field;
-          const s = `${guideType} titled ${label}`;
+          const s = `${guideType} titled ${wrapForMonospace(label)}`;
           return { short: s, long: s };
         }
         case 'annotations':
@@ -97,16 +97,17 @@ export function visTypeToken(): DescriptionToken<VisPayload> {
       const p = ctx.edge?.payload;
       if (!p) return { short: '', long: '' };
       const spec = p.spec;
+      const joinHint: JoinHint = 'clause';
       switch (p.nodeType) {
         case 'root': {
           const ct = getChartType(spec);
           const s = `a ${ct}`;
-          return { short: s, long: s };
+          return { short: s, long: s, joinHint };
         }
         case 'view': {
           const viewName = spec.mark ?? p.viewType ?? 'view';
           const s = `a ${viewName}`;
-          return { short: s, long: s };
+          return { short: s, long: s, joinHint };
         }
         case 'xAxis':
         case 'yAxis':
@@ -115,7 +116,7 @@ export function visTypeToken(): DescriptionToken<VisPayload> {
           if (!p.groupby) return { short: '', long: '' };
           const fd = getFieldDef(p.groupby, spec.fields ?? []);
           const s = `for a ${fd.type ?? 'unknown'} scale`;
-          return { short: s, long: s };
+          return { short: s, long: s, joinHint };
         }
         default:
           return { short: '', long: '' };
@@ -134,11 +135,11 @@ export function childrenToken(): DescriptionToken<VisPayload> {
         const spec = p.spec;
         const axes = spec.axes?.map((a) => {
           const fd = getFieldDef(a.field, spec.fields ?? []);
-          return a.title ?? fd.label ?? a.field;
+          return wrapForMonospace(a.title ?? fd.label ?? a.field);
         }).join(' and ');
         if (axes && spec.axes && spec.axes.length > 0) {
           const s = `with ${spec.axes.length > 1 ? 'axes' : 'axis'} ${axes}`;
-          return { short: s, long: s };
+          return { short: s, long: s, joinHint: 'clause' as const };
         }
       }
       const count = ctx.navNode.childNavIds.length;
@@ -169,18 +170,18 @@ export function visDataToken(): DescriptionToken<VisPayload> {
           const axis = spec.axes?.find((a) => a.field === p.groupby);
           const bins = getBins(p.groupby, data, spec.fields ?? [], axis?.ticks);
           if (bins.length > 0) {
-            const first = fmtValue(bins[0]![0]!, fd);
-            const last = fmtValue(bins[bins.length - 1]![1]!, fd);
+            const first = fmtDataValue(bins[0]![0]!, fd);
+            const last = fmtDataValue(bins[bins.length - 1]![1]!, fd);
             const s = `with values from ${first} to ${last}`;
-            return { short: s, long: s };
+            return { short: s, long: s, joinHint: 'clause' as const };
           }
         } else {
           const domain = getDomain(fd, data);
           if (domain.length > 0) {
-            const first = fmtValue(domain[0]!, fd);
-            const last = fmtValue(domain[domain.length - 1]!, fd);
+            const first = fmtDataValue(domain[0]!, fd);
+            const last = fmtDataValue(domain[domain.length - 1]!, fd);
             const s = `with ${pluralize(domain.length, 'value')} from ${first} to ${last}`;
-            return { short: s, long: s };
+            return { short: s, long: s, joinHint: 'clause' as const };
           }
         }
       }
@@ -203,8 +204,8 @@ export function visSizeToken(): DescriptionToken<VisPayload> {
       const spec = p.spec;
       if (p.nodeType === 'root' && p.groupby) {
         const childCount = ctx.edge?.children.length ?? 0;
-        const s = `with ${childCount} views for ${p.groupby}`;
-        return { short: s, long: s };
+        const s = `with ${childCount} views for ${wrapForMonospace(p.groupby)}`;
+        return { short: s, long: s, joinHint: 'clause' as const };
       }
       if (p.nodeType === 'filteredData') {
         const data = spec.selection ? selectionTest(spec.data, spec.selection) : spec.data;
@@ -213,7 +214,7 @@ export function visSizeToken(): DescriptionToken<VisPayload> {
         return { short: s, long: s };
       }
       if (p.nodeType === 'annotations') {
-        const s = `${ctx.edge?.children.length ?? 0} highlights`;
+        const s = pluralize(ctx.edge?.children.length ?? 0, 'highlight');
         return { short: s, long: s };
       }
       return { short: '', long: '' };
@@ -244,14 +245,14 @@ export function visAggregateToken(): DescriptionToken<VisPayload> {
       const selection = selectionTest(data, ctx.fullPredicate);
       if (selection.length === 0) return { short: '', long: '' };
       if (selection.length === 1) {
-        const s = `the ${label} value is ${fmtValue(selection[0]![fd.field]!, fd)}`;
+        const s = `the ${wrapForMonospace(label)} value is ${fmtDataValue(selection[0]![fd.field]!, fd)}`;
         return { short: s, long: s };
       }
       const avg = averageValue(selection, fd.field);
       const max = selection.reduce((a, b) => Math.max(a, Number(b[fd.field])), Number(selection[0]![fd.field]));
       const min = selection.reduce((a, b) => Math.min(a, Number(b[fd.field])), Number(selection[0]![fd.field]));
-      const short = `avg ${label}: ${fmtValue(avg, fd)}`;
-      const long = `the average value for the ${label} field is ${fmtValue(avg, fd)}, the maximum is ${fmtValue(max, fd)}, and the minimum is ${fmtValue(min, fd)}`;
+      const short = `avg ${wrapForMonospace(label)}: ${fmtDataValue(avg, fd)}`;
+      const long = `the average value for the ${wrapForMonospace(label)} field is ${fmtDataValue(avg, fd)}, the maximum is ${fmtDataValue(max, fd)}, and the minimum is ${fmtDataValue(min, fd)}`;
       return { short, long };
     },
   };
@@ -297,7 +298,7 @@ export function visQuartileToken(): DescriptionToken<VisPayload> {
       const thisAvg = sel.length === 0 ? 0 : averageValue(sel, fd.field);
       const pos = avgs.indexOf(thisAvg) / avgs.length;
       const quartile = Math.max(1, Math.ceil(pos * 4));
-      const s = `this section's average ${label} is in the ${ordinalSuffix(quartile)} quartile of all sections`;
+      const s = `this section's average ${wrapForMonospace(label)} is in the ${ordinalSuffix(quartile)} quartile of all sections`;
       return { short: s, long: s };
     },
   };
@@ -339,7 +340,7 @@ export function parentToken(): DescriptionToken<VisPayload> {
           const parentEdge = ctx.runtime.getHyperedge(parent.hyperedgeId);
           if (parentEdge?.payload?.nodeType === 'view' && parentEdge.payload.predicate && 'equal' in parentEdge.payload.predicate) {
             const fd = getFieldDef(parentEdge.payload.predicate.field, spec.fields ?? []);
-            const s = fmtValue(parentEdge.payload.predicate.equal as import('../spec/types.js').OlliValue, fd);
+            const s = fmtDataValue(parentEdge.payload.predicate.equal as OlliValue, fd);
             return { short: s, long: s };
           }
           cur = parent;

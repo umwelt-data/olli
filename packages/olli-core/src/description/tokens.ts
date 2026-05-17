@@ -5,9 +5,21 @@ import type { NavigationRuntime } from '../runtime/runtime.js';
 
 export type TokenName = string;
 
+export type JoinHint = 'sentence' | 'clause';
+
 export interface TokenValue {
   short: string;
   long: string;
+  joinHint?: JoinHint;
+}
+
+export function capitalizeFirst(s: string): string {
+  if (s.startsWith('`')) return s;
+  return s.slice(0, 1).toUpperCase() + s.slice(1);
+}
+
+export function removeFinalPeriod(s: string): string {
+  return s.endsWith('.') ? s.slice(0, -1) : s;
 }
 
 export interface TokenContext<P> {

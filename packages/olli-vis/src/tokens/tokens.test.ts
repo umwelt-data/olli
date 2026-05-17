@@ -60,7 +60,7 @@ describe('vis tokens', () => {
       })!;
       const desc = runtime.getDescriptionFor(xAxisNavId)();
       expect(desc).toContain('Category');
-      expect(desc).toContain('x-axis');
+      expect(desc.toLowerCase()).toContain('x-axis');
       dispose();
     });
   });

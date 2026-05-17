@@ -1,6 +1,7 @@
 export type {
   TokenName,
   TokenValue,
+  JoinHint,
   TokenContext,
   DescriptionToken,
   TokenRegistry,
@@ -10,6 +11,8 @@ export {
   createTokenRegistry,
   isTokenApplicable,
   registerBuiltinTokens,
+  capitalizeFirst,
+  removeFinalPeriod,
   nameToken,
   indexToken,
   levelToken,
@@ -30,4 +33,4 @@ export {
   createCustomizationStore,
   defaultCustomizationFor,
 } from './customization.js';
-export { describe } from './describe.js';
+export { assembleParts, describe } from './describe.js';

@@ -47,6 +47,13 @@
   font-style: var(--olli-virtual-style);
 }
 
+.olli-vis .olli-node-label code {
+  font-family: monospace;
+  background: var(--olli-code-bg, rgba(0, 0, 0, 0.06));
+  padding: 0 3px;
+  border-radius: 2px;
+}
+
 .olli-dialog-overlay {
   position: fixed;
   inset: 0;

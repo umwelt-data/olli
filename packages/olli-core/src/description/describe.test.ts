@@ -32,6 +32,8 @@ describe('describe() — default recipe rendering', () => {
       expect(desc).toContain('1 of 2');
       expect(desc).toContain('Diagram'); // parent token
       expect(desc).toContain('1 child'); // children token
+      expect(desc.endsWith('.')).toBe(true);
+      expect(desc[0]).toBe(desc[0]!.toUpperCase());
       dispose();
     });
   });
@@ -43,6 +45,7 @@ describe('describe() — default recipe rendering', () => {
       expect(desc).toContain('Diagram');
       // no parent/index should appear
       expect(desc).not.toContain('of');
+      expect(desc.endsWith('.')).toBe(true);
       dispose();
     });
   });
@@ -62,7 +65,7 @@ describe('describe() — customization', () => {
         duration: 'persistent',
       });
       const after = accessor();
-      expect(after).toBe('Group A');
+      expect(after).toBe('Group A.');
       dispose();
     });
   });
@@ -82,13 +85,13 @@ describe('describe() — customization', () => {
         recipe: [{ token: 'children', brevity: 'short' }],
         duration: 'persistent',
       });
-      expect(accessor()).toBe('1 child');
+      expect(accessor()).toBe('1 child.');
       rt.customization.setFor('', {
         role: '',
         recipe: [{ token: 'children', brevity: 'long' }],
         duration: 'persistent',
       });
-      expect(accessor()).toBe('1 child: Leaf A1');
+      expect(accessor()).toBe('1 child: Leaf A1.');
       dispose();
     });
   });
@@ -105,7 +108,7 @@ describe('describe() — customization', () => {
         ],
         duration: 'persistent',
       });
-      expect(accessor()).toBe('Diagram. Group A');
+      expect(accessor()).toBe('Diagram. Group A.');
       rt.customization.setFor('', {
         role: '',
         recipe: [
@@ -114,7 +117,7 @@ describe('describe() — customization', () => {
         ],
         duration: 'persistent',
       });
-      expect(accessor()).toBe('Group A. Diagram');
+      expect(accessor()).toBe('Group A. Diagram.');
       dispose();
     });
   });
@@ -130,7 +133,7 @@ describe('describe() — customization', () => {
         ],
         duration: 'persistent',
       });
-      expect(rt.getDescriptionFor('root/a')()).toBe('Group A');
+      expect(rt.getDescriptionFor('root/a')()).toBe('Group A.');
       dispose();
     });
   });
@@ -149,7 +152,7 @@ describe('describe() — presets', () => {
         },
       ]);
       rt.customization.applyPreset('minimal');
-      expect(accessor()).toBe('Group A');
+      expect(accessor()).toBe('Group A.');
       expect(rt.customization.activePresetName()).toBe('minimal');
       dispose();
     });
