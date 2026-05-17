@@ -124,8 +124,8 @@ testSuite('built-in tokens', () => {
         fullPredicate: rt.fullPredicate(defaultId),
       };
       const defaultV = parentContextToken().compute(defaultCtx);
-      expect(defaultV.short).toBe('Parent context: Hangs relation (default)');
-      expect(defaultV.long).toBe('Parent context for Box B1: Hangs relation (default)');
+      expect(defaultV.short).toBe('Grouping: Hangs relation (current)');
+      expect(defaultV.long).toBe('Grouping for Box B1: Hangs relation (current)');
 
       rt.moveFocus('right');
       const otherId = rt.focusedNavId();
@@ -138,8 +138,8 @@ testSuite('built-in tokens', () => {
         fullPredicate: rt.fullPredicate(otherId),
       };
       const otherV = parentContextToken().compute(otherCtx);
-      expect(otherV.short).toBe('Parent context: Diagram');
-      expect(otherV.long).toBe('Parent context for Box B1: Diagram');
+      expect(otherV.short).toBe('Grouping: Diagram');
+      expect(otherV.long).toBe('Grouping for Box B1: Diagram');
 
       expect(parentContextToken().applicableRoles).toEqual([VIRTUAL_ROLE]);
       dispose();

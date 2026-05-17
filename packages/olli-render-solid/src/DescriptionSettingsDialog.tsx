@@ -7,6 +7,7 @@ import type {
   NavNode,
   Customization,
   RecipeEntry,
+  RecipeFilter,
   Brevity,
   JoinHint,
 } from 'olli-core';
@@ -58,12 +59,14 @@ function detectPreset(
   presets: ReadonlyArray<{ name: string; customizations: readonly Customization[] }>,
   role: string,
   entries: TokenFormEntry[],
+  recipeFilter?: RecipeFilter | null,
 ): PresetChoice {
   const availableTokens = new Set(entries.map((e) => e.token));
   for (const preset of presets) {
     const presetForRole = preset.customizations.find((c) => c.role === role);
     if (!presetForRole) continue;
-    const relevantRecipe = presetForRole.recipe.filter((e) => availableTokens.has(e.token));
+    const filtered = recipeFilter ? recipeFilter(role, presetForRole.recipe) : presetForRole.recipe;
+    const relevantRecipe = filtered.filter((e) => availableTokens.has(e.token));
     const included = entries.filter((e) => e.included);
     if (included.length !== relevantRecipe.length) continue;
     const matches = included.every(
@@ -175,6 +178,7 @@ export function descriptionSettingsDialog<P>(
       }
       const filteredRoles = config.roles.filter((r) => presentRoles.has(r.value));
       const presets = runtime.customization.listPresets();
+      const rf = runtime.customization.recipeFilter();
 
       const initialEntries = buildFormEntries(runtime, initialRole, navNode);
       const entriesCache = new Map<string, TokenFormEntry[]>();
@@ -183,7 +187,7 @@ export function descriptionSettingsDialog<P>(
       const [selectedRole, setSelectedRole] = createSignal(initialRole);
       const [entries, setEntries] = createSignal<TokenFormEntry[]>(initialEntries);
       const [preset, setPreset] = createSignal<PresetChoice>(
-        detectPreset(presets, initialRole, initialEntries),
+        detectPreset(presets, initialRole, initialEntries, rf),
       );
 
       const nodeForRole = createMemo(() => {
@@ -205,7 +209,7 @@ export function descriptionSettingsDialog<P>(
         }
         const loaded = entriesCache.get(role)!;
         setEntries(loaded);
-        setPreset(detectPreset(presets, role, loaded));
+        setPreset(detectPreset(presets, role, loaded, rf));
       };
 
       const presetChoices = createMemo(() => [
@@ -224,8 +228,9 @@ export function descriptionSettingsDialog<P>(
         const presetForRole = found.customizations.find((c) => c.role === role);
         if (!presetForRole) return;
 
+        const filteredRecipe = rf ? rf(role, presetForRole.recipe) : presetForRole.recipe;
         const recipeMap = new Map(
-          presetForRole.recipe.map((e) => [e.token, e.brevity]),
+          filteredRecipe.map((e) => [e.token, e.brevity]),
         );
         const applicableTokens = runtime.tokens.applicableTo(role);
 
@@ -249,7 +254,7 @@ export function descriptionSettingsDialog<P>(
         };
 
         const newEntries: TokenFormEntry[] = [];
-        for (const entry of presetForRole.recipe) {
+        for (const entry of filteredRecipe) {
           const token = runtime.tokens.byName(entry.token);
           if (token && isTokenApplicable(token, role) && hasOutput(entry.token)) {
             newEntries.push({
@@ -272,7 +277,7 @@ export function descriptionSettingsDialog<P>(
           i === idx ? { ...e, included: !e.included } : e,
         );
         setEntries(newEntries);
-        setPreset(detectPreset(presets, selectedRole(), newEntries));
+        setPreset(detectPreset(presets, selectedRole(), newEntries, rf));
       };
 
       const setBrevity = (idx: number, brevity: Brevity) => {
@@ -280,7 +285,7 @@ export function descriptionSettingsDialog<P>(
           i === idx ? { ...e, brevity } : e,
         );
         setEntries(newEntries);
-        setPreset(detectPreset(presets, selectedRole(), newEntries));
+        setPreset(detectPreset(presets, selectedRole(), newEntries, rf));
       };
 
       const moveToken = (idx: number, direction: -1 | 1) => {
@@ -290,7 +295,7 @@ export function descriptionSettingsDialog<P>(
         if (targetIdx < 0 || targetIdx >= next.length) return;
         [next[idx], next[targetIdx]] = [next[targetIdx]!, next[idx]!];
         setEntries(next);
-        setPreset(detectPreset(presets, selectedRole(), next));
+        setPreset(detectPreset(presets, selectedRole(), next, rf));
       };
 
       const applyChanges = () => {
@@ -310,10 +315,13 @@ export function descriptionSettingsDialog<P>(
           if (found) {
             const presetForRole = found.customizations.find((c) => c.role === role);
             if (presetForRole) {
-              runtime.customization.setFor(role, presetForRole);
+              const filteredPreset = rf
+                ? { ...presetForRole, recipe: rf(role, presetForRole.recipe) }
+                : presetForRole;
+              runtime.customization.setFor(role, filteredPreset);
               const newEntries = buildFormEntries(runtime, role, nodeForRole());
               setEntries(newEntries);
-              setPreset(detectPreset(presets, role, newEntries));
+              setPreset(detectPreset(presets, role, newEntries, rf));
               return;
             }
           }
@@ -321,7 +329,7 @@ export function descriptionSettingsDialog<P>(
         runtime.customization.resetFor(role);
         const newEntries = buildFormEntries(runtime, role, nodeForRole());
         setEntries(newEntries);
-        setPreset(detectPreset(presets, role, newEntries));
+        setPreset(detectPreset(presets, role, newEntries, rf));
       };
 
       return {

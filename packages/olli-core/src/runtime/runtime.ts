@@ -110,6 +110,14 @@ export function createNavigationRuntime<P>(initialGraph: Hypergraph<P>): Navigat
   const tokens = createTokenRegistry<P>();
   registerBuiltinTokens(tokens);
   const customization = createCustomizationStore();
+  customization.setRecipeFilter((role, recipe) => {
+    const graph = hypergraph();
+    const anyMultiParent = [...graph.edges.values()].some(
+      (e) => (e.role ?? '') === role && e.parents.length > 1,
+    );
+    if (anyMultiParent) return recipe;
+    return recipe.filter((entry) => entry.token !== 'parent');
+  });
 
   function getHyperedge(id: HyperedgeId): Hyperedge<P> | undefined {
     return hypergraph().edges.get(id);

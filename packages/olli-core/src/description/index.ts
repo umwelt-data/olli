@@ -26,6 +26,7 @@ export type {
   RecipeEntry,
   Customization,
   CustomizationStore,
+  RecipeFilter,
 } from './customization.js';
 export {
   DEFAULT_RECIPE,

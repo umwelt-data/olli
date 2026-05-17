@@ -30,7 +30,7 @@ describe('describe() — default recipe rendering', () => {
       const desc = rt.getDescriptionFor('root/a')();
       expect(desc).toContain('Group A');
       expect(desc).toContain('1 of 2');
-      expect(desc).toContain('Diagram'); // parent token
+      expect(desc).not.toContain('Diagram'); // parent token excluded for single-parent graph
       expect(desc).toContain('1 child'); // children token
       expect(desc.endsWith('.')).toBe(true);
       expect(desc[0]).toBe(desc[0]!.toUpperCase());
@@ -174,17 +174,17 @@ describe('describe() — virtual parent-context sibling', () => {
       const defaultId = rt.focusedNavId();
       expect(defaultId).toBe(`root/hangs/x${VIRTUAL_SUFFIX}0`);
       const defaultDesc = rt.getDescriptionFor(defaultId)();
-      expect(defaultDesc).toContain('Parent context for Box B1');
+      expect(defaultDesc).toContain('Grouping for Box B1');
       expect(defaultDesc).toContain('Hangs relation');
-      expect(defaultDesc).toContain('(default)');
+      expect(defaultDesc).toContain('(current)');
 
       rt.moveFocus('right');
       const otherId = rt.focusedNavId();
       expect(otherId).toBe(`root/hangs/x${VIRTUAL_SUFFIX}1`);
       const otherDesc = rt.getDescriptionFor(otherId)();
-      expect(otherDesc).toContain('Parent context for Box B1');
+      expect(otherDesc).toContain('Grouping for Box B1');
       expect(otherDesc).toContain('Diagram');
-      expect(otherDesc).not.toContain('(default)');
+      expect(otherDesc).not.toContain('(current)');
       dispose();
     });
   });

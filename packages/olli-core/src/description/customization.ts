@@ -15,6 +15,8 @@ export interface Customization {
   duration: Duration;
 }
 
+export type RecipeFilter = (role: string, recipe: readonly RecipeEntry[]) => readonly RecipeEntry[];
+
 export interface CustomizationStore {
   activeFor(role: string): Accessor<Customization>;
   setFor(role: string, customization: Customization): void;
@@ -23,6 +25,8 @@ export interface CustomizationStore {
   applyPreset(name: string): void;
   activePresetName(): string | null;
   listPresets(): ReadonlyArray<{ name: string; customizations: readonly Customization[] }>;
+  setRecipeFilter(fn: RecipeFilter | null): void;
+  recipeFilter(): RecipeFilter | null;
 }
 
 export const DEFAULT_RECIPE: readonly RecipeEntry[] = [
@@ -48,11 +52,17 @@ export function createCustomizationStore(): CustomizationStore {
   const perRole = new Map<string, { get: Accessor<Customization>; set: Setter<Customization> }>();
   const presets = new Map<string, readonly Customization[]>();
   const [activePreset, setActivePreset] = createSignal<string | null>(null);
+  let filterFn: RecipeFilter | null = null;
+
+  function applyFilter(role: string, c: Customization): Customization {
+    if (!filterFn) return c;
+    return { ...c, recipe: filterFn(role, c.recipe) };
+  }
 
   function ensure(role: string) {
     const existing = perRole.get(role);
     if (existing) return existing;
-    const [get, set] = createSignal<Customization>(defaultCustomizationFor(role));
+    const [get, set] = createSignal<Customization>(applyFilter(role, defaultCustomizationFor(role)));
     const entry = { get, set };
     perRole.set(role, entry);
     return entry;
@@ -66,7 +76,7 @@ export function createCustomizationStore(): CustomizationStore {
       ensure(role).set(() => customization);
     },
     resetFor(role) {
-      ensure(role).set(() => defaultCustomizationFor(role));
+      ensure(role).set(() => applyFilter(role, defaultCustomizationFor(role)));
     },
     registerPreset(name, customizations) {
       presets.set(name, customizations);
@@ -75,7 +85,7 @@ export function createCustomizationStore(): CustomizationStore {
       const preset = presets.get(name);
       if (!preset) throw new Error(`unknown preset: ${name}`);
       for (const customization of preset) {
-        ensure(customization.role).set(() => customization);
+        ensure(customization.role).set(() => applyFilter(customization.role, customization));
       }
       setActivePreset(name);
     },
@@ -84,6 +94,12 @@ export function createCustomizationStore(): CustomizationStore {
     },
     listPresets() {
       return [...presets.entries()].map(([name, customizations]) => ({ name, customizations }));
+    },
+    setRecipeFilter(fn) {
+      filterFn = fn;
+    },
+    recipeFilter() {
+      return filterFn;
     },
   };
 }

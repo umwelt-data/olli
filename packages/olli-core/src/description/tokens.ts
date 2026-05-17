@@ -81,7 +81,7 @@ export function nameToken<P>(): DescriptionToken<P> {
     applicableRoles: '*',
     compute: ({ navNode, edge }) => {
       if (navNode.kind === 'virtualParentContext') {
-        return { short: 'Parent context', long: 'Parent context' };
+        return { short: 'Grouping', long: 'Grouping' };
       }
       if (!edge) return { short: '', long: '' };
       const short = edge.displayName;
@@ -125,12 +125,16 @@ export function parentToken<P>(): DescriptionToken<P> {
   return {
     name: 'parent',
     applicableRoles: '*',
-    compute: ({ navNode, runtime, hypergraph }) => {
+    compute: ({ navNode, edge, runtime, hypergraph }) => {
       if (!navNode.parentNavId) return { short: '', long: '' };
       const parent = runtime.getNavNode(navNode.parentNavId);
       if (!parent || parent.hyperedgeId === null) return { short: '', long: '' };
       const parentEdge = hypergraph.edges.get(parent.hyperedgeId);
       const name = parentEdge?.displayName ?? '';
+      if (!name) return { short: '', long: '' };
+      if (edge && edge.parents.length > 1) {
+        return { short: `grouping: ${name}`, long: `current grouping: ${name}` };
+      }
       return { short: name, long: `parent: ${name}` };
     },
   };
@@ -175,10 +179,10 @@ export function parentContextToken<P>(): DescriptionToken<P> {
         ? hypergraph.edges.get(targetEdgeId)?.displayName ?? ''
         : '';
 
-      const isDefault = optionIndexOfVirtual(navNode.navId) === 0;
-      const suffix = isDefault ? ' (default)' : '';
-      const short = `Parent context: ${targetName}${suffix}`;
-      const long = `Parent context for ${sourceName}: ${targetName}${suffix}`;
+      const isCurrent = optionIndexOfVirtual(navNode.navId) === 0;
+      const suffix = isCurrent ? ' (current)' : '';
+      const short = `Grouping: ${targetName}${suffix}`;
+      const long = `Grouping for ${sourceName}: ${targetName}${suffix}`;
       return { short, long };
     },
   };

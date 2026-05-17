@@ -5,7 +5,7 @@ type RoleTokens = Record<OlliNodeType, string[]>;
 
 const roleTokenMap: RoleTokens = {
   root: ['name', 'visType', 'visSize', 'children'],
-  view: ['name', 'visType', 'children'],
+  view: ['visType', 'name', 'children'],
   xAxis: ['name', 'visType', 'visData', 'parent', 'aggregate'],
   yAxis: ['name', 'visType', 'visData', 'parent', 'aggregate'],
   legend: ['name', 'visType', 'visData', 'parent', 'aggregate'],
@@ -39,7 +39,7 @@ function makePreset(
 
 const detailedRoles: RoleTokens = {
   root: ['name', 'visType', 'visSize', 'children'],
-  view: ['name', 'visType', 'children'],
+  view: ['visType', 'name', 'children'],
   xAxis: ['name', 'visType', 'visData', 'parent', 'aggregate'],
   yAxis: ['name', 'visType', 'visData', 'parent', 'aggregate'],
   legend: ['name', 'visType', 'visData', 'parent', 'aggregate'],
@@ -51,7 +51,7 @@ const detailedRoles: RoleTokens = {
 
 const standardRoles: RoleTokens = {
   root: ['name', 'visType', 'children'],
-  view: ['name', 'visType'],
+  view: ['visType', 'name'],
   xAxis: ['name', 'visData', 'aggregate'],
   yAxis: ['name', 'visData', 'aggregate'],
   legend: ['name', 'visData', 'aggregate'],

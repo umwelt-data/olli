@@ -35,7 +35,7 @@ export function nameToken(): DescriptionToken<VisPayload> {
     applicableRoles: '*' as const,
     compute: (ctx: Ctx) => {
       if (ctx.navNode.kind === 'virtualParentContext') {
-        return { short: 'Parent context', long: 'Parent context' };
+        return { short: 'Grouping', long: 'Grouping' };
       }
       const p = ctx.edge?.payload;
       if (!p) {
@@ -54,7 +54,7 @@ export function nameToken(): DescriptionToken<VisPayload> {
           if (p.predicate && 'equal' in p.predicate) {
             const fd = getFieldDef(p.predicate.field, spec.fields ?? []);
             const s = `titled ${fmtDataValue(p.predicate.equal as OlliValue, fd)}`;
-            return { short: s, long: s };
+            return { short: s, long: s, joinHint: 'clause' };
           }
           return { short: '', long: '' };
         }
@@ -100,13 +100,27 @@ export function visTypeToken(): DescriptionToken<VisPayload> {
       const joinHint: JoinHint = 'clause';
       switch (p.nodeType) {
         case 'root': {
-          const ct = getChartType(spec);
+          const childTypes: string[] = [];
+          for (const childId of ctx.navNode.childNavIds) {
+            const childNode = ctx.runtime.getNavNode(childId);
+            if (!childNode?.hyperedgeId) continue;
+            const childEdge = ctx.hypergraph.edges.get(childNode.hyperedgeId);
+            if (childEdge?.payload?.nodeType === 'view' && childEdge.payload.spec) {
+              childTypes.push(getChartType(childEdge.payload.spec));
+            }
+          }
+          const unique = [...new Set(childTypes)];
+          const ct = unique.length > 1
+            ? unique.join(' and ')
+            : getChartType(spec);
           const s = `a ${ct}`;
           return { short: s, long: s, joinHint };
         }
         case 'view': {
-          const viewName = spec.mark ?? p.viewType ?? 'view';
-          const s = `a ${viewName}`;
+          const ct = (p.viewType === 'facet' && spec.mark === 'line')
+            ? 'line'
+            : getChartType(spec);
+          const s = `a ${ct}`;
           return { short: s, long: s, joinHint };
         }
         case 'xAxis':
@@ -352,6 +366,9 @@ export function parentToken(): DescriptionToken<VisPayload> {
       const parentEdge = ctx.hypergraph.edges.get(parent.hyperedgeId);
       const name = parentEdge?.displayName ?? '';
       if (!name) return { short: '', long: '' };
+      if (ctx.edge && ctx.edge.parents.length > 1) {
+        return { short: `grouping: ${name}`, long: `current grouping: ${name}` };
+      }
       return { short: name, long: `parent: ${name}` };
     },
   };
