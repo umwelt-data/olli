@@ -1,4 +1,5 @@
 import { For, Show, createSignal, createMemo } from 'solid-js';
+import { parseInlineCode } from './NodeLabel';
 import type {
   DialogContribution,
   DialogRenderResult,
@@ -7,8 +8,9 @@ import type {
   Customization,
   RecipeEntry,
   Brevity,
+  JoinHint,
 } from 'olli-core';
-import { isTokenApplicable } from 'olli-core';
+import { isTokenApplicable, assembleParts } from 'olli-core';
 
 interface TokenFormEntry {
   token: string;
@@ -136,16 +138,16 @@ function computePreview<P>(
     fullPredicate: runtime.fullPredicate(navNode.navId),
   };
 
-  const parts: string[] = [];
+  const parts: { text: string; joinHint: JoinHint }[] = [];
   for (const entry of entries) {
     if (!entry.included) continue;
     const token = runtime.tokens.byName(entry.token);
     if (!token || !isTokenApplicable(token, role)) continue;
     const value = token.compute(ctx);
-    const s = entry.brevity === 'long' ? value.long : value.short;
-    if (s) parts.push(s);
+    const text = entry.brevity === 'long' ? value.long : value.short;
+    if (text) parts.push({ text, joinHint: value.joinHint ?? 'sentence' });
   }
-  return parts.join('. ');
+  return assembleParts(parts);
 }
 
 function findNavNodeForRole<P>(runtime: NavigationRuntime<P>, role: string): NavNode | undefined {
@@ -339,7 +341,7 @@ export function descriptionSettingsDialog<P>(
             </label>
 
             <div role="status" aria-live="polite" class="olli-description-preview">
-              Preview: {preview() || '(empty)'}
+              Preview: {preview() ? parseInlineCode(preview()!) : '(empty)'}
             </div>
 
             <Show when={hasPresets}>

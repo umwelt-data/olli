@@ -1,7 +1,7 @@
 import { type JSX } from 'solid-js';
 import type { NavigationRuntime, NavNodeId } from 'olli-core';
 
-function parseInlineCode(text: string): JSX.Element[] {
+export function parseInlineCode(text: string): JSX.Element[] {
   const parts: JSX.Element[] = [];
   const regex = /`([^`]+)`/g;
   let lastIndex = 0;
