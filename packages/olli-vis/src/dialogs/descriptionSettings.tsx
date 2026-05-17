@@ -39,6 +39,7 @@ const TOKEN_DESCRIPTIONS: Record<string, string> = {
 export function descriptionSettingsDialog(): DialogContribution<VisPayload> {
   return sharedDialog<VisPayload>({
     roles: ALL_ROLES.map((r) => ({ value: r, label: ROLE_LABELS[r] })),
+    defaultPreset: 'standard',
     tokenLabels: TOKEN_LABELS,
     tokenDescriptions: TOKEN_DESCRIPTIONS,
     roleForNode: (runtime, navNode) => {

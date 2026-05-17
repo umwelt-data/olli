@@ -18,6 +18,7 @@ interface TokenFormEntry {
 
 export interface DescriptionSettingsConfig {
   roles: ReadonlyArray<{ value: string; label: string }>;
+  defaultPreset?: string;
   tokenLabels?: Record<string, string>;
   tokenDescriptions?: Record<string, string>;
   roleForNode: (runtime: NavigationRuntime<any>, navNode: NavNode) => string;
@@ -174,6 +175,9 @@ export function descriptionSettingsDialog<P>(
       const presets = runtime.customization.listPresets();
 
       const initialEntries = buildFormEntries(runtime, initialRole, navNode);
+      const entriesCache = new Map<string, TokenFormEntry[]>();
+      entriesCache.set(initialRole, initialEntries);
+
       const [selectedRole, setSelectedRole] = createSignal(initialRole);
       const [entries, setEntries] = createSignal<TokenFormEntry[]>(initialEntries);
       const [preset, setPreset] = createSignal<PresetChoice>(
@@ -191,11 +195,15 @@ export function descriptionSettingsDialog<P>(
       );
 
       const handleRoleChange = (role: string) => {
+        entriesCache.set(selectedRole(), entries());
         setSelectedRole(role);
-        const repNode = role === initialRole ? navNode : (findNavNodeForRole(runtime, role) ?? navNode);
-        const newEntries = buildFormEntries(runtime, role, repNode);
-        setEntries(newEntries);
-        setPreset(detectPreset(presets, role, newEntries));
+        if (!entriesCache.has(role)) {
+          const repNode = role === initialRole ? navNode : (findNavNodeForRole(runtime, role) ?? navNode);
+          entriesCache.set(role, buildFormEntries(runtime, role, repNode));
+        }
+        const loaded = entriesCache.get(role)!;
+        setEntries(loaded);
+        setPreset(detectPreset(presets, role, loaded));
       };
 
       const presetChoices = createMemo(() => [
@@ -284,24 +292,30 @@ export function descriptionSettingsDialog<P>(
       };
 
       const applyChanges = () => {
-        const role = selectedRole();
-        if (preset() !== 'custom') {
-          runtime.customization.applyPreset(preset());
-        } else {
-          const recipe: RecipeEntry[] = entries()
+        entriesCache.set(selectedRole(), entries());
+        for (const [role, roleEntries] of entriesCache) {
+          const recipe: RecipeEntry[] = roleEntries
             .filter((e) => e.included)
             .map((e) => ({ token: e.token, brevity: e.brevity }));
-          const customization: Customization = {
-            role,
-            recipe,
-            duration: 'persistent',
-          };
-          runtime.customization.setFor(role, customization);
+          runtime.customization.setFor(role, { role, recipe, duration: 'persistent' });
         }
       };
 
       const resetToDefault = () => {
         const role = selectedRole();
+        if (config.defaultPreset) {
+          const found = presets.find((p) => p.name === config.defaultPreset);
+          if (found) {
+            const presetForRole = found.customizations.find((c) => c.role === role);
+            if (presetForRole) {
+              runtime.customization.setFor(role, presetForRole);
+              const newEntries = buildFormEntries(runtime, role, nodeForRole());
+              setEntries(newEntries);
+              setPreset(detectPreset(presets, role, newEntries));
+              return;
+            }
+          }
+        }
         runtime.customization.resetFor(role);
         const newEntries = buildFormEntries(runtime, role, nodeForRole());
         setEntries(newEntries);
