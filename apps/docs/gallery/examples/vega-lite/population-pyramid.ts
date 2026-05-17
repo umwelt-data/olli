@@ -14,7 +14,7 @@ export const populationPyramid: VisualizationExample = {
     transform: [
       { filter: 'datum.year == 2000' },
       { calculate: "datum.sex == 2 ? 'Female' : 'Male'", as: 'gender' },
-      { calculate: 'datum.sex == 2 ? -datum.people : datum.people', as: 'signed_people' },
+      { calculate: 'datum.sex == 2 ? -datum.people : datum.people', as: 'people' },
     ],
     width: 300,
     height: 200,
@@ -22,11 +22,11 @@ export const populationPyramid: VisualizationExample = {
     encoding: {
       x: {
         aggregate: 'sum',
-        field: 'signed_people',
+        field: 'people',
         title: 'population',
         axis: { format: 's' },
       },
-      y: { field: 'age', axis: null, sort: 'descending' },
+      y: { field: 'age', type: "ordinal", axis: null, sort: 'descending' },
       color: {
         field: 'gender',
         scale: { range: ['#675193', '#ca8861'] },
