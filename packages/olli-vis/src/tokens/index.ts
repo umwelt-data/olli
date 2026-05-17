@@ -1,8 +1,8 @@
 import type { DescriptionToken, JoinHint, TokenContext } from 'olli-core';
 import { selectionTest } from 'olli-core';
-import type { VisPayload, OlliNodeType, UnitOlliVisSpec, OlliValue } from '../spec/types.js';
+import type { VisPayload, OlliNodeType, UnitOlliVisSpec, OlliValue, OlliFieldDef } from '../spec/types.js';
 import { getFieldDef, getDomain, getBins } from '../util/data.js';
-import { fmtDataValue, wrapForMonospace, pluralize, averageValue, ordinalSuffix } from '../util/values.js';
+import { fmtDataValue, wrapForMonospace, pluralize, averageValue, ordinalSuffix, dataPrecision } from '../util/values.js';
 import { predicateToDescription } from '../lower/describe.js';
 
 type Ctx = TokenContext<VisPayload>;
@@ -236,6 +236,10 @@ export function visSizeToken(): DescriptionToken<VisPayload> {
   };
 }
 
+function isValueField(fd: OlliFieldDef): boolean {
+  return fd.type === 'quantitative' && !fd.bin;
+}
+
 export function visAggregateToken(): DescriptionToken<VisPayload> {
   return {
     name: 'aggregate',
@@ -245,29 +249,55 @@ export function visAggregateToken(): DescriptionToken<VisPayload> {
       if (!p) return { short: '', long: '' };
       const spec = p.spec;
       const data = spec.selection ? selectionTest(spec.data, spec.selection) : spec.data;
+      const fields = spec.fields ?? [];
 
-      let fd = p.groupby ? getFieldDef(p.groupby, spec.fields ?? []) : undefined;
-      if (!fd || fd.type !== 'quantitative') {
-        const axisType = p.nodeType === 'xAxis' ? 'x' : 'y';
-        const otherAxis = spec.axes?.find((a) => a.axisType !== axisType);
-        if (!otherAxis) return { short: '', long: '' };
-        fd = getFieldDef(otherAxis.field, spec.fields ?? []);
-        if (fd.type !== 'quantitative') return { short: '', long: '' };
+      let targetFields: OlliFieldDef[];
+
+      if (p.groupby) {
+        const fd = getFieldDef(p.groupby, fields);
+        if (!isValueField(fd)) return { short: '', long: '' };
+        targetFields = [fd];
+      } else {
+        const predField = p.predicate?.field;
+        const predFd = predField ? getFieldDef(predField, fields) : undefined;
+        if (predFd && isValueField(predFd)) {
+          targetFields = [predFd];
+        } else {
+          const allGuideFields = [
+            ...(spec.axes ?? []).map((a) => a.field),
+            ...(spec.legends ?? []).map((l) => l.field),
+            ...(spec.guides ?? []).map((g) => g.field),
+          ];
+          targetFields = [...new Set(allGuideFields)]
+            .map((f) => getFieldDef(f, fields))
+            .filter(isValueField);
+          if (targetFields.length === 0) return { short: '', long: '' };
+        }
       }
 
-      const label = fd.label ?? fd.field;
       const selection = selectionTest(data, ctx.fullPredicate);
       if (selection.length === 0) return { short: '', long: '' };
-      if (selection.length === 1) {
-        const s = `the ${wrapForMonospace(label)} value is ${fmtDataValue(selection[0]![fd.field]!, fd)}`;
-        return { short: s, long: s };
+
+      const shortParts: string[] = [];
+      const longParts: string[] = [];
+
+      for (const fd of targetFields) {
+        const label = fd.label ?? fd.field;
+        if (selection.length === 1) {
+          const s = `the ${wrapForMonospace(label)} value is ${fmtDataValue(selection[0]![fd.field]!, fd)}`;
+          shortParts.push(s);
+          longParts.push(s);
+        } else {
+          const precision = dataPrecision(selection, fd.field);
+          const avg = averageValue(selection, fd.field);
+          const max = selection.reduce((a, b) => Math.max(a, Number(b[fd.field])), Number(selection[0]![fd.field]));
+          const min = selection.reduce((a, b) => Math.min(a, Number(b[fd.field])), Number(selection[0]![fd.field]));
+          shortParts.push(`avg ${wrapForMonospace(label)}: ${fmtDataValue(avg, fd, precision)}`);
+          longParts.push(`the average value for the ${wrapForMonospace(label)} field is ${fmtDataValue(avg, fd, precision)}, the maximum is ${fmtDataValue(max, fd, precision)}, and the minimum is ${fmtDataValue(min, fd, precision)}`);
+        }
       }
-      const avg = averageValue(selection, fd.field);
-      const max = selection.reduce((a, b) => Math.max(a, Number(b[fd.field])), Number(selection[0]![fd.field]));
-      const min = selection.reduce((a, b) => Math.min(a, Number(b[fd.field])), Number(selection[0]![fd.field]));
-      const short = `avg ${wrapForMonospace(label)}: ${fmtDataValue(avg, fd)}`;
-      const long = `the average value for the ${wrapForMonospace(label)} field is ${fmtDataValue(avg, fd)}, the maximum is ${fmtDataValue(max, fd)}, and the minimum is ${fmtDataValue(min, fd)}`;
-      return { short, long };
+
+      return { short: shortParts.join(', '), long: longParts.join('; ') };
     },
   };
 }

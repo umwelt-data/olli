@@ -83,7 +83,7 @@ describe('vis tokens', () => {
     });
   });
 
-  it('aggregate token computes values for xAxis node', () => {
+  it('aggregate token shows on value axis but not key axis', () => {
     createRoot((dispose) => {
       const runtime = setup();
       runtime.customization.applyPreset('detailed');
@@ -94,9 +94,15 @@ describe('vis tokens', () => {
         const edge = runtime.getHyperedge(node.hyperedgeId!)!;
         return edge.payload?.nodeType === 'xAxis';
       })!;
-      const desc = runtime.getDescriptionFor(xAxisNavId)();
-      // xAxis description should include aggregate info about the quantitative field
-      expect(desc).toContain('average');
+      const yAxisNavId = rootNode.childNavIds.find((id) => {
+        const node = runtime.getNavNode(id)!;
+        const edge = runtime.getHyperedge(node.hyperedgeId!)!;
+        return edge.payload?.nodeType === 'yAxis';
+      })!;
+      const xDesc = runtime.getDescriptionFor(xAxisNavId)();
+      const yDesc = runtime.getDescriptionFor(yAxisNavId)();
+      expect(xDesc).not.toContain('average');
+      expect(yDesc).toContain('average');
       dispose();
     });
   });

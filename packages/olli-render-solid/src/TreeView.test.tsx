@@ -242,11 +242,11 @@ describe('<TreeView /> — virtual parent-context siblings', () => {
     expect(virtuals[1]!.getAttribute('aria-posinset')).toBe('2');
 
     const label0 = virtuals[0]!.querySelector(':scope > .olli-node-label')!.textContent ?? '';
-    expect(label0).toContain('Parent context for Box B1');
+    expect(label0).toContain('Grouping for Box B1');
     expect(label0).toContain('Hangs relation');
-    expect(label0).toContain('(default)');
+    expect(label0).toContain('(current)');
     const label1 = virtuals[1]!.querySelector(':scope > .olli-node-label')!.textContent ?? '';
-    expect(label1).toContain('Parent context for Box B1');
+    expect(label1).toContain('Grouping for Box B1');
     expect(label1).toContain('Diagram');
 
     // Virtuals live in the "hangs" node's group, not in "x"'s group.
@@ -593,7 +593,7 @@ describe('<TreeView /> — reactivity', () => {
 
     const virtual = container.querySelector<HTMLElement>('[data-virtual="true"]')!;
     const virtualLabel = virtual.querySelector('.olli-node-label')!.textContent ?? '';
-    expect(virtualLabel).toContain('Parent context for Box B1');
+    expect(virtualLabel).toContain('Grouping for Box B1');
     expect(VIRTUAL_ROLE).toBe('__virtualParentContext__');
   });
 });

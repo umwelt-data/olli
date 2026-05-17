@@ -33,6 +33,6 @@ export type {
 export { isMultiSpec } from './spec/types.js';
 export { elaborateSpec } from './spec/elaborate.js';
 export { inferStructure } from './spec/infer.js';
-export { fmtValue, serializeValue, pluralize, averageValue, ordinalSuffix, capitalizeFirst, removeFinalPeriod, wrapForMonospace as fieldName } from './util/values.js';
+export { fmtValue, serializeValue, pluralize, averageValue, dataPrecision, ordinalSuffix, capitalizeFirst, removeFinalPeriod, wrapForMonospace as fieldName } from './util/values.js';
 export { getFieldDef, getDomain, getBins, fieldToPredicates } from './util/data.js';
 export { typeInference } from './util/types.js';

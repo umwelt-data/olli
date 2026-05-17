@@ -9,6 +9,7 @@ export {
   capitalizeFirst,
   removeFinalPeriod,
   averageValue,
+  dataPrecision,
   wrapForMonospace as fieldName,
   fmtDataValue,
 } from './values.js';

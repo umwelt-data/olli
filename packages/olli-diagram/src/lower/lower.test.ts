@@ -350,7 +350,7 @@ describe('pulley navigation — multi-parent ascent', () => {
       expect(ids).toHaveLength(2);
       const d0 = rt.getDescriptionFor(ids[0]!)();
       expect(d0).toContain('Pulley System A');
-      expect(d0).toContain('(default)');
+      expect(d0).toContain('(current)');
       const d1 = rt.getDescriptionFor(ids[1]!)();
       expect(d1).toContain('Pulley A hangs from Rope q');
       dispose();

@@ -1,6 +1,6 @@
-import type { OlliFieldDef, OlliTimeUnit, OlliValue } from '../spec/types.js';
+import type { OlliDataset, OlliFieldDef, OlliTimeUnit, OlliValue } from '../spec/types.js';
 
-export function fmtValue(value: OlliValue, fieldDef: OlliFieldDef): string {
+export function fmtValue(value: OlliValue, fieldDef: OlliFieldDef, precision?: number): string {
   if (fieldDef.type === 'temporal' && !(value instanceof Date)) {
     value = new Date(value);
   } else if (fieldDef.type === 'quantitative' && isNumeric(String(value))) {
@@ -9,8 +9,13 @@ export function fmtValue(value: OlliValue, fieldDef: OlliFieldDef): string {
   if (value instanceof Date) {
     return dateToTimeUnit(value, fieldDef.timeUnit);
   }
-  if (typeof value === 'number' && !isNaN(value) && value % 1 !== 0) {
-    return value.toFixed(2);
+  if (typeof value === 'number' && !isNaN(value)) {
+    if (precision !== undefined) {
+      return value.toFixed(precision);
+    }
+    if (value % 1 !== 0) {
+      return value.toFixed(Math.max(2, minPrecisionForValue(value)));
+    }
   }
   return String(value);
 }
@@ -48,6 +53,30 @@ export function isNumeric(value: string): boolean {
   return !isNaN(Number(value.replaceAll(',', '')));
 }
 
+export function minPrecisionForValue(value: number): number {
+  if (value === 0 || Math.abs(value) >= 1) return 0;
+  return -Math.floor(Math.log10(Math.abs(value)));
+}
+
+export function dataPrecision(data: OlliDataset, field: string): number {
+  let maxDecimals = 0;
+  let maxMinPrecision = 0;
+  for (const row of data) {
+    const val = row[field];
+    if (val == null) continue;
+    const str = String(val);
+    const dotIndex = str.indexOf('.');
+    if (dotIndex >= 0) {
+      maxDecimals = Math.max(maxDecimals, str.length - dotIndex - 1);
+    }
+    const num = Number(val);
+    if (!isNaN(num)) {
+      maxMinPrecision = Math.max(maxMinPrecision, minPrecisionForValue(num));
+    }
+  }
+  return Math.min(maxDecimals, Math.max(2, maxMinPrecision));
+}
+
 export function pluralize(count: number, noun: string, suffix = 's'): string {
   return `${count} ${noun}${count !== 1 ? suffix : ''}`;
 }
@@ -67,10 +96,10 @@ export function wrapForMonospace(name: string): string {
   return '`' + name + '`';
 }
 
-export function fmtDataValue(value: OlliValue, fieldDef: OlliFieldDef): string {
-  return wrapForMonospace(fmtValue(value, fieldDef));
+export function fmtDataValue(value: OlliValue, fieldDef: OlliFieldDef, precision?: number): string {
+  return wrapForMonospace(fmtValue(value, fieldDef, precision));
 }
 
-export function averageValue(data: Record<string, unknown>[], field: string): number {
-  return Math.round(data.reduce((a, b) => a + Number(b[field]), 0) / data.length);
+export function averageValue(data: OlliDataset, field: string): number {
+  return data.reduce((a, b) => a + Number(b[field]), 0) / data.length;
 }
