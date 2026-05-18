@@ -183,6 +183,21 @@ describe('VegaLiteAdapter', () => {
     }
   }, 30000);
 
+  // Stacked area y-axis intentionally has 0 children: the y-axis ticks represent
+  // stacked cumulative totals (0–15000) but per-row sum_count values are individual
+  // series contributions (2–2440). Binning by either scale would produce misleading
+  // highlights — per-series bins don't map to visual positions, and stacked-total bins
+  // would lump nearly all rows into the first bucket.
+  it('stacked-area-chart y-axis has no children (stacked axis)', async () => {
+    const example = vlExamples.find(e => e.id === 'stacked-area-chart')!;
+    const olliSpec = await VegaLiteAdapter(example.spec) as UnitOlliVisSpec;
+    const graph = lowerVisSpec(olliSpec);
+    const yAxes = [...graph.edges.values()].filter(e => e.role === 'yAxis');
+
+    expect(yAxes.length).toBe(1);
+    expect(yAxes[0]!.children.length).toBe(0);
+  }, 30000);
+
   describe('structure regression', () => {
     for (const example of vlExamples) {
       it(`${example.id}`, async () => {
