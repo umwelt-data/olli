@@ -140,6 +140,49 @@ describe('VegaLiteAdapter', () => {
     expect(typeof olliSpec.data[0]!.price).toBe('number');
   }, 30000);
 
+  it('histogram bins have filteredData children', async () => {
+    const example = vlExamples.find(e => e.id === 'histogram')!;
+    const olliSpec = await VegaLiteAdapter(example.spec) as UnitOlliVisSpec;
+    const graph = lowerVisSpec(olliSpec);
+    const root = graph.edges.get(graph.roots[0]!)!;
+    expect(root.children.length).toBeGreaterThan(0);
+    for (const childId of root.children) {
+      const child = graph.edges.get(childId)!;
+      expect(child.role).toBe('filteredData');
+    }
+  }, 30000);
+
+  it('concat chart scatterplot x and y axes have filteredData children', async () => {
+    const example = vlExamples.find(e => e.id === 'concat-chart')!;
+    const olliSpec = await VegaLiteAdapter(example.spec);
+    expect('operator' in olliSpec).toBe(true);
+    if ('operator' in olliSpec) {
+      const scatterUnit = olliSpec.units[1]!;
+      const graph = lowerVisSpec(scatterUnit);
+      const xAxes = [...graph.edges.values()].filter(e => e.role === 'xAxis');
+      const yAxes = [...graph.edges.values()].filter(e => e.role === 'yAxis');
+      expect(xAxes.length).toBeGreaterThan(0);
+      expect(yAxes.length).toBeGreaterThan(0);
+      for (const axis of [...xAxes, ...yAxes]) {
+        expect(axis.children.length).toBeGreaterThan(0);
+      }
+    }
+  }, 30000);
+
+  it('area chart x-axis has tick-based bins, not one per month', async () => {
+    const example = vlExamples.find(e => e.id === 'area-chart')!;
+    const olliSpec = await VegaLiteAdapter(example.spec) as UnitOlliVisSpec;
+    const graph = lowerVisSpec(olliSpec);
+    const xAxes = [...graph.edges.values()].filter(e => e.role === 'xAxis');
+    expect(xAxes.length).toBe(1);
+    expect(xAxes[0]!.children.length).toBeGreaterThan(0);
+    expect(xAxes[0]!.children.length).toBeLessThan(20);
+    for (const childId of xAxes[0]!.children) {
+      const child = graph.edges.get(childId)!;
+      expect(child.role).toBe('filteredData');
+    }
+  }, 30000);
+
   describe('structure regression', () => {
     for (const example of vlExamples) {
       it(`${example.id}`, async () => {

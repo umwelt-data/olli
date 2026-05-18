@@ -22,11 +22,30 @@ describe('testDatum', () => {
     expect(testDatum({ x: 5 }, { field: 'x', gte: 5 })).toBe(true);
   });
 
-  it('range inclusive by default', () => {
+  it('range inclusive by default [lo, hi]', () => {
+    expect(testDatum({ x: 1 }, { field: 'x', range: [1, 5] })).toBe(true);
     expect(testDatum({ x: 5 }, { field: 'x', range: [1, 5] })).toBe(true);
-    expect(
-      testDatum({ x: 5 }, { field: 'x', range: [1, 5], inclusive: false }),
-    ).toBe(false);
+    expect(testDatum({ x: 3 }, { field: 'x', range: [1, 5] })).toBe(true);
+    expect(testDatum({ x: 0 }, { field: 'x', range: [1, 5] })).toBe(false);
+    expect(testDatum({ x: 6 }, { field: 'x', range: [1, 5] })).toBe(false);
+  });
+
+  it('range right-exclusive [lo, hi)', () => {
+    expect(testDatum({ x: 1 }, { field: 'x', range: [1, 5], inclusiveRight: false })).toBe(true);
+    expect(testDatum({ x: 3 }, { field: 'x', range: [1, 5], inclusiveRight: false })).toBe(true);
+    expect(testDatum({ x: 5 }, { field: 'x', range: [1, 5], inclusiveRight: false })).toBe(false);
+  });
+
+  it('range left-exclusive (lo, hi]', () => {
+    expect(testDatum({ x: 1 }, { field: 'x', range: [1, 5], inclusiveLeft: false })).toBe(false);
+    expect(testDatum({ x: 3 }, { field: 'x', range: [1, 5], inclusiveLeft: false })).toBe(true);
+    expect(testDatum({ x: 5 }, { field: 'x', range: [1, 5], inclusiveLeft: false })).toBe(true);
+  });
+
+  it('range fully exclusive (lo, hi)', () => {
+    expect(testDatum({ x: 1 }, { field: 'x', range: [1, 5], inclusiveLeft: false, inclusiveRight: false })).toBe(false);
+    expect(testDatum({ x: 3 }, { field: 'x', range: [1, 5], inclusiveLeft: false, inclusiveRight: false })).toBe(true);
+    expect(testDatum({ x: 5 }, { field: 'x', range: [1, 5], inclusiveLeft: false, inclusiveRight: false })).toBe(false);
   });
 
   it('oneOf', () => {

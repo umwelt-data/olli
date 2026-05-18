@@ -67,6 +67,13 @@ export function getBins(
   const domain = getDomain(fieldDef, data);
   if (domain.length === 0) return [];
 
+  if (fieldDef.bin && field.startsWith('bin_')) {
+    return domain.map((v) => {
+      const end = data.find((d) => d[field] === v)?.[field + '_end'];
+      return [Number(v), Number(end)] as [number, number];
+    });
+  }
+
   let tickValues: number[] | undefined;
 
   if (ticks) {
@@ -78,11 +85,6 @@ export function getBins(
     const step = (max - min) / n;
     tickValues = [];
     for (let i = 0; i <= n; i++) tickValues.push(min + step * i);
-  } else if (fieldDef.bin && field.startsWith('bin_')) {
-    return domain.map((v) => {
-      const end = data.find((d) => d[field] === v)?.[field + '_end'];
-      return [Number(v), Number(end)] as [number, number];
-    });
   } else {
     const min = Number(domain[0]);
     const max = Number(domain[domain.length - 1]!);
@@ -128,12 +130,13 @@ export function getBinPredicates(
   data: OlliDataset,
   fields: OlliFieldDef[],
   ticks?: OlliValue[],
-): Array<FieldPredicate & { inclusive?: boolean }> {
+): FieldPredicate[] {
   const bins = getBins(field, data, fields, ticks);
   return bins.map((bin, idx) => ({
     field,
     range: bin as [number, number],
-    inclusive: idx === bins.length - 1,
+    inclusiveLeft: true,
+    inclusiveRight: idx === bins.length - 1,
   }));
 }
 
@@ -144,11 +147,7 @@ export function fieldToPredicates(
   ticks?: OlliValue[],
 ): FieldPredicate[] {
   const fieldDef = getFieldDef(field, fields);
-  if (
-    fieldDef.type === 'nominal' ||
-    fieldDef.type === 'ordinal' ||
-    fieldDef.timeUnit
-  ) {
+  if (fieldDef.type === 'nominal' || fieldDef.type === 'ordinal') {
     const domain = getDomain(fieldDef, data);
     return domain.map((value) => ({
       field,
