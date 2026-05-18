@@ -26,6 +26,13 @@ function getChartType(spec: UnitOlliVisSpec): string {
     );
     if (hasQuant && noTemporal) return 'dotplot';
   }
+  if (spec.mark === 'rect') {
+    const colorLegend = spec.legends?.find((l) => l.channel === 'color');
+    if (colorLegend) {
+      const fd = getFieldDef(colorLegend.field, spec.fields ?? []);
+      if (fd.type === 'quantitative') return 'heatmap';
+    }
+  }
   return `${spec.mark} chart`;
 }
 
