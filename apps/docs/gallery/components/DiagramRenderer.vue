@@ -17,16 +17,15 @@ let disposeBridge: (() => void) | undefined;
 async function mountDiagram() {
   if (!chartContainer.value || !treeContainer.value) return;
 
-  const [utils, olliJs] = await Promise.all([
-    import('@umwelt-data/umwelt-utils'),
+  const [{ render, elements }, { createBluefishBridge }, olliJs] = await Promise.all([
+    props.example.children(),
+    import('@umwelt-data/umwelt-utils/bluefish-bridge'),
     import('olli'),
   ]);
 
-  const { svgElement, destroy } = await utils.mountBluefish(
-    chartContainer.value,
-    props.example.children,
-  );
-  destroyMount = destroy;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  destroyMount = render(() => elements as any, chartContainer.value);
+  const svgElement = chartContainer.value.querySelector('svg') as SVGSVGElement;
 
   handle = olliJs.olliDiagram(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,8 +33,7 @@ async function mountDiagram() {
     treeContainer.value,
   );
 
-  const bridge = utils.createBluefishBridge({ handle, svgElement });
-  disposeBridge = bridge.destroy;
+  disposeBridge = createBluefishBridge({ handle, svgElement }).destroy;
 
   if (import.meta.env.DEV) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

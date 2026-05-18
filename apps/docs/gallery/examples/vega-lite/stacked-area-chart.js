@@ -1,0 +1,21 @@
+export const stackedAreaChart = {
+    id: 'stacked-area-chart',
+    title: 'Stacked area chart',
+    domain: 'visualization',
+    toolkit: 'vega-lite',
+    tags: ['area', 'stacked', 'temporal'],
+    description: 'Unemployment across industries, stacked by series.',
+    spec: {
+        $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+        width: 300,
+        height: 200,
+        data: { url: 'https://raw.githubusercontent.com/vega/vega-datasets/next/data/unemployment-across-industries.json' },
+        mark: { type: 'area', line: true, point: true },
+        encoding: {
+            x: { timeUnit: 'yearmonth', field: 'date', axis: { format: '%Y' } },
+            y: { aggregate: 'sum', field: 'count' },
+            color: { field: 'series', scale: { scheme: 'category20b' } },
+        },
+    },
+};
+//# sourceMappingURL=stacked-area-chart.js.map

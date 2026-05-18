@@ -33,7 +33,7 @@ export function VisualizationRenderer(props: { example: VisualizationExample }) 
           const [vega, vegaLite, utils, olliJs] = await Promise.all([
             import('vega'),
             import('vega-lite'),
-            import('@umwelt-data/umwelt-utils'),
+            import('@umwelt-data/umwelt-utils/vl-bridge'),
             import('olli'),
           ]);
           if (cancelled) return;

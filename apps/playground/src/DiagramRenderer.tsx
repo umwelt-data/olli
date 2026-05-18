@@ -25,23 +25,21 @@ export function DiagramRenderer(props: { example: DiagramExample }) {
         });
 
         (async () => {
-          const [utils, olliJs] = await Promise.all([
-            import('@umwelt-data/umwelt-utils'),
+          const [{ render, elements }, { createBluefishBridge }, olliJs] = await Promise.all([
+            props.example.children(),
+            import('@umwelt-data/umwelt-utils/bluefish-bridge'),
             import('olli'),
           ]);
           if (cancelled) return;
 
-          const { svgElement, destroy } = await utils.mountBluefish(
-            chartRef,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            props.example.children as any,
-          );
-          destroyMount = destroy;
-          if (cancelled) { destroy(); return; }
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          destroyMount = render(() => elements as any, chartRef);
+          const svgElement = chartRef.querySelector('svg') as SVGSVGElement;
+          if (cancelled) { destroyMount(); return; }
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           handle = olliJs.olliDiagram(props.example.spec as any, treeRef);
-          disposeBridge = utils.createBluefishBridge({ handle, svgElement }).destroy;
+          disposeBridge = createBluefishBridge({ handle, svgElement }).destroy;
         })();
       },
     ),
