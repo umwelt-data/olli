@@ -1,0 +1,663 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`VegaLiteAdapter > structure regression > aggregate-bar-chart 1`] = `
+{
+  "axes": [
+    {
+      "axisType": "x",
+      "field": "month_date",
+    },
+    {
+      "axisType": "y",
+      "field": "mean_precipitation",
+    },
+  ],
+  "facet": undefined,
+  "fields": [
+    {
+      "field": "month_date",
+      "type": "ordinal",
+    },
+    {
+      "field": "mean_precipitation",
+      "type": "quantitative",
+    },
+  ],
+  "legends": [],
+  "mark": "bar",
+}
+`;
+
+exports[`VegaLiteAdapter > structure regression > area-chart 1`] = `
+{
+  "axes": [
+    {
+      "axisType": "x",
+      "field": "yearmonth_date",
+    },
+    {
+      "axisType": "y",
+      "field": "sum_count",
+    },
+  ],
+  "facet": undefined,
+  "fields": [
+    {
+      "field": "yearmonth_date",
+      "type": "temporal",
+    },
+    {
+      "field": "sum_count",
+      "type": "quantitative",
+    },
+  ],
+  "legends": [],
+  "mark": "area",
+}
+`;
+
+exports[`VegaLiteAdapter > structure regression > bar-chart 1`] = `
+{
+  "axes": [
+    {
+      "axisType": "x",
+      "field": "category",
+    },
+    {
+      "axisType": "y",
+      "field": "amount",
+    },
+  ],
+  "facet": undefined,
+  "fields": [
+    {
+      "field": "category",
+      "type": "nominal",
+    },
+    {
+      "field": "amount",
+      "type": "quantitative",
+    },
+  ],
+  "legends": [],
+  "mark": "bar",
+}
+`;
+
+exports[`VegaLiteAdapter > structure regression > concat-chart 1`] = `
+{
+  "operator": "concat",
+  "units": [
+    {
+      "axes": [
+        {
+          "axisType": "x",
+          "field": "month_date",
+        },
+        {
+          "axisType": "y",
+          "field": "mean_precipitation",
+        },
+      ],
+      "facet": undefined,
+      "fields": [
+        {
+          "field": "month_date",
+          "type": "ordinal",
+        },
+        {
+          "field": "mean_precipitation",
+          "type": "quantitative",
+        },
+      ],
+      "legends": [],
+      "mark": "bar",
+    },
+    {
+      "axes": [
+        {
+          "axisType": "x",
+          "field": "bin_maxbins_10_temp_min",
+        },
+        {
+          "axisType": "y",
+          "field": "bin_maxbins_10_temp_max",
+        },
+      ],
+      "facet": undefined,
+      "fields": [
+        {
+          "field": "bin_maxbins_10_temp_min",
+          "type": "quantitative",
+        },
+        {
+          "field": "bin_maxbins_10_temp_max",
+          "type": "quantitative",
+        },
+        {
+          "field": "__count",
+          "type": "quantitative",
+        },
+      ],
+      "legends": [
+        {
+          "channel": "size",
+          "field": "__count",
+        },
+      ],
+      "mark": "point",
+    },
+  ],
+}
+`;
+
+exports[`VegaLiteAdapter > structure regression > faceted-chart 1`] = `
+{
+  "axes": [
+    {
+      "axisType": "x",
+      "field": "yield",
+    },
+    {
+      "axisType": "y",
+      "field": "variety",
+    },
+  ],
+  "facet": "site",
+  "fields": [
+    {
+      "field": "site",
+      "type": "ordinal",
+    },
+    {
+      "field": "yield",
+      "type": "quantitative",
+    },
+    {
+      "field": "variety",
+      "type": "ordinal",
+    },
+    {
+      "field": "year",
+      "type": "nominal",
+    },
+  ],
+  "legends": [
+    {
+      "channel": "color",
+      "field": "year",
+    },
+  ],
+  "mark": "point",
+}
+`;
+
+exports[`VegaLiteAdapter > structure regression > grouped-bar-chart 1`] = `
+{
+  "axes": [
+    {
+      "axisType": "x",
+      "field": "category",
+    },
+    {
+      "axisType": "y",
+      "field": "value",
+    },
+  ],
+  "facet": undefined,
+  "fields": [
+    {
+      "field": "category",
+      "type": "nominal",
+    },
+    {
+      "field": "value",
+      "type": "quantitative",
+    },
+    {
+      "field": "group",
+      "type": "nominal",
+    },
+  ],
+  "legends": [
+    {
+      "channel": "color",
+      "field": "group",
+    },
+  ],
+  "mark": "bar",
+}
+`;
+
+exports[`VegaLiteAdapter > structure regression > heatmap 1`] = `
+{
+  "axes": [
+    {
+      "axisType": "x",
+      "field": "date_date",
+    },
+    {
+      "axisType": "y",
+      "field": "month_date",
+    },
+  ],
+  "facet": undefined,
+  "fields": [
+    {
+      "field": "date_date",
+      "type": "ordinal",
+    },
+    {
+      "field": "month_date",
+      "type": "ordinal",
+    },
+    {
+      "field": "max_temp_max",
+      "type": "quantitative",
+    },
+  ],
+  "legends": [
+    {
+      "channel": "color",
+      "field": "max_temp_max",
+    },
+  ],
+  "mark": "rect",
+}
+`;
+
+exports[`VegaLiteAdapter > structure regression > histogram 1`] = `
+{
+  "axes": [
+    {
+      "axisType": "x",
+      "field": "bin_maxbins_10_IMDB Rating",
+    },
+    {
+      "axisType": "y",
+      "field": "__count",
+    },
+  ],
+  "facet": undefined,
+  "fields": [
+    {
+      "field": "bin_maxbins_10_IMDB Rating",
+      "type": "quantitative",
+    },
+    {
+      "field": "__count",
+      "type": "quantitative",
+    },
+  ],
+  "legends": [],
+  "mark": "bar",
+}
+`;
+
+exports[`VegaLiteAdapter > structure regression > lasagna-plot 1`] = `
+{
+  "axes": [
+    {
+      "axisType": "x",
+      "field": "yearmonthdate_date",
+    },
+    {
+      "axisType": "y",
+      "field": "symbol",
+    },
+  ],
+  "facet": undefined,
+  "fields": [
+    {
+      "field": "yearmonthdate_date",
+      "type": "ordinal",
+    },
+    {
+      "field": "symbol",
+      "type": "nominal",
+    },
+    {
+      "field": "sum_price",
+      "type": "quantitative",
+    },
+  ],
+  "legends": [
+    {
+      "channel": "color",
+      "field": "sum_price",
+    },
+  ],
+  "mark": "rect",
+}
+`;
+
+exports[`VegaLiteAdapter > structure regression > layered-chart 1`] = `
+{
+  "operator": "layer",
+  "units": [
+    {
+      "axes": [
+        {
+          "axisType": "x",
+          "field": "year_date",
+        },
+        {
+          "axisType": "y",
+          "field": "mean_price",
+        },
+      ],
+      "facet": undefined,
+      "fields": [
+        {
+          "field": "year_date",
+          "type": "temporal",
+        },
+        {
+          "field": "mean_price",
+          "type": "quantitative",
+        },
+      ],
+      "legends": [],
+      "mark": "line",
+    },
+    {
+      "axes": [
+        {
+          "axisType": "x",
+          "field": "year_date",
+        },
+        {
+          "axisType": "y",
+          "field": "price",
+        },
+      ],
+      "facet": undefined,
+      "fields": [
+        {
+          "field": "year_date",
+          "type": "temporal",
+        },
+        {
+          "field": "price",
+          "type": "quantitative",
+        },
+      ],
+      "legends": [],
+      "mark": "point",
+    },
+  ],
+}
+`;
+
+exports[`VegaLiteAdapter > structure regression > line-chart 1`] = `
+{
+  "axes": [
+    {
+      "axisType": "x",
+      "field": "date",
+    },
+    {
+      "axisType": "y",
+      "field": "price",
+    },
+  ],
+  "facet": undefined,
+  "fields": [
+    {
+      "field": "date",
+      "type": "temporal",
+    },
+    {
+      "field": "price",
+      "type": "quantitative",
+    },
+  ],
+  "legends": [],
+  "mark": "line",
+}
+`;
+
+exports[`VegaLiteAdapter > structure regression > multi-series-line 1`] = `
+{
+  "axes": [
+    {
+      "axisType": "x",
+      "field": "date",
+    },
+    {
+      "axisType": "y",
+      "field": "price",
+    },
+  ],
+  "facet": "symbol",
+  "fields": [
+    {
+      "field": "date",
+      "type": "temporal",
+    },
+    {
+      "field": "price",
+      "type": "quantitative",
+    },
+    {
+      "field": "symbol",
+      "type": "nominal",
+    },
+  ],
+  "legends": [],
+  "mark": "line",
+}
+`;
+
+exports[`VegaLiteAdapter > structure regression > population-pyramid 1`] = `
+{
+  "axes": [
+    {
+      "axisType": "x",
+      "field": "sum_people",
+    },
+    {
+      "axisType": "y",
+      "field": "age",
+    },
+  ],
+  "facet": undefined,
+  "fields": [
+    {
+      "field": "sum_people",
+      "type": "quantitative",
+    },
+    {
+      "field": "age",
+      "type": "ordinal",
+    },
+    {
+      "field": "gender",
+      "type": "nominal",
+    },
+  ],
+  "legends": [
+    {
+      "channel": "color",
+      "field": "gender",
+    },
+  ],
+  "mark": "bar",
+}
+`;
+
+exports[`VegaLiteAdapter > structure regression > scatterplot 1`] = `
+{
+  "axes": [
+    {
+      "axisType": "x",
+      "field": "Flipper Length (mm)",
+    },
+    {
+      "axisType": "y",
+      "field": "Body Mass (g)",
+    },
+  ],
+  "facet": undefined,
+  "fields": [
+    {
+      "field": "Flipper Length (mm)",
+      "type": "quantitative",
+    },
+    {
+      "field": "Body Mass (g)",
+      "type": "quantitative",
+    },
+    {
+      "field": "Species",
+      "type": "nominal",
+    },
+  ],
+  "legends": [
+    {
+      "channel": "color",
+      "field": "Species",
+    },
+  ],
+  "mark": "point",
+}
+`;
+
+exports[`VegaLiteAdapter > structure regression > stacked-area-chart 1`] = `
+{
+  "axes": [
+    {
+      "axisType": "x",
+      "field": "yearmonth_date",
+    },
+    {
+      "axisType": "y",
+      "field": "sum_count",
+    },
+  ],
+  "facet": undefined,
+  "fields": [
+    {
+      "field": "yearmonth_date",
+      "type": "temporal",
+    },
+    {
+      "field": "sum_count",
+      "type": "quantitative",
+    },
+    {
+      "field": "series",
+      "type": "nominal",
+    },
+  ],
+  "legends": [
+    {
+      "channel": "color",
+      "field": "series",
+    },
+  ],
+  "mark": "area",
+}
+`;
+
+exports[`VegaLiteAdapter > structure regression > stacked-bar-chart 1`] = `
+{
+  "axes": [
+    {
+      "axisType": "x",
+      "field": "sum_yield",
+    },
+    {
+      "axisType": "y",
+      "field": "variety",
+    },
+  ],
+  "facet": undefined,
+  "fields": [
+    {
+      "field": "sum_yield",
+      "type": "quantitative",
+    },
+    {
+      "field": "variety",
+      "type": "nominal",
+    },
+    {
+      "field": "site",
+      "type": "nominal",
+    },
+  ],
+  "legends": [
+    {
+      "channel": "color",
+      "field": "site",
+    },
+  ],
+  "mark": "bar",
+}
+`;
+
+exports[`VegaLiteAdapter > structure regression > streamgraph 1`] = `
+{
+  "axes": [
+    {
+      "axisType": "x",
+      "field": "yearmonth_date",
+    },
+    {
+      "axisType": "y",
+      "field": "sum_count",
+    },
+  ],
+  "facet": undefined,
+  "fields": [
+    {
+      "field": "yearmonth_date",
+      "type": "temporal",
+    },
+    {
+      "field": "sum_count",
+      "type": "quantitative",
+    },
+    {
+      "field": "series",
+      "type": "nominal",
+    },
+  ],
+  "legends": [
+    {
+      "channel": "color",
+      "field": "series",
+    },
+  ],
+  "mark": "area",
+}
+`;
+
+exports[`VegaLiteAdapter > structure regression > strip-plot 1`] = `
+{
+  "axes": [
+    {
+      "axisType": "x",
+      "field": "Horsepower",
+    },
+    {
+      "axisType": "y",
+      "field": "Cylinders",
+    },
+  ],
+  "facet": undefined,
+  "fields": [
+    {
+      "field": "Horsepower",
+      "type": "quantitative",
+    },
+    {
+      "field": "Cylinders",
+      "type": "ordinal",
+    },
+  ],
+  "legends": [],
+  "mark": "tick",
+}
+`;

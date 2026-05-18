@@ -49,7 +49,7 @@ export function VisualizationRenderer(props: { example: VisualizationExample }) 
             .runAsync();
           if (cancelled) return;
 
-          const olliSpec = await olliJs.VegaLiteAdapter(injected);
+          const olliSpec = await olliJs.VegaLiteAdapter(props.example.spec);
           if (cancelled) return;
 
           handle = olliJs.olliVis(olliSpec, treeRef, { initialPreset: 'standard' });

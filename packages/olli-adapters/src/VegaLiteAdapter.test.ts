@@ -1,7 +1,33 @@
 import { describe, it, expect } from 'vitest';
 import { VegaLiteAdapter } from './index.js';
 import { lowerVisSpec } from 'olli-vis';
-import type { UnitOlliVisSpec } from 'olli-vis';
+import type { OlliVisSpec, UnitOlliVisSpec } from 'olli-vis';
+import { examples } from '../../../apps/docs/gallery/examples/index.js';
+import type { VisualizationExample } from '../../../apps/docs/gallery/examples/index.js';
+
+function unitSkeleton(spec: UnitOlliVisSpec) {
+  return {
+    mark: spec.mark,
+    facet: spec.facet,
+    fields: spec.fields?.map((f) => ({ field: f.field, type: f.type })),
+    axes: spec.axes?.map((a) => ({ axisType: a.axisType, field: a.field })),
+    legends: spec.legends?.map((l) => ({ channel: l.channel, field: l.field })),
+  };
+}
+
+function structuralSkeleton(spec: OlliVisSpec) {
+  if ('operator' in spec) {
+    return {
+      operator: spec.operator,
+      units: spec.units.map(unitSkeleton),
+    };
+  }
+  return unitSkeleton(spec as UnitOlliVisSpec);
+}
+
+const vlExamples = examples.filter(
+  (e): e is VisualizationExample => e.domain === 'visualization',
+);
 
 describe('VegaLiteAdapter', () => {
   it('multi-series line chart y-axes have filteredData children', async () => {
@@ -113,4 +139,13 @@ describe('VegaLiteAdapter', () => {
     const olliSpec = await VegaLiteAdapter(spec) as UnitOlliVisSpec;
     expect(typeof olliSpec.data[0]!.price).toBe('number');
   }, 30000);
+
+  describe('structure regression', () => {
+    for (const example of vlExamples) {
+      it(`${example.id}`, async () => {
+        const olliSpec = await VegaLiteAdapter(example.spec);
+        expect(structuralSkeleton(olliSpec)).toMatchSnapshot();
+      }, 30000);
+    }
+  });
 });

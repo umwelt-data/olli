@@ -20,6 +20,25 @@ const spec = await VegaLiteAdapter(myVegaLiteSpec);
 const handle = olliVis(spec, container);
 ```
 
+## Testing
+
+```sh
+pnpm test              # from repo root (runs all packages)
+pnpm test              # from this package directory
+```
+
+### Structure regression snapshots
+
+Every Vega-Lite example in `apps/docs/gallery/examples/` has a snapshot test that captures the structural skeleton of the adapter output (mark, fields, axes, legends, facet, and multi-spec operator). This guards against silent changes to the adapter's output shape — for example, a unit spec accidentally becoming a multi-spec.
+
+Snapshots live in `src/__snapshots__/VegaLiteAdapter.test.ts.snap`. When you intentionally change adapter output structure, update them:
+
+```sh
+npx vitest run --update
+```
+
+Review the diff in the `.snap` file to confirm only expected changes.
+
 ## Dependencies
 
 - `olli-vis`
