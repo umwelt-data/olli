@@ -1,4 +1,4 @@
-import type { UnitOlliVisSpec, OlliVisSpec, OlliDataset, OlliAxis, OlliLegend, OlliMark } from 'olli-vis';
+import type { UnitOlliVisSpec, OlliVisSpec, OlliDataset, OlliAxis, OlliMark } from 'olli-vis';
 import { typeInference } from 'olli-vis';
 import { typeCoerceData } from '@umwelt-data/umwelt-utils/data';
 import { getData, getVegaScene, getVegaView } from './utils.js';
@@ -11,17 +11,125 @@ export const VegaLiteAdapter: VisAdapter<any> = async (spec: any): Promise<OlliV
   const scene = getVegaScene(view);
   const data = getData(scene);
 
+  if ('repeat' in spec && 'spec' in spec) {
+    return adaptRepeatSpec(scene, spec, data);
+  }
+
+  if ('facet' in spec && 'spec' in spec && !('mark' in spec)) {
+    return adaptFacetSpec(scene, spec, data);
+  }
+
   if ('mark' in spec) {
-    return adaptUnitSpec(scene, spec, data[0]!);
-  } else {
-    if ('layer' in spec || 'concat' in spec || 'hconcat' in spec || 'vconcat' in spec) {
-      const vlOp = Object.keys(spec).find((k) => ['layer', 'concat', 'hconcat', 'vconcat'].includes(k))!;
-      return await adaptMultiSpec(scene, spec, vlOp, data);
-    }
+    const normalized = normalizeOverlayMark(spec);
+    return adaptUnitSpec(scene, normalized, data[0]!);
+  }
+
+  if ('layer' in spec || 'concat' in spec || 'hconcat' in spec || 'vconcat' in spec) {
+    const vlOp = Object.keys(spec).find((k) => ['layer', 'concat', 'hconcat', 'vconcat'].includes(k))!;
+    return await adaptMultiSpec(scene, spec, vlOp, data);
   }
 
   return adaptUnitSpec(scene, spec, data[0]!);
 };
+
+function normalizeOverlayMark(spec: any): any {
+  const mark = spec.mark;
+  if (mark && typeof mark === 'object' && (mark.point || mark.line)) {
+    const { point, line, ...rest } = mark;
+    return { ...spec, mark: Object.keys(rest).length === 1 && 'type' in rest ? rest.type : rest };
+  }
+  return spec;
+}
+
+function getFacetField(facetDef: any): string | undefined {
+  if (facetDef.field) return facetDef.field;
+  if (facetDef.row) return facetDef.row.field;
+  if (facetDef.column) return facetDef.column.field;
+  return undefined;
+}
+
+function resolveInnerSpec(spec: any): { innerSpec: any; facetFields: string[] } {
+  const facetFields: string[] = [];
+  let current = spec;
+  while ('facet' in current && 'spec' in current && !('mark' in current) && !('layer' in current)) {
+    const f = getFacetField(current.facet);
+    if (f) facetFields.push(f);
+    current = { ...current.spec, data: current.spec.data || current.data, description: current.description || current.spec.description };
+  }
+  return { innerSpec: current, facetFields };
+}
+
+async function adaptFacetSpec(scene: any, spec: any, data: OlliDataset[]): Promise<OlliVisSpec> {
+  const { innerSpec, facetFields } = resolveInnerSpec(spec);
+
+  if ('mark' in innerSpec) {
+    const result = adaptUnitSpec(scene, normalizeOverlayMark(innerSpec), data[0]!);
+    if (facetFields.length && !result.facet) result.facet = facetFields[0]!;
+    return result;
+  }
+
+  if ('layer' in innerSpec) {
+    return adaptMultiSpec(scene, innerSpec, 'layer', data);
+  }
+
+  return adaptUnitSpec(scene, innerSpec, data[0]!);
+}
+
+async function adaptRepeatSpec(scene: any, spec: any, data: OlliDataset[]): Promise<OlliVisSpec> {
+  const repeatDef = spec.repeat;
+  const repeatValues: string[] = Array.isArray(repeatDef)
+    ? repeatDef
+    : [...(repeatDef.row || []), ...(repeatDef.column || []), ...(repeatDef.layer || [])];
+
+  const units: UnitOlliVisSpec[] = [];
+  const usedDatasets = new Set<number>();
+  const isLayerRepeat = !Array.isArray(repeatDef) && repeatDef.layer;
+
+  for (const value of repeatValues) {
+    const inner = JSON.parse(JSON.stringify(spec.spec));
+    resolveRepeatRefs(inner, value);
+    const innerSpec = normalizeOverlayMark(inner);
+
+    if ('mark' in innerSpec) {
+      const datasetIdx = data.findIndex((d, i) => {
+        if (!isLayerRepeat && usedDatasets.has(i)) return false;
+        if (!d?.length || !d[0]) return false;
+        const fields = Object.keys(d[0]);
+        if (innerSpec.encoding) {
+          const viewFields = Object.values(innerSpec.encoding)
+            .map((f: any) => getFieldFromEncoding(f, d))
+            .filter((f): f is string => !!f);
+          return viewFields.length > 0 && viewFields.every((f) => fields.includes(f));
+        }
+        return false;
+      });
+      const dataset = datasetIdx >= 0 ? data[datasetIdx]! : data[0]!;
+      if (datasetIdx >= 0) usedDatasets.add(datasetIdx);
+      units.push(adaptUnitSpec(scene, innerSpec, dataset));
+    }
+  }
+
+  if (units.length === 1) return units[0]!;
+  const operator = !Array.isArray(repeatDef) && repeatDef.layer ? 'layer' : 'concat';
+  return { operator, units };
+}
+
+function resolveRepeatRefs(obj: any, value: string): void {
+  for (const key of Object.keys(obj)) {
+    const v = obj[key];
+    if (v && typeof v === 'object') {
+      if ('repeat' in v && Object.keys(v).length === 1) {
+        obj[key] = value;
+      } else if (v.field && typeof v.field === 'object' && 'repeat' in v.field) {
+        v.field = value;
+      } else if (v.datum && typeof v.datum === 'object' && 'repeat' in v.datum) {
+        v.datum = value;
+      } else {
+        resolveRepeatRefs(v, value);
+      }
+    }
+  }
+}
 
 function getFieldFromEncoding(encoding: any, data: OlliDataset): string | undefined {
   if ('aggregate' in encoding) {
@@ -71,10 +179,16 @@ function adaptUnitSpec(scene: any, spec: any, data: OlliDataset): UnitOlliVisSpe
 
   const getMark = (spec: any): OlliMark | undefined => {
     const mark = spec.mark;
-    if (mark && mark.type) {
-      return mark.type;
+    const raw = mark && mark.type ? mark.type : mark;
+    switch (raw) {
+      case 'circle':
+      case 'square':
+        return 'point';
+      case 'trail':
+        return 'line';
+      default:
+        return raw;
     }
-    return mark;
   };
   const mark = getMark(spec);
   if (mark !== undefined) olliSpec.mark = mark;
@@ -98,8 +212,11 @@ function adaptUnitSpec(scene: any, spec: any, data: OlliDataset): UnitOlliVisSpe
       } else if (olliSpec.mark === 'line' && ['color', 'detail'].includes(channel)) {
         olliSpec.facet = fieldDef.field;
       } else if (['x', 'y'].includes(channel)) {
-        const ticks = getVegaAxisTicks(scene);
-        const axisTicks = ticks?.[channel as 'x' | 'y'];
+        let axisTicks: any[] | undefined;
+        try {
+          const ticks = getVegaAxisTicks(scene);
+          axisTicks = ticks?.[channel as 'x' | 'y'];
+        } catch {}
         const axis: OlliAxis = {
           axisType: channel as 'x' | 'y',
           field: fieldDef.field,
@@ -148,22 +265,24 @@ async function adaptMultiSpec(
 
   for (const view of spec[vlOp]) {
     if ('mark' in view) {
+      const mergedEncoding = { ...(spec.encoding || {}), ...(view.encoding || {}) };
       const viewSpec = {
         data: view.data || spec.data,
         mark: view.mark,
-        encoding: view.encoding,
+        encoding: mergedEncoding,
       };
+      if (!Object.keys(mergedEncoding).length) continue;
       const dataset = data.find((d) => {
-        if (!d.length) return false;
+        if (!d?.length) return false;
         const fields = Object.keys(d[0]!);
         const viewFields = Object.values(viewSpec.encoding)
           .map((f: any) => getFieldFromEncoding(f, d))
           .filter((f): f is string => !!f);
-        return viewFields.every((f) => fields.includes(f));
+        return viewFields.length > 0 && viewFields.every((f) => fields.includes(f));
       });
       if (!dataset) continue;
       const viewOlliSpec = adaptUnitSpec(scene, viewSpec, dataset);
-      const unitSpec = units.find((s) => s.data.length > 0 && Object.keys(s.data[0]!).every((k) => k in dataset[0]!));
+      const unitSpec = units.find((s) => s.data?.length > 0 && Object.keys(s.data[0]!).every((k) => k in dataset[0]!));
       if (unitSpec) {
         unitSpec.fields!.push(...(viewOlliSpec.fields ?? []));
         unitSpec.axes!.push(...(viewOlliSpec.axes ?? []));

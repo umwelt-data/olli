@@ -5,7 +5,7 @@ import type { FieldPredicate, LogicalComposition, Selection } from 'olli-core';
 export type OlliValue = string | number | Date;
 export type OlliDatum = Record<string, OlliValue>;
 export type OlliDataset = OlliDatum[];
-export type OlliMark = 'point' | 'bar' | 'line' | 'area' | 'rect';
+export type OlliMark = 'point' | 'bar' | 'line' | 'area' | 'rect' | 'tick';
 
 // ---- Field definitions ----
 
