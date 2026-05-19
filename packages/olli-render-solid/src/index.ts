@@ -8,3 +8,4 @@ export {
 } from './DescriptionSettingsDialog.jsx';
 export { mount, type MountOptions } from './mount.jsx';
 export { registerDefaultKeybindings } from './keybindings.js';
+export { helpDialog } from './HelpDialog.jsx';

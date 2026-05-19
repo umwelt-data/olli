@@ -2,6 +2,8 @@ import type { NavigationRuntime } from './runtime.js';
 
 export interface KeybindingContribution<P> {
   key: string;
+  label?: string;
+  group?: string;
   handler: (runtime: NavigationRuntime<P>, event: KeyboardEvent) => boolean;
 }
 

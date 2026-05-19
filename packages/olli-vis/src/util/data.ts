@@ -1,4 +1,4 @@
-import type { FieldPredicate, LogicalComposition } from 'olli-core';
+import type { FieldPredicate, FieldRangePredicate, LogicalComposition } from 'olli-core';
 import { selectionTest } from 'olli-core';
 import type { OlliDataset, OlliFieldDef, OlliValue } from '../spec/types.js';
 import { dateToTimeUnit, serializeValue } from './values.js';
@@ -130,7 +130,7 @@ export function getBinPredicates(
   data: OlliDataset,
   fields: OlliFieldDef[],
   ticks?: OlliValue[],
-): FieldPredicate[] {
+): FieldRangePredicate[] {
   const bins = getBins(field, data, fields, ticks);
   return bins.map((bin, idx) => ({
     field,

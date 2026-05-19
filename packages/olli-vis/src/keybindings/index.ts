@@ -4,8 +4,13 @@ import type { VisPayload } from '../spec/types.js';
 function jumpToNodeType(
   nodeType: string,
 ): KeybindingContribution<VisPayload> {
+  const label = nodeType === 'xAxis' ? 'Jump to X axis'
+    : nodeType === 'yAxis' ? 'Jump to Y axis'
+    : 'Jump to legend';
   return {
     key: nodeType === 'xAxis' ? 'x' : nodeType === 'yAxis' ? 'y' : 'l',
+    label,
+    group: 'Jump to section',
     handler: (runtime) => {
       const graph = runtime.hypergraph();
       for (const [, edge] of graph.edges) {

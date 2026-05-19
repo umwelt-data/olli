@@ -1,4 +1,5 @@
 import type { NavigationRuntime } from 'olli-core';
+import { helpDialog } from './HelpDialog.jsx';
 
 const registered = new WeakSet<object>();
 
@@ -22,8 +23,12 @@ export function registerDefaultKeybindings<P>(runtime: NavigationRuntime<P>): vo
   if (registered.has(runtime as unknown as object)) return;
   registered.add(runtime as unknown as object);
 
+  runtime.registerDialog(helpDialog<P>());
+
   runtime.registerKeybinding({
     key: 'ArrowUp',
+    label: 'Move to parent',
+    group: 'Navigation',
     handler: (rt) => {
       rt.moveFocus('up');
       return true;
@@ -31,6 +36,8 @@ export function registerDefaultKeybindings<P>(runtime: NavigationRuntime<P>): vo
   });
   runtime.registerKeybinding({
     key: 'ArrowDown',
+    label: 'Move to first child',
+    group: 'Navigation',
     handler: (rt) => {
       rt.moveFocus('down');
       return true;
@@ -38,6 +45,8 @@ export function registerDefaultKeybindings<P>(runtime: NavigationRuntime<P>): vo
   });
   runtime.registerKeybinding({
     key: 'ArrowLeft',
+    label: 'Move to previous sibling',
+    group: 'Navigation',
     handler: (rt) => {
       rt.moveFocus('left');
       return true;
@@ -45,6 +54,8 @@ export function registerDefaultKeybindings<P>(runtime: NavigationRuntime<P>): vo
   });
   runtime.registerKeybinding({
     key: 'ArrowRight',
+    label: 'Move to next sibling',
+    group: 'Navigation',
     handler: (rt) => {
       rt.moveFocus('right');
       return true;
@@ -52,6 +63,8 @@ export function registerDefaultKeybindings<P>(runtime: NavigationRuntime<P>): vo
   });
   runtime.registerKeybinding({
     key: 'Home',
+    label: 'Move to first sibling',
+    group: 'Navigation',
     handler: (rt) => {
       rt.moveFocus('first');
       return true;
@@ -59,6 +72,8 @@ export function registerDefaultKeybindings<P>(runtime: NavigationRuntime<P>): vo
   });
   runtime.registerKeybinding({
     key: 'End',
+    label: 'Move to last sibling',
+    group: 'Navigation',
     handler: (rt) => {
       rt.moveFocus('last');
       return true;
@@ -66,6 +81,8 @@ export function registerDefaultKeybindings<P>(runtime: NavigationRuntime<P>): vo
   });
   runtime.registerKeybinding({
     key: 'Enter',
+    label: 'Expand',
+    group: 'Navigation',
     handler: (rt) => {
       rt.moveFocus('down');
       return true;
@@ -73,6 +90,8 @@ export function registerDefaultKeybindings<P>(runtime: NavigationRuntime<P>): vo
   });
   runtime.registerKeybinding({
     key: ' ',
+    label: 'Expand',
+    group: 'Navigation',
     handler: (rt) => {
       rt.moveFocus('down');
       return true;
@@ -80,6 +99,8 @@ export function registerDefaultKeybindings<P>(runtime: NavigationRuntime<P>): vo
   });
   runtime.registerKeybinding({
     key: 'Escape',
+    label: 'Collapse / go to parent',
+    group: 'Navigation',
     handler: (rt) => {
       rt.moveFocus('up');
       return true;
@@ -87,6 +108,8 @@ export function registerDefaultKeybindings<P>(runtime: NavigationRuntime<P>): vo
   });
   runtime.registerKeybinding({
     key: 'o',
+    label: 'Jump to Olli root',
+    group: 'Navigation',
     handler: (rt) => {
       const rootId = rt.navTree().roots[0];
       if (rootId) rt.focus(rootId);

@@ -4,7 +4,7 @@ import type { OlliNodeType } from '../spec/types.js';
 type RoleTokens = Record<OlliNodeType, string[]>;
 
 const roleTokenMap: RoleTokens = {
-  root: ['name', 'visType', 'visSize', 'children'],
+  root: ['name', 'visType', 'visSize', 'children', 'instructions'],
   view: ['visType', 'name', 'children'],
   xAxis: ['name', 'visType', 'visData', 'parent', 'aggregate'],
   yAxis: ['name', 'visType', 'visData', 'parent', 'aggregate'],
@@ -38,7 +38,7 @@ function makePreset(
 }
 
 const detailedRoles: RoleTokens = {
-  root: ['name', 'visType', 'visSize', 'children'],
+  root: ['name', 'visType', 'visSize', 'children', 'instructions'],
   view: ['visType', 'name', 'children'],
   xAxis: ['name', 'visType', 'visData', 'parent', 'aggregate'],
   yAxis: ['name', 'visType', 'visData', 'parent', 'aggregate'],
@@ -50,7 +50,7 @@ const detailedRoles: RoleTokens = {
 };
 
 const standardRoles: RoleTokens = {
-  root: ['name', 'visType', 'children'],
+  root: ['name', 'visType', 'children', 'instructions'],
   view: ['visType', 'name'],
   xAxis: ['name', 'visData', 'aggregate'],
   yAxis: ['name', 'visData', 'aggregate'],
@@ -62,7 +62,7 @@ const standardRoles: RoleTokens = {
 };
 
 const minimalRoles: RoleTokens = {
-  root: ['name', 'visType'],
+  root: ['name', 'visType', 'instructions'],
   view: ['name'],
   xAxis: ['name', 'visData'],
   yAxis: ['name', 'visData'],

@@ -358,10 +358,14 @@ export function visQuartileToken(): DescriptionToken<VisPayload> {
 export function visInstructionsToken(): DescriptionToken<VisPayload> {
   return {
     name: 'instructions',
-    applicableRoles: roles('filteredData', 'other'),
+    applicableRoles: roles('root', 'filteredData', 'other'),
     compute: (ctx: Ctx) => {
       const p = ctx.edge?.payload;
       if (!p) return { short: '', long: '' };
+      if (p.nodeType === 'root') {
+        const s = 'press ? for help';
+        return { short: s, long: s };
+      }
       if (p.predicate) {
         const spec = p.spec;
         const data = spec.selection ? selectionTest(spec.data, spec.selection) : spec.data;
