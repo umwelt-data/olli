@@ -1,4 +1,5 @@
 import { For, Show, createSignal } from 'solid-js';
+import { UAParser } from 'ua-parser-js';
 import type {
   DialogContribution,
   DialogRenderResult,
@@ -9,12 +10,12 @@ import type {
 type OS = 'mac' | 'windows';
 
 function detectOS(): OS {
-  if (typeof navigator !== 'undefined') {
-    const ua = navigator.userAgent ?? '';
-    if (/Win/i.test(ua)) return 'windows';
-  }
-  return 'mac';
+  const osName = new UAParser().getOS().name;
+  if (osName === 'macOS') return 'mac';
+  return 'windows';
 }
+
+const GROUP_ORDER = ['Navigation', 'Jump to section', 'Dialogs'];
 
 function formatKey(key: string): string {
   switch (key) {
@@ -28,7 +29,7 @@ function formatKey(key: string): string {
 }
 
 interface HelpEntry {
-  key: string;
+  keys: string[];
   label: string;
 }
 
@@ -39,35 +40,38 @@ interface HelpGroup {
 
 function buildKeybindingGroups<P>(runtime: NavigationRuntime<P>): HelpGroup[] {
   const groupMap = new Map<string, HelpEntry[]>();
-  const groupOrder: string[] = [];
 
   for (const binding of runtime.keybindings.list()) {
     if (!binding.label || !binding.group) continue;
-    const dedupeKey = `${binding.key}::${binding.label}`;
     let entries = groupMap.get(binding.group);
     if (!entries) {
       entries = [];
       groupMap.set(binding.group, entries);
-      groupOrder.push(binding.group);
     }
-    if (entries.some((e) => `${e.key}::${e.label}` === dedupeKey)) continue;
-    entries.push({ key: formatKey(binding.key), label: binding.label });
+    const existing = entries.find((e) => e.label === binding.label);
+    const formatted = formatKey(binding.key);
+    if (existing) {
+      if (!existing.keys.includes(formatted)) existing.keys.push(formatted);
+    } else {
+      entries.push({ keys: [formatted], label: binding.label });
+    }
   }
 
   const dialogEntries: HelpEntry[] = [];
   for (const dialog of runtime.dialogs.list()) {
     if (!dialog.triggerKey) continue;
     dialogEntries.push({
-      key: formatKey(dialog.triggerKey),
+      keys: [formatKey(dialog.triggerKey)],
       label: `Open ${dialog.label}`,
     });
   }
   if (dialogEntries.length > 0) {
     groupMap.set('Dialogs', dialogEntries);
-    groupOrder.splice(1, 0, 'Dialogs');
   }
 
-  return groupOrder.map((name) => ({ name, entries: groupMap.get(name)! }));
+  return GROUP_ORDER
+    .filter((name) => groupMap.has(name))
+    .map((name) => ({ name, entries: groupMap.get(name)! }));
 }
 
 export function helpDialog<P>(): DialogContribution<P> {
@@ -144,7 +148,14 @@ export function helpDialog<P>(): DialogContribution<P> {
                         {(entry) => (
                           <tr>
                             <td>
-                              <kbd>{entry.key}</kbd>
+                              <For each={entry.keys}>
+                                {(k, i) => (
+                                  <>
+                                    {i() > 0 && ' / '}
+                                    <kbd>{k}</kbd>
+                                  </>
+                                )}
+                              </For>
                             </td>
                             <td>{entry.label}</td>
                           </tr>

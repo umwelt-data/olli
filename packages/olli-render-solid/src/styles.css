@@ -84,6 +84,11 @@
   overflow: auto;
 }
 
+.olli-dialog-content > p:first-child,
+.olli-dialog-content > :first-child > p:first-child {
+  margin-top: 0;
+}
+
 #olli-dialog-title:has(+ #olli-dialog-description) {
   margin-bottom: 0;
 }
