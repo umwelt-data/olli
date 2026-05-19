@@ -36,7 +36,7 @@ export function registerDefaultKeybindings<P>(runtime: NavigationRuntime<P>): vo
   });
   runtime.registerKeybinding({
     key: 'ArrowDown',
-    label: 'Move to first child',
+    label: 'Move to child',
     group: 'Navigation',
     handler: (rt) => {
       rt.moveFocus('down');

@@ -103,6 +103,7 @@ export function createNavigationRuntime<P>(initialGraph: Hypergraph<P>): Navigat
   const [focusedNavId, setFocusedNavId] = createSignal<NavNodeId>(initialFocus);
   const [selection, setSelectionSignal] = createSignal<Selection>(EMPTY_AND);
   const [expanded, setExpandedSignal] = createSignal<ReadonlySet<NavNodeId>>(new Set());
+  const lastVisitedChild = new Map<NavNodeId, NavNodeId>();
 
   const keybindings = createKeybindingRegistry<P>();
   const dialogs = createDialogRegistry<P>();
@@ -201,6 +202,10 @@ export function createNavigationRuntime<P>(initialGraph: Hypergraph<P>): Navigat
 
   function focus(navId: NavNodeId): void {
     setFocusedNavId(navId);
+    const focused = getNavNode(navId);
+    if (focused?.parentNavId) {
+      lastVisitedChild.set(focused.parentNavId, navId);
+    }
   }
 
   function moveFocus(direction: MoveDirection): void {
@@ -251,8 +256,12 @@ export function createNavigationRuntime<P>(initialGraph: Hypergraph<P>): Navigat
 
     switch (direction) {
       case 'down': {
-        const first = node.childNavIds[0];
-        if (first) focus(first);
+        const remembered = lastVisitedChild.get(current);
+        const target =
+          remembered && node.childNavIds.includes(remembered)
+            ? remembered
+            : node.childNavIds[0];
+        if (target) focus(target);
         return;
       }
       case 'up': {

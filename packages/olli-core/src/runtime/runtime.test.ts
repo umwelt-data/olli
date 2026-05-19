@@ -107,6 +107,43 @@ describe('NavigationRuntime — single-parent navigation', () => {
       dispose();
     });
   });
+
+  it('Down remembers last-visited child', () => {
+    createRoot((dispose) => {
+      const rt = createNavigationRuntime(singleParentTree());
+      rt.moveFocus('down'); // r -> r/a
+      rt.moveFocus('right'); // r/a -> r/b
+      rt.moveFocus('up'); // r/b -> r
+      rt.moveFocus('down'); // r -> r/b (remembered)
+      expect(rt.focusedNavId()).toBe('r/b');
+      dispose();
+    });
+  });
+
+  it('Down falls back to first child when no history', () => {
+    createRoot((dispose) => {
+      const rt = createNavigationRuntime(singleParentTree());
+      rt.focus('r/a');
+      rt.moveFocus('down'); // r/a -> r/a/a1 (first child, no history)
+      expect(rt.focusedNavId()).toBe('r/a/a1');
+      dispose();
+    });
+  });
+
+  it('Down ignores stale history after tree rebuild', () => {
+    createRoot((dispose) => {
+      const rt = createNavigationRuntime(singleParentTree());
+      rt.moveFocus('down'); // r -> r/a
+      rt.moveFocus('right'); // r/a -> r/b
+      rt.moveFocus('up'); // r/b -> r
+      // Rebuild the tree with a different graph
+      rt.setHypergraph(twoParentGraph());
+      rt.focus('root');
+      rt.moveFocus('down'); // root -> root/x (first child, old history invalid)
+      expect(rt.focusedNavId()).toBe('root/x');
+      dispose();
+    });
+  });
 });
 
 describe('NavigationRuntime — multi-parent ascent via virtual parent-context siblings', () => {
