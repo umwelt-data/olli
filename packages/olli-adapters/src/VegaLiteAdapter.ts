@@ -2,7 +2,8 @@ import type { UnitOlliVisSpec, OlliVisSpec, OlliDataset, OlliAxis, OlliMark } fr
 import { typeInference } from 'olli-vis';
 import { typeCoerceData } from '@umwelt-data/umwelt-utils/data';
 import { getData, getVegaScene, getVegaView } from './utils.js';
-import { getVegaAxisTicks } from '@umwelt-data/umwelt-utils/vega';
+import { computeAxisTicks } from '@umwelt-data/umwelt-utils/vega';
+import type { AxisTicksConfig } from '@umwelt-data/umwelt-utils/vega';
 import type { VisAdapter } from './types.js';
 
 export const VegaLiteAdapter: VisAdapter<any> = async (spec: any): Promise<OlliVisSpec> => {
@@ -212,11 +213,25 @@ function adaptUnitSpec(scene: any, spec: any, data: OlliDataset): UnitOlliVisSpe
       } else if (olliSpec.mark === 'line' && ['color', 'detail'].includes(channel)) {
         olliSpec.facet = fieldDef.field;
       } else if (['x', 'y'].includes(channel)) {
-        let axisTicks: any[] | undefined;
-        try {
-          const ticks = getVegaAxisTicks(scene);
-          axisTicks = ticks?.[channel as 'x' | 'y'];
-        } catch {}
+        const isStackedCumulativeAxis = encoding.aggregate
+          && encoding.stack !== null && encoding.stack !== false
+          && ['area', 'bar'].includes(mark ?? '')
+          && spec.encoding && ('color' in spec.encoding || 'detail' in spec.encoding);
+        const tickConfig: AxisTicksConfig = {
+          field: fieldDef.field,
+          type: fieldDef.type,
+          bin: !!encoding.bin,
+          timeUnit: encoding.timeUnit,
+          scaleZero: encoding.scale?.zero,
+          scaleDomain: encoding.scale?.domain,
+          axisSize: channel === 'x'
+            ? (typeof spec.width === 'number' ? spec.width : undefined)
+            : (typeof spec.height === 'number' ? spec.height : undefined),
+          tickCount: encoding.axis?.tickCount,
+          tickValues: encoding.axis?.values,
+        };
+        const computed = computeAxisTicks(data, { [channel]: tickConfig });
+        const axisTicks = (isStackedCumulativeAxis && encoding.axis !== null) ? [] : computed[channel as 'x' | 'y'];
         const axis: OlliAxis = {
           axisType: channel as 'x' | 'y',
           field: fieldDef.field,

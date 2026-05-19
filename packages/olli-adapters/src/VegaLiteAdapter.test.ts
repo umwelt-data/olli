@@ -188,7 +188,7 @@ describe('VegaLiteAdapter', () => {
   // series contributions (2–2440). Binning by either scale would produce misleading
   // highlights — per-series bins don't map to visual positions, and stacked-total bins
   // would lump nearly all rows into the first bucket.
-  it('stacked-area-chart y-axis has no children (stacked axis)', async () => {
+  it('stacked-area-chart y-axis has no children (stacked cumulative axis)', async () => {
     const example = vlExamples.find(e => e.id === 'stacked-area-chart')!;
     const olliSpec = await VegaLiteAdapter(example.spec) as UnitOlliVisSpec;
     const graph = lowerVisSpec(olliSpec);
@@ -196,6 +196,16 @@ describe('VegaLiteAdapter', () => {
 
     expect(yAxes.length).toBe(1);
     expect(yAxes[0]!.children.length).toBe(0);
+  }, 30000);
+
+  it('stacked-area-chart x-axis still has children (non-cumulative axis)', async () => {
+    const example = vlExamples.find(e => e.id === 'stacked-area-chart')!;
+    const olliSpec = await VegaLiteAdapter(example.spec) as UnitOlliVisSpec;
+    const graph = lowerVisSpec(olliSpec);
+    const xAxes = [...graph.edges.values()].filter(e => e.role === 'xAxis');
+
+    expect(xAxes.length).toBe(1);
+    expect(xAxes[0]!.children.length).toBeGreaterThan(0);
   }, 30000);
 
   describe('structure regression', () => {
