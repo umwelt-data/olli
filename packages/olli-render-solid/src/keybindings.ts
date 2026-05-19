@@ -27,7 +27,7 @@ export function registerDefaultKeybindings<P>(runtime: NavigationRuntime<P>): vo
 
   runtime.registerKeybinding({
     key: 'ArrowUp',
-    label: 'Move to parent',
+    label: 'Up one level',
     group: 'Navigation',
     handler: (rt) => {
       rt.moveFocus('up');
@@ -36,7 +36,7 @@ export function registerDefaultKeybindings<P>(runtime: NavigationRuntime<P>): vo
   });
   runtime.registerKeybinding({
     key: 'ArrowDown',
-    label: 'Move to child',
+    label: 'Down one level',
     group: 'Navigation',
     handler: (rt) => {
       rt.moveFocus('down');
@@ -45,7 +45,7 @@ export function registerDefaultKeybindings<P>(runtime: NavigationRuntime<P>): vo
   });
   runtime.registerKeybinding({
     key: 'ArrowLeft',
-    label: 'Move to previous sibling',
+    label: 'Previous item',
     group: 'Navigation',
     handler: (rt) => {
       rt.moveFocus('left');
@@ -54,7 +54,7 @@ export function registerDefaultKeybindings<P>(runtime: NavigationRuntime<P>): vo
   });
   runtime.registerKeybinding({
     key: 'ArrowRight',
-    label: 'Move to next sibling',
+    label: 'Next item',
     group: 'Navigation',
     handler: (rt) => {
       rt.moveFocus('right');
@@ -63,7 +63,7 @@ export function registerDefaultKeybindings<P>(runtime: NavigationRuntime<P>): vo
   });
   runtime.registerKeybinding({
     key: 'Home',
-    label: 'Move to first sibling',
+    label: 'First item on this level',
     group: 'Navigation',
     handler: (rt) => {
       rt.moveFocus('first');
@@ -72,7 +72,7 @@ export function registerDefaultKeybindings<P>(runtime: NavigationRuntime<P>): vo
   });
   runtime.registerKeybinding({
     key: 'End',
-    label: 'Move to last sibling',
+    label: 'Last item on this level',
     group: 'Navigation',
     handler: (rt) => {
       rt.moveFocus('last');
@@ -81,7 +81,7 @@ export function registerDefaultKeybindings<P>(runtime: NavigationRuntime<P>): vo
   });
   runtime.registerKeybinding({
     key: 'Enter',
-    label: 'Expand',
+    label: 'Down one level',
     group: 'Navigation',
     handler: (rt) => {
       rt.moveFocus('down');
@@ -90,7 +90,7 @@ export function registerDefaultKeybindings<P>(runtime: NavigationRuntime<P>): vo
   });
   runtime.registerKeybinding({
     key: ' ',
-    label: 'Expand',
+    label: 'Down one level',
     group: 'Navigation',
     handler: (rt) => {
       rt.moveFocus('down');
@@ -99,7 +99,7 @@ export function registerDefaultKeybindings<P>(runtime: NavigationRuntime<P>): vo
   });
   runtime.registerKeybinding({
     key: 'Escape',
-    label: 'Collapse / go to parent',
+    label: 'Up one level',
     group: 'Navigation',
     handler: (rt) => {
       rt.moveFocus('up');
@@ -108,7 +108,7 @@ export function registerDefaultKeybindings<P>(runtime: NavigationRuntime<P>): vo
   });
   runtime.registerKeybinding({
     key: 'o',
-    label: 'Jump to Olli root',
+    label: 'Go to top level',
     group: 'Navigation',
     handler: (rt) => {
       const rootId = rt.navTree().roots[0];
