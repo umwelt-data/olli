@@ -1,16 +1,3 @@
-import type { OlliDataset } from 'olli-vis';
-
-export async function getVegaView(spec: any): Promise<any> {
-  const vega = await import('vega');
-  const runtime = vega.parse(spec);
-  const view = await new vega.View(runtime).renderer('svg').hover().runAsync();
-  return view;
-}
-
-export function getVegaScene(view: any): any {
-  return (view.scenegraph() as any).root.items[0];
-}
-
 export function filterUniqueObjects<T>(arr: T[]): T[] {
   return arr.filter((value, index) => {
     const _value = JSON.stringify(value);
@@ -23,79 +10,21 @@ export function filterUniqueObjects<T>(arr: T[]): T[] {
   });
 }
 
-export function findScenegraphNodes(scenegraphNode: any, passRole: string): any[] {
-  let nodes: any[] = [];
-  const cancelRoles: string[] = ['cell', 'axis-grid'];
-  if (scenegraphNode.items === undefined) {
-    return nodes;
-  }
-  for (const nestedItem of scenegraphNode.items) {
-    if (nestedItem.role !== undefined) {
-      if (nestedItem.role === passRole && verifyNode(nestedItem, cancelRoles)) {
-        nodes.push(nestedItem);
-      } else {
-        nodes = nodes.concat(findScenegraphNodes(nestedItem, passRole));
-      }
-    } else {
-      nodes = nodes.concat(findScenegraphNodes(nestedItem, passRole));
-    }
-  }
-  return nodes;
+export function inferFormatFromUrl(url: string): string {
+  if (url.endsWith('.csv') || url.endsWith('.tsv')) return 'csv';
+  return 'json';
 }
 
-function verifyNode(scenegraphNode: any, cancelRoles: string[]): boolean {
-  if (scenegraphNode.role !== undefined && !cancelRoles.some((role: string) => scenegraphNode.role.includes(role))) {
-    if (
-      scenegraphNode.items.every((item: any) => verifyNode(item, cancelRoles)) ||
-      scenegraphNode.items === undefined
-    ) {
-      return true;
-    } else {
-      return false;
+export function parseCsv(text: string): any[] {
+  const lines = text.split('\n').filter((l) => l.trim());
+  if (lines.length < 2) return [];
+  const headers = lines[0]!.split(',').map((h) => h.trim());
+  return lines.slice(1).map((line) => {
+    const values = line.split(',').map((v) => v.trim());
+    const obj: Record<string, any> = {};
+    for (let i = 0; i < headers.length; i++) {
+      obj[headers[i]!] = values[i] ?? '';
     }
-  } else if (scenegraphNode.role === undefined && scenegraphNode.items !== undefined) {
-    return scenegraphNode.items.every((item: any) => verifyNode(item, cancelRoles));
-  } else if (scenegraphNode.role === undefined && scenegraphNode.items === undefined) {
-    return true;
-  } else {
-    return false;
-  }
+    return obj;
+  });
 }
-
-export function getData(scene: any): OlliDataset[] {
-  try {
-    const datasets = scene.context.data;
-    const data_n = Object.keys(datasets).filter((name) => {
-      return name.match(/data_\d/);
-    });
-    if (data_n.length) {
-      const extracted = data_n
-        .map((name) => {
-          return datasets[name]?.values?.value as OlliDataset | undefined;
-        })
-        .filter((d): d is OlliDataset => {
-          if (!d || !d.length) return false;
-          if (!d[0] || Object.keys(d[0]).length === 0) return false;
-          return true;
-        })
-        .filter((d: OlliDataset, idx: number, self: OlliDataset[]) => {
-          return (
-            self.findLastIndex((d2: OlliDataset) => d2.length > 0 && d2[0] && Object.keys(d2[0]).every((k) => Object.keys(d[0]!).includes(k))) === idx
-          );
-        });
-      if (extracted.length) return extracted;
-    }
-    const source_n = Object.keys(datasets).filter((name) => {
-      return name.match(/(source)|(data)_\d/);
-    });
-    const name = source_n[source_n.length - 1];
-    if (name) {
-      const dataset = datasets[name]?.values?.value as OlliDataset;
-      if (dataset?.length) return [dataset];
-    }
-    return [[]];
-  } catch (error) {
-    throw new Error(`No data found in the Vega scenegraph \n ${error}`);
-  }
-}
-

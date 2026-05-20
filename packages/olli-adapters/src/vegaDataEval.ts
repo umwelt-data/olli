@@ -410,7 +410,7 @@ function ceilDate(floored: Date, units: string[]): Date {
 function applyStack(data: Dataset, t: any): Dataset {
   const groupby: string[] = t.groupby || [];
   const field = t.field as string;
-  const [asStart, asEnd] = t.as as [string, string];
+  const [asStart, asEnd] = (t.as || ['y0', 'y1']) as [string, string];
   const sortFields: string[] = t.sort?.field || [];
   const sortOrders: string[] = t.sort?.order || [];
   const offset: string = t.offset || 'zero';

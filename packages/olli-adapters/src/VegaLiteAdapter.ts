@@ -5,6 +5,7 @@ import { evaluateVegaData, extractOutputDatasets } from './vegaDataEval.js';
 import { computeAxisTicks } from '@umwelt-data/umwelt-utils/vega';
 import type { AxisTicksConfig } from '@umwelt-data/umwelt-utils/vega';
 import type { VisAdapter } from './types.js';
+import { inferFormatFromUrl, parseCsv } from './utils.js';
 import { compile } from 'vega-lite';
 
 function getDatasets(vegaSpec: any): OlliDataset[] {
@@ -78,25 +79,6 @@ async function resolveData(spec: any): Promise<any> {
   }
 
   return { ...spec, data: { ...data, values, url: undefined } };
-}
-
-function inferFormatFromUrl(url: string): string {
-  if (url.endsWith('.csv') || url.endsWith('.tsv')) return 'csv';
-  return 'json';
-}
-
-function parseCsv(text: string): any[] {
-  const lines = text.split('\n').filter((l) => l.trim());
-  if (lines.length < 2) return [];
-  const headers = lines[0]!.split(',').map((h) => h.trim());
-  return lines.slice(1).map((line) => {
-    const values = line.split(',').map((v) => v.trim());
-    const obj: Record<string, any> = {};
-    for (let i = 0; i < headers.length; i++) {
-      obj[headers[i]!] = values[i] ?? '';
-    }
-    return obj;
-  });
 }
 
 export const VegaLiteAdapter: VisAdapter<any> = async (spec: any): Promise<OlliVisSpec> => {

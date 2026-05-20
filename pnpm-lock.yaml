@@ -146,9 +146,6 @@ importers:
       olli-vis:
         specifier: workspace:*
         version: link:../olli-vis
-      vega:
-        specifier: ^5.0.0
-        version: 5.33.1
       vega-expression:
         specifier: ^5.0.0
         version: 5.2.1
