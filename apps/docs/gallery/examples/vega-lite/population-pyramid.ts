@@ -9,7 +9,7 @@ export const populationPyramid: VisualizationExample = {
   description: 'A US population pyramid for 2000, rendered as a diverging bar chart.',
   spec: {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
-    description: 'A population pyramid for the US in 2000, created using stack.',
+    description: 'A population pyramid for the US in 2000.',
     data: { url: 'https://raw.githubusercontent.com/vega/vega-datasets/next/data/population.json' },
     transform: [
       { filter: 'datum.year == 2000' },

@@ -12,6 +12,7 @@
     "build": "tsc -b"
   },
   "dependencies": {
+    "@umwelt-data/umwelt-utils": "link:../../../umwelt-utils",
     "olli-core": "workspace:*",
     "olli-render-solid": "workspace:*",
     "solid-js": "^1.9.3"

@@ -1,41 +1,19 @@
-import type { OlliDataset, OlliFieldDef, OlliTimeUnit, OlliValue } from '../spec/types.js';
+import type { OlliDataset, OlliFieldDef, OlliValue } from '../spec/types.js';
+import {
+  fmtValue as sharedFmtValue,
+  dateToTimeUnit as sharedDateToTimeUnit,
+  isNumeric,
+  minPrecisionForValue,
+} from '@umwelt-data/umwelt-utils/description';
+
+export { isNumeric, minPrecisionForValue };
 
 export function fmtValue(value: OlliValue, fieldDef: OlliFieldDef, precision?: number): string {
-  if (fieldDef.type === 'temporal' && !(value instanceof Date)) {
-    value = new Date(value);
-  } else if (fieldDef.type === 'quantitative' && isNumeric(String(value))) {
-    value = Number(String(value));
-  }
-  if (value instanceof Date) {
-    return dateToTimeUnit(value, fieldDef.timeUnit);
-  }
-  if (typeof value === 'number' && !isNaN(value)) {
-    if (precision !== undefined) {
-      return value.toFixed(precision);
-    }
-    if (value % 1 !== 0) {
-      return value.toFixed(Math.max(2, minPrecisionForValue(value)));
-    }
-  }
-  return String(value);
+  return sharedFmtValue(value, fieldDef, precision);
 }
 
-export function dateToTimeUnit(date: Date, timeUnit?: OlliTimeUnit): string {
-  if (!timeUnit) {
-    return date.toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-  }
-  const opts: Intl.DateTimeFormatOptions = {};
-  if (timeUnit.includes('year')) opts.year = 'numeric';
-  if (timeUnit.includes('month')) opts.month = 'short';
-  if (timeUnit.includes('day')) opts.weekday = 'short';
-  if (timeUnit.includes('date')) opts.day = 'numeric';
-  if (timeUnit.includes('hours')) opts.hour = 'numeric';
-  if (timeUnit.includes('minutes')) opts.minute = 'numeric';
-  if (timeUnit.includes('seconds')) opts.second = 'numeric';
-  if (Object.keys(opts).length === 0) {
-    return date.toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-  }
-  return date.toLocaleString('en-US', opts);
+export function dateToTimeUnit(date: Date, timeUnit?: string): string {
+  return sharedDateToTimeUnit(date, timeUnit);
 }
 
 export function serializeValue(value: unknown, fieldDef: OlliFieldDef): unknown {
@@ -47,15 +25,6 @@ export function serializeValue(value: unknown, fieldDef: OlliFieldDef): unknown 
     return Number(value);
   }
   return value;
-}
-
-export function isNumeric(value: string): boolean {
-  return !isNaN(Number(value.replaceAll(',', '')));
-}
-
-export function minPrecisionForValue(value: number): number {
-  if (value === 0 || Math.abs(value) >= 1) return 0;
-  return -Math.floor(Math.log10(Math.abs(value)));
 }
 
 export function dataPrecision(data: OlliDataset, field: string): number {

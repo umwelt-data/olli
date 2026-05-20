@@ -188,6 +188,9 @@ importers:
 
   packages/olli-vis:
     dependencies:
+      '@umwelt-data/umwelt-utils':
+        specifier: link:../../../umwelt-utils
+        version: link:../../../umwelt-utils
       olli-core:
         specifier: workspace:*
         version: link:../olli-core

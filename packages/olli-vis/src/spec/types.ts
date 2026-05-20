@@ -82,6 +82,7 @@ export interface UnitOlliVisSpec {
   legends?: OlliLegend[];
   guides?: OlliGuide[];
   facet?: string;
+  stack?: 'stacked' | 'grouped';
   selection?: Selection;
   title?: string;
   description?: string;

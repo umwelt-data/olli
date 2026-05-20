@@ -25,6 +25,7 @@ exports[`VegaLiteAdapter > structure regression > aggregate-bar-chart 1`] = `
   ],
   "legends": [],
   "mark": "bar",
+  "stack": undefined,
 }
 `;
 
@@ -53,6 +54,7 @@ exports[`VegaLiteAdapter > structure regression > area-chart 1`] = `
   ],
   "legends": [],
   "mark": "area",
+  "stack": undefined,
 }
 `;
 
@@ -81,6 +83,7 @@ exports[`VegaLiteAdapter > structure regression > bar-chart 1`] = `
   ],
   "legends": [],
   "mark": "bar",
+  "stack": undefined,
 }
 `;
 
@@ -112,6 +115,7 @@ exports[`VegaLiteAdapter > structure regression > concat-chart 1`] = `
       ],
       "legends": [],
       "mark": "bar",
+      "stack": undefined,
     },
     {
       "axes": [
@@ -146,6 +150,7 @@ exports[`VegaLiteAdapter > structure regression > concat-chart 1`] = `
         },
       ],
       "mark": "point",
+      "stack": undefined,
     },
   ],
 }
@@ -189,6 +194,7 @@ exports[`VegaLiteAdapter > structure regression > faceted-chart 1`] = `
     },
   ],
   "mark": "point",
+  "stack": undefined,
 }
 `;
 
@@ -226,6 +232,7 @@ exports[`VegaLiteAdapter > structure regression > grouped-bar-chart 1`] = `
     },
   ],
   "mark": "bar",
+  "stack": "grouped",
 }
 `;
 
@@ -263,6 +270,7 @@ exports[`VegaLiteAdapter > structure regression > heatmap 1`] = `
     },
   ],
   "mark": "rect",
+  "stack": undefined,
 }
 `;
 
@@ -291,6 +299,7 @@ exports[`VegaLiteAdapter > structure regression > histogram 1`] = `
   ],
   "legends": [],
   "mark": "bar",
+  "stack": undefined,
 }
 `;
 
@@ -328,6 +337,7 @@ exports[`VegaLiteAdapter > structure regression > lasagna-plot 1`] = `
     },
   ],
   "mark": "rect",
+  "stack": undefined,
 }
 `;
 
@@ -359,6 +369,7 @@ exports[`VegaLiteAdapter > structure regression > layered-chart 1`] = `
       ],
       "legends": [],
       "mark": "line",
+      "stack": undefined,
     },
     {
       "axes": [
@@ -384,6 +395,7 @@ exports[`VegaLiteAdapter > structure regression > layered-chart 1`] = `
       ],
       "legends": [],
       "mark": "point",
+      "stack": undefined,
     },
   ],
 }
@@ -414,6 +426,7 @@ exports[`VegaLiteAdapter > structure regression > line-chart 1`] = `
   ],
   "legends": [],
   "mark": "line",
+  "stack": undefined,
 }
 `;
 
@@ -446,6 +459,7 @@ exports[`VegaLiteAdapter > structure regression > multi-series-line 1`] = `
   ],
   "legends": [],
   "mark": "line",
+  "stack": undefined,
 }
 `;
 
@@ -483,6 +497,7 @@ exports[`VegaLiteAdapter > structure regression > population-pyramid 1`] = `
     },
   ],
   "mark": "bar",
+  "stack": "stacked",
 }
 `;
 
@@ -520,6 +535,7 @@ exports[`VegaLiteAdapter > structure regression > scatterplot 1`] = `
     },
   ],
   "mark": "point",
+  "stack": undefined,
 }
 `;
 
@@ -557,6 +573,7 @@ exports[`VegaLiteAdapter > structure regression > stacked-area-chart 1`] = `
     },
   ],
   "mark": "area",
+  "stack": "stacked",
 }
 `;
 
@@ -594,6 +611,7 @@ exports[`VegaLiteAdapter > structure regression > stacked-bar-chart 1`] = `
     },
   ],
   "mark": "bar",
+  "stack": "stacked",
 }
 `;
 
@@ -631,6 +649,7 @@ exports[`VegaLiteAdapter > structure regression > streamgraph 1`] = `
     },
   ],
   "mark": "area",
+  "stack": "stacked",
 }
 `;
 
@@ -659,5 +678,6 @@ exports[`VegaLiteAdapter > structure regression > strip-plot 1`] = `
   ],
   "legends": [],
   "mark": "tick",
+  "stack": undefined,
 }
 `;

@@ -33,6 +33,9 @@ function getChartType(spec: UnitOlliVisSpec): string {
       if (fd.type === 'quantitative') return 'heatmap';
     }
   }
+  if (spec.stack) {
+    return `${spec.stack} ${spec.mark} chart`;
+  }
   return `${spec.mark} chart`;
 }
 
@@ -55,6 +58,9 @@ export function nameToken(): DescriptionToken<VisPayload> {
       switch (p.nodeType) {
         case 'root': {
           const s = spec.description || spec.title || '';
+          if (spec.description) {
+            return { short: s, long: s, nextJoinHint: 'sentence' };
+          }
           return { short: s, long: s };
         }
         case 'view': {

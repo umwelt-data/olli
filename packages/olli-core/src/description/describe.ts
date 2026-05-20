@@ -71,13 +71,18 @@ export function describe<P>(
     const active = customization.activeFor(role)();
 
     const parts: { text: string; joinHint: JoinHint }[] = [];
+    let pendingNextJoinHint: JoinHint | undefined;
     for (const entry of active.recipe) {
       const token = tokens.byName(entry.token);
       if (!token) continue;
       if (!isTokenApplicable(token, role)) continue;
       const value = token.compute(context);
       const text = entry.brevity === 'long' ? value.long : value.short;
-      if (text) parts.push({ text, joinHint: value.joinHint ?? 'sentence' });
+      if (text) {
+        const joinHint = pendingNextJoinHint ?? value.joinHint ?? 'sentence';
+        parts.push({ text, joinHint });
+        pendingNextJoinHint = value.nextJoinHint;
+      }
     }
     return assembleParts(parts);
   });

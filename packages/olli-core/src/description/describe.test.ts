@@ -190,6 +190,68 @@ describe('describe() — virtual parent-context sibling', () => {
   });
 });
 
+describe('describe() — nextJoinHint override', () => {
+  it('nextJoinHint overrides the following token joinHint', () => {
+    createRoot((dispose) => {
+      const rt = createNavigationRuntime(smallGraph());
+      rt.registerToken({
+        name: 'sentenceBreaker',
+        applicableRoles: '*',
+        compute: () => ({ short: 'first part', long: 'first part', nextJoinHint: 'sentence' }),
+      });
+      rt.registerToken({
+        name: 'clauseFollower',
+        applicableRoles: '*',
+        compute: () => ({ short: 'second part', long: 'second part', joinHint: 'clause' }),
+      });
+      rt.customization.setFor('', {
+        role: '',
+        recipe: [
+          { token: 'sentenceBreaker', brevity: 'short' },
+          { token: 'clauseFollower', brevity: 'short' },
+        ],
+        duration: 'persistent',
+      });
+      const desc = rt.getDescriptionFor('root/a')();
+      expect(desc).toBe('First part. Second part.');
+      dispose();
+    });
+  });
+
+  it('nextJoinHint carries across empty tokens', () => {
+    createRoot((dispose) => {
+      const rt = createNavigationRuntime(smallGraph());
+      rt.registerToken({
+        name: 'sentenceBreaker',
+        applicableRoles: '*',
+        compute: () => ({ short: 'first part', long: 'first part', nextJoinHint: 'sentence' }),
+      });
+      rt.registerToken({
+        name: 'emptyToken',
+        applicableRoles: '*',
+        compute: () => ({ short: '', long: '' }),
+      });
+      rt.registerToken({
+        name: 'clauseFollower',
+        applicableRoles: '*',
+        compute: () => ({ short: 'second part', long: 'second part', joinHint: 'clause' }),
+      });
+      rt.customization.setFor('', {
+        role: '',
+        recipe: [
+          { token: 'sentenceBreaker', brevity: 'short' },
+          { token: 'emptyToken', brevity: 'short' },
+          { token: 'clauseFollower', brevity: 'short' },
+        ],
+        duration: 'persistent',
+      });
+      const desc = rt.getDescriptionFor('root/a')();
+      expect(desc).toBe('First part. Second part.');
+      dispose();
+    });
+  });
+});
+
 describe('describe() — reactivity', () => {
   it('memo re-reads after setSelection', () => {
     createRoot((dispose) => {

@@ -9,6 +9,7 @@ function unitSkeleton(spec: UnitOlliVisSpec) {
   return {
     mark: spec.mark,
     facet: spec.facet,
+    stack: spec.stack,
     fields: spec.fields?.map((f) => ({ field: f.field, type: f.type })),
     axes: spec.axes?.map((a) => ({ axisType: a.axisType, field: a.field })),
     legends: spec.legends?.map((l) => ({ channel: l.channel, field: l.field })),
@@ -206,6 +207,24 @@ describe('VegaLiteAdapter', () => {
 
     expect(xAxes.length).toBe(1);
     expect(xAxes[0]!.children.length).toBeGreaterThan(0);
+  }, 30000);
+
+  it('stacked-bar-chart has stack: stacked', async () => {
+    const example = vlExamples.find(e => e.id === 'stacked-bar-chart')!;
+    const olliSpec = await VegaLiteAdapter(example.spec) as UnitOlliVisSpec;
+    expect(olliSpec.stack).toBe('stacked');
+  }, 30000);
+
+  it('stacked-area-chart has stack: stacked', async () => {
+    const example = vlExamples.find(e => e.id === 'stacked-area-chart')!;
+    const olliSpec = await VegaLiteAdapter(example.spec) as UnitOlliVisSpec;
+    expect(olliSpec.stack).toBe('stacked');
+  }, 30000);
+
+  it('grouped-bar-chart has stack: grouped', async () => {
+    const example = vlExamples.find(e => e.id === 'grouped-bar-chart')!;
+    const olliSpec = await VegaLiteAdapter(example.spec) as UnitOlliVisSpec;
+    expect(olliSpec.stack).toBe('grouped');
   }, 30000);
 
   describe('structure regression', () => {

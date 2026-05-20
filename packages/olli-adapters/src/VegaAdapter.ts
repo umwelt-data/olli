@@ -32,6 +32,13 @@ export function VegaAdapterSync(spec: any): UnitOlliVisSpec {
   if (title !== undefined) result.title = title;
   if (description !== undefined) result.description = description;
 
+  const hasStackTransform = Array.isArray(spec.data) && spec.data.some((d: any) =>
+    Array.isArray(d.transform) && d.transform.some((t: any) => t.type === 'stack'),
+  );
+  if (hasStackTransform) {
+    result.stack = 'stacked';
+  }
+
   return result;
 }
 

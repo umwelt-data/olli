@@ -1,6 +1,7 @@
 import type { UnitOlliVisSpec, OlliVisSpec, OlliDataset, OlliAxis, OlliMark } from 'olli-vis';
 import { typeInference } from 'olli-vis';
 import { typeCoerceData } from '@umwelt-data/umwelt-utils/data';
+import { describeField } from '@umwelt-data/umwelt-utils/description';
 import { evaluateVegaData, extractOutputDatasets } from './vegaDataEval.js';
 import { computeAxisTicks } from '@umwelt-data/umwelt-utils/vega';
 import type { AxisTicksConfig } from '@umwelt-data/umwelt-utils/vega';
@@ -205,14 +206,12 @@ function getFieldFromEncoding(encoding: any, data: OlliDataset): string | undefi
 }
 
 function getLabelFromEncoding(encoding: any): string {
-  if ('aggregate' in encoding) {
-    if (encoding.aggregate === 'count') {
-      return 'count';
-    }
-  }
-  return `${encoding.bin ? 'binned ' : ''}${'aggregate' in encoding ? `${encoding.aggregate} ` : ''}${
-    'condition' in encoding ? encoding.condition.field : encoding.field
-  }${'timeUnit' in encoding && !(encoding.timeUnit === encoding.field.toLowerCase()) ? ` (${encoding.timeUnit})` : ''}`;
+  return describeField({
+    field: 'condition' in encoding ? encoding.condition.field : encoding.field,
+    bin: encoding.bin,
+    aggregate: encoding.aggregate,
+    timeUnit: encoding.timeUnit !== encoding.field?.toLowerCase() ? encoding.timeUnit : undefined,
+  });
 }
 
 function coerceData(olliSpec: UnitOlliVisSpec): void {
@@ -308,6 +307,24 @@ function adaptUnitSpec(spec: any, data: OlliDataset): UnitOlliVisSpec {
 
       if (!olliSpec.fields!.find((f) => f.field === fieldDef.field)) {
         olliSpec.fields!.push(fieldDef);
+      }
+    }
+  }
+
+  if (['bar', 'area'].includes(mark ?? '') && spec.encoding) {
+    const hasColorOrDetail = 'color' in spec.encoding || 'detail' in spec.encoding;
+    const hasOffset = 'xOffset' in spec.encoding || 'yOffset' in spec.encoding;
+    if (mark === 'bar' && hasOffset) {
+      olliSpec.stack = 'grouped';
+    } else if (hasColorOrDetail) {
+      const quantChannel = (['x', 'y'] as const).find((ch) => {
+        const enc = spec.encoding?.[ch];
+        return enc && (enc.aggregate || enc.type === 'quantitative');
+      });
+      const quantEnc = quantChannel ? spec.encoding[quantChannel] : undefined;
+      const stackDisabled = quantEnc?.stack === false || quantEnc?.stack === null;
+      if (!stackDisabled) {
+        olliSpec.stack = 'stacked';
       }
     }
   }

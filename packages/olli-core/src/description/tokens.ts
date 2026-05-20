@@ -11,6 +11,7 @@ export interface TokenValue {
   short: string;
   long: string;
   joinHint?: JoinHint;
+  nextJoinHint?: JoinHint;
 }
 
 export function capitalizeFirst(s: string): string {

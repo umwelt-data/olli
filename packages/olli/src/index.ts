@@ -18,6 +18,7 @@ export type {
 } from 'olli-core';
 
 // Re-export vis spec types
+export { isMultiSpec } from 'olli-vis';
 export type {
   OlliVisSpec,
   UnitOlliVisSpec,

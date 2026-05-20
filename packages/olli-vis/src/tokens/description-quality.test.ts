@@ -71,10 +71,16 @@ const lineChartSpec: UnitOlliVisSpec = {
   ],
 };
 
+const barChartWithDescription: UnitOlliVisSpec = {
+  ...barChartSpec,
+  description: 'A chart about sales',
+};
+
 const specs = [
   { name: 'bar chart', spec: barChartSpec },
   { name: 'scatterplot', spec: scatterplotSpec },
   { name: 'line chart', spec: lineChartSpec },
+  { name: 'bar chart with description', spec: barChartWithDescription },
 ];
 
 const presets = ['detailed', 'standard', 'minimal'] as const;
@@ -106,6 +112,15 @@ function collectAllDescriptions(spec: UnitOlliVisSpec, preset: string): { navId:
   });
   return results;
 }
+
+describe('spec.description sentence boundary', () => {
+  it('description is followed by a sentence break, not a comma', () => {
+    const descriptions = collectAllDescriptions(barChartWithDescription, 'detailed');
+    const root = descriptions[0]!;
+    expect(root.desc).toMatch(/A chart about sales\.\s+A\s/);
+    expect(root.desc).not.toMatch(/A chart about sales,/);
+  });
+});
 
 describe('description quality invariants', () => {
   for (const { name, spec } of specs) {
