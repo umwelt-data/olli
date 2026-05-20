@@ -17,7 +17,8 @@
   "dependencies": {
     "olli-vis": "workspace:*",
     "olli-diagram": "workspace:*",
-    "@umwelt-data/umwelt-utils": "link:../../../umwelt-utils"
+    "@umwelt-data/umwelt-utils": "link:../../../umwelt-utils",
+    "vega-expression": "^5.0.0"
   },
   "peerDependencies": {
     "vega": "^5.0.0",

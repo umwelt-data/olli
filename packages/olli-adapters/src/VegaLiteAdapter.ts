@@ -1,36 +1,107 @@
 import type { UnitOlliVisSpec, OlliVisSpec, OlliDataset, OlliAxis, OlliMark } from 'olli-vis';
 import { typeInference } from 'olli-vis';
 import { typeCoerceData } from '@umwelt-data/umwelt-utils/data';
-import { getData, getVegaScene, getVegaView } from './utils.js';
+import { evaluateVegaData, extractOutputDatasets } from './vegaDataEval.js';
 import { computeAxisTicks } from '@umwelt-data/umwelt-utils/vega';
 import type { AxisTicksConfig } from '@umwelt-data/umwelt-utils/vega';
 import type { VisAdapter } from './types.js';
+import { compile } from 'vega-lite';
 
-export const VegaLiteAdapter: VisAdapter<any> = async (spec: any): Promise<OlliVisSpec> => {
-  const vegaLite = await import('vega-lite');
-  const view = await getVegaView(vegaLite.compile(spec).spec);
-  const scene = getVegaScene(view);
-  const data = getData(scene);
+function getDatasets(vegaSpec: any): OlliDataset[] {
+  const store = evaluateVegaData(vegaSpec.data);
+  const leafNames = findLeafDatasets(vegaSpec.data);
+  if (leafNames.length) {
+    const datasets = leafNames
+      .map((name) => store[name])
+      .filter((d): d is Record<string, any>[] => !!d && d.length > 0 && !!d[0] && Object.keys(d[0]).length > 0);
+    const deduped = datasets.filter((d, idx, self) => {
+      return (
+        self.findLastIndex(
+          (d2) => d2.length > 0 && d2[0] && Object.keys(d2[0]!).every((k) => Object.keys(d[0]!).includes(k)),
+        ) === idx
+      );
+    });
+    if (deduped.length) return deduped as OlliDataset[];
+  }
+  return extractOutputDatasets(vegaSpec.data, store) as OlliDataset[];
+}
+
+function findLeafDatasets(dataEntries: any[]): string[] {
+  const sourcedBy = new Set<string>();
+  for (const entry of dataEntries) {
+    if (entry.source) sourcedBy.add(entry.source);
+  }
+  return dataEntries
+    .map((e) => e.name)
+    .filter((name) => /^(source|data)_\d+$/.test(name) && !sourcedBy.has(name));
+}
+
+export function VegaLiteAdapterSync(spec: any): OlliVisSpec {
+  const vegaSpec = compile(spec).spec;
+  const data = getDatasets(vegaSpec);
 
   if ('repeat' in spec && 'spec' in spec) {
-    return adaptRepeatSpec(scene, spec, data);
+    return adaptRepeatSpec(spec, data);
   }
 
   if ('facet' in spec && 'spec' in spec && !('mark' in spec)) {
-    return adaptFacetSpec(scene, spec, data);
+    return adaptFacetSpec(spec, data);
   }
 
   if ('mark' in spec) {
     const normalized = normalizeOverlayMark(spec);
-    return adaptUnitSpec(scene, normalized, data[0]!);
+    return adaptUnitSpec(normalized, data[0]!);
   }
 
   if ('layer' in spec || 'concat' in spec || 'hconcat' in spec || 'vconcat' in spec) {
     const vlOp = Object.keys(spec).find((k) => ['layer', 'concat', 'hconcat', 'vconcat'].includes(k))!;
-    return await adaptMultiSpec(scene, spec, vlOp, data);
+    return adaptMultiSpec(spec, vlOp, data);
   }
 
-  return adaptUnitSpec(scene, spec, data[0]!);
+  return adaptUnitSpec(spec, data[0]!);
+}
+
+async function resolveData(spec: any): Promise<any> {
+  const data = spec.data;
+  if (!data || data.values) return spec;
+  if (!data.url) return spec;
+
+  const response = await fetch(data.url);
+  const text = await response.text();
+  const format = data.format?.type || inferFormatFromUrl(data.url);
+
+  let values: any[];
+  if (format === 'json') {
+    values = JSON.parse(text);
+  } else {
+    values = parseCsv(text);
+  }
+
+  return { ...spec, data: { ...data, values, url: undefined } };
+}
+
+function inferFormatFromUrl(url: string): string {
+  if (url.endsWith('.csv') || url.endsWith('.tsv')) return 'csv';
+  return 'json';
+}
+
+function parseCsv(text: string): any[] {
+  const lines = text.split('\n').filter((l) => l.trim());
+  if (lines.length < 2) return [];
+  const headers = lines[0]!.split(',').map((h) => h.trim());
+  return lines.slice(1).map((line) => {
+    const values = line.split(',').map((v) => v.trim());
+    const obj: Record<string, any> = {};
+    for (let i = 0; i < headers.length; i++) {
+      obj[headers[i]!] = values[i] ?? '';
+    }
+    return obj;
+  });
+}
+
+export const VegaLiteAdapter: VisAdapter<any> = async (spec: any): Promise<OlliVisSpec> => {
+  const resolved = await resolveData(spec);
+  return VegaLiteAdapterSync(resolved);
 };
 
 function normalizeOverlayMark(spec: any): any {
@@ -60,23 +131,23 @@ function resolveInnerSpec(spec: any): { innerSpec: any; facetFields: string[] } 
   return { innerSpec: current, facetFields };
 }
 
-async function adaptFacetSpec(scene: any, spec: any, data: OlliDataset[]): Promise<OlliVisSpec> {
+function adaptFacetSpec(spec: any, data: OlliDataset[]): OlliVisSpec {
   const { innerSpec, facetFields } = resolveInnerSpec(spec);
 
   if ('mark' in innerSpec) {
-    const result = adaptUnitSpec(scene, normalizeOverlayMark(innerSpec), data[0]!);
+    const result = adaptUnitSpec(normalizeOverlayMark(innerSpec), data[0]!);
     if (facetFields.length && !result.facet) result.facet = facetFields[0]!;
     return result;
   }
 
   if ('layer' in innerSpec) {
-    return adaptMultiSpec(scene, innerSpec, 'layer', data);
+    return adaptMultiSpec(innerSpec, 'layer', data);
   }
 
-  return adaptUnitSpec(scene, innerSpec, data[0]!);
+  return adaptUnitSpec(innerSpec, data[0]!);
 }
 
-async function adaptRepeatSpec(scene: any, spec: any, data: OlliDataset[]): Promise<OlliVisSpec> {
+function adaptRepeatSpec(spec: any, data: OlliDataset[]): OlliVisSpec {
   const repeatDef = spec.repeat;
   const repeatValues: string[] = Array.isArray(repeatDef)
     ? repeatDef
@@ -106,7 +177,7 @@ async function adaptRepeatSpec(scene: any, spec: any, data: OlliDataset[]): Prom
       });
       const dataset = datasetIdx >= 0 ? data[datasetIdx]! : data[0]!;
       if (datasetIdx >= 0) usedDatasets.add(datasetIdx);
-      units.push(adaptUnitSpec(scene, innerSpec, dataset));
+      units.push(adaptUnitSpec(innerSpec, dataset));
     }
   }
 
@@ -168,7 +239,7 @@ function coerceData(olliSpec: UnitOlliVisSpec): void {
   olliSpec.data = typeCoerceData(olliSpec.data, fieldSpecs) as OlliDataset;
 }
 
-function adaptUnitSpec(scene: any, spec: any, data: OlliDataset): UnitOlliVisSpec {
+function adaptUnitSpec(spec: any, data: OlliDataset): UnitOlliVisSpec {
   const olliSpec: UnitOlliVisSpec = {
     description: spec.description,
     data,
@@ -264,12 +335,11 @@ function adaptUnitSpec(scene: any, spec: any, data: OlliDataset): UnitOlliVisSpe
   return olliSpec;
 }
 
-async function adaptMultiSpec(
-  scene: any,
+function adaptMultiSpec(
   spec: any,
   vlOp: string,
   data: OlliDataset[],
-): Promise<OlliVisSpec> {
+): OlliVisSpec {
   const units: UnitOlliVisSpec[] = data.map((d) => ({
     description: spec.description,
     data: d,
@@ -296,7 +366,7 @@ async function adaptMultiSpec(
         return viewFields.length > 0 && viewFields.every((f) => fields.includes(f));
       });
       if (!dataset) continue;
-      const viewOlliSpec = adaptUnitSpec(scene, viewSpec, dataset);
+      const viewOlliSpec = adaptUnitSpec(viewSpec, dataset);
       const unitSpec = units.find((s) => s.data?.length > 0 && Object.keys(s.data[0]!).every((k) => k in dataset[0]!));
       if (unitSpec) {
         unitSpec.fields!.push(...(viewOlliSpec.fields ?? []));

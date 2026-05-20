@@ -5,7 +5,7 @@ export { type OlliHandle, type OlliOptions } from './handle.js';
 export { bridgeSignal } from './bridge.js';
 
 // Re-export adapters
-export { VegaAdapter, VegaLiteAdapter, ObservablePlotAdapter, type VisAdapter } from 'olli-adapters';
+export { VegaAdapter, VegaLiteAdapter, VegaLiteAdapterSync, ObservablePlotAdapter, type VisAdapter } from 'olli-adapters';
 
 // Re-export core types
 export type {
