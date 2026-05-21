@@ -39,7 +39,7 @@ async function mountVegaLite() {
   // to scrape the rendered scenegraph for data. We pass the same injected
   // spec so extracted predicates align with the one the user sees.
   const olliSpec = await olliJs.VegaLiteAdapter(injected);
-  handle = olliJs.olliVis(olliSpec, treeContainer.value, { initialPreset: 'medium' });
+  handle = olliJs.olliVis(olliSpec, treeContainer.value, { initialPreset: 'standard' });
 
   disposeBridge = utils.connectOlliToVegaLite(handle, view);
 
