@@ -10,30 +10,30 @@ const TEXT_STYLE = { 'font-size': '13', fill: '#334155' };
 const ARROW_STYLE = { stroke: '#64748b', 'stroke-width': 1.5, bow: 0, straights: true, padStart: 0, padEnd: 15 };
 
 export const architectureSpec: BluefishSpecFn = ({ Align, Arrow, Distribute, Group, Rect, Ref, Text }: BluefishKit) => {
-  function box(name: string, label: string, w: number) {
-    return Align({ name, alignment: 'center', customData: { olli: { label } } }, [
+  function box(name: string, label: string, w: number, description?: string) {
+    return Align({ name, alignment: 'center', customData: { olli: { label, description } } }, [
       Rect({ width: w, height: BOX_H, ...BOX_STYLE }),
       Text({ ...TEXT_STYLE }, label),
     ]);
   }
 
-  function arrow(name: string, from: string, to: string) {
-    return Arrow({ name, ...ARROW_STYLE, customData: { olli: { skip: true } } }, [
+  function arrow(from: string, to: string) {
+    return Arrow({ ...ARROW_STYLE, customData: { olli: { semantic: 'feeds into' } } }, [
       Ref({ select: from }), Ref({ select: to }),
     ]);
   }
 
   return [
     // Boxes
-    box('ext', 'External spec', 130),
-    box('adapter', 'Adapter', 85),
-    box('spec', 'OlliVisSpec / DiagramSpec', 215),
-    box('lower', 'Lowerer (domain)', 150),
-    box('hg', 'Hypergraph<Payload>', 175),
-    box('runtime', 'Navigation Runtime', 170),
-    box('navtree', 'NavTree', 85),
-    box('renderer', 'Renderer (Solid.js)', 175),
-    box('aria', 'ARIA tree view', 140),
+    box('ext', 'External spec', 130, 'A visualization or diagram specification'),
+    box('adapter', 'Adapter', 85, 'Converts the external format into an Olli spec'),
+    box('spec', 'OlliVisSpec / DiagramSpec', 215, 'Olli\'s internal specification format'),
+    box('lower', 'Lowerer (domain)', 150, 'Domain-specific logic that converts a spec into a graph'),
+    box('hg', 'Hypergraph<Payload>', 175, 'A directed, multi-parent graph representing the visualization or diagram structure'),
+    box('runtime', 'Navigation Runtime', 170, 'Manages focus, selection, and expansion state'),
+    box('navtree', 'NavTree', 85, 'A navigable tree built from the hypergraph'),
+    box('renderer', 'Renderer (Solid.js)', 175, 'Produces the final accessible output'),
+    box('aria', 'ARIA tree view', 140, 'The screen-reader-accessible tree view widget'),
 
     // Horizontal positioning (order matters: each step depends on prior left values).
     // Use 'left' alignment (not 'centerX') so bboxOwners.left is set directly —
@@ -55,27 +55,27 @@ export const architectureSpec: BluefishSpecFn = ({ Align, Arrow, Distribute, Gro
     Distribute({ direction: 'vertical', spacing: V_GAP }, [Ref({ select: 'navtree' }), Ref({ select: 'renderer' })]),
     Align({ alignment: 'top' }, [Ref({ select: 'renderer' }), Ref({ select: 'aria' })]),
 
-    // Arrows
-    arrow('a1', 'ext', 'adapter'),
-    arrow('a2', 'adapter', 'spec'),
-    arrow('a3', 'spec', 'lower'),
-    arrow('a4', 'lower', 'hg'),
-    arrow('a5', 'hg', 'runtime'),
-    arrow('a6', 'runtime', 'navtree'),
-    arrow('a7', 'navtree', 'renderer'),
-    arrow('a8', 'renderer', 'aria'),
+    // Arrows (unnamed so the adapter creates direct connection relations, not connector elements)
+    arrow('ext', 'adapter'),
+    arrow('adapter', 'spec'),
+    arrow('spec', 'lower'),
+    arrow('lower', 'hg'),
+    arrow('hg', 'runtime'),
+    arrow('runtime', 'navtree'),
+    arrow('navtree', 'renderer'),
+    arrow('renderer', 'aria'),
 
     // Semantic groups (for olli accessibility tree)
-    Group({ name: 'input', customData: { olli: { label: 'Input' } } }, [
+    Group({ name: 'input', customData: { olli: { label: 'Input', description: 'External formats are converted into Olli\'s internal spec type' } } }, [
       Ref({ select: 'ext' }), Ref({ select: 'adapter' }),
     ]),
-    Group({ name: 'specProcessing', customData: { olli: { label: 'Spec processing' } } }, [
+    Group({ name: 'specProcessing', customData: { olli: { label: 'Spec processing', description: 'The spec is lowered into a hypergraph data structure' } } }, [
       Ref({ select: 'spec' }), Ref({ select: 'lower' }), Ref({ select: 'hg' }),
     ]),
-    Group({ name: 'navigation', customData: { olli: { label: 'Navigation' } } }, [
+    Group({ name: 'navigation', customData: { olli: { label: 'Navigation', description: 'Focus and expansion state are managed and a navigable tree is built' } } }, [
       Ref({ select: 'runtime' }), Ref({ select: 'navtree' }),
     ]),
-    Group({ name: 'output', customData: { olli: { label: 'Output' } } }, [
+    Group({ name: 'output', customData: { olli: { label: 'Output', description: 'The nav tree is rendered as an accessible ARIA tree view' } } }, [
       Ref({ select: 'renderer' }), Ref({ select: 'aria' }),
     ]),
   ];

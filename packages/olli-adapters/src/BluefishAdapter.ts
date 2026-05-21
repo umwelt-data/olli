@@ -13,7 +13,10 @@ import type { DiagramAdapter } from './types.js';
 
 export interface OlliCustomData {
   kind?: string;
+  /** Short display name — overrides the Bluefish element name or text content. */
   label?: string;
+  /** Explanatory text — what the element does or represents. Appended after label in screen reader output. */
+  description?: string;
   semantic?: string;
   directed?: boolean;
   skip?: boolean;
@@ -139,12 +142,11 @@ function extractElementFromInline(
   const olli = getOlliMeta(node);
   if (olli.skip) return;
 
-  if (node.type === 'Text') {
-    const label = olli.label ?? stringChildren(node)[0] ?? name;
-    elements.set(name, { id: name, label, kind: olli.kind ?? 'text' });
-  } else {
-    elements.set(name, { id: name, label: olli.label ?? name, kind: olli.kind ?? node.type.toLowerCase() });
-  }
+  const el: DiagramElement = node.type === 'Text'
+    ? { id: name, label: olli.label ?? stringChildren(node)[0] ?? name, kind: olli.kind ?? 'text' }
+    : { id: name, label: olli.label ?? name, kind: olli.kind ?? node.type.toLowerCase() };
+  if (olli.description) el.description = olli.description;
+  elements.set(name, el);
 }
 
 const LAYOUT_TYPES = new Set(['Align', 'Distribute', 'StackH', 'StackV']);
@@ -172,7 +174,9 @@ function processNode(
       return;
     }
     if (!elements.has(name)) {
-      elements.set(name, { id: name, label: olli.label ?? name, kind: olli.kind ?? type.toLowerCase() });
+      const el: DiagramElement = { id: name, label: olli.label ?? name, kind: olli.kind ?? type.toLowerCase() };
+      if (olli.description) el.description = olli.description;
+      elements.set(name, el);
     }
     return;
   }
@@ -184,7 +188,9 @@ function processNode(
     }
     if (!elements.has(name)) {
       const label = olli.label ?? stringChildren(node)[0] ?? name;
-      elements.set(name, { id: name, label, kind: olli.kind ?? 'text' });
+      const el: DiagramElement = { id: name, label, kind: olli.kind ?? 'text' };
+      if (olli.description) el.description = olli.description;
+      elements.set(name, el);
     }
     return;
   }
@@ -246,7 +252,9 @@ function processNode(
   if (name && refKids.length === 0 && inlineKids.length > 0) {
     if (olli.skip) return;
     if (!elements.has(name)) {
-      elements.set(name, { id: name, label: olli.label ?? name, kind: olli.kind ?? type.toLowerCase() });
+      const el: DiagramElement = { id: name, label: olli.label ?? name, kind: olli.kind ?? type.toLowerCase() };
+      if (olli.description) el.description = olli.description;
+      elements.set(name, el);
     }
     return;
   }
@@ -280,6 +288,7 @@ function processNode(
   if (type === 'Group') {
     const rel: GroupingRelation = { kind: 'grouping', id: relId, members: memberIds };
     if (olli.label) rel.label = olli.label;
+    if (olli.description) rel.description = olli.description;
     relations.push(rel);
   } else if (LAYOUT_TYPES.has(type)) {
     // Layout relations are suppressed unless the author opts in via customData.olli

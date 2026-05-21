@@ -55,8 +55,9 @@ export function lowerDiagramSpec(spec: DiagramSpec): Hypergraph<DiagramPayload> 
       children,
       parents,
       payload: { sourceRelation: rel },
-      ...(!isStructural(rel) && { contextOnly: true }),
     };
+    if (!isStructural(rel)) edge.contextOnly = true;
+    if (rel.kind === 'grouping' && rel.description) edge.description = rel.description;
     edges.push(edge);
   }
 
@@ -79,6 +80,7 @@ export function lowerDiagramSpec(spec: DiagramSpec): Hypergraph<DiagramPayload> 
       parents,
       payload: { sourceElement: el },
     };
+    if (el.description) edge.description = el.description;
     edges.push(edge);
 
     if (isOrphan && !isConnector) orphanIds.push(el.id);

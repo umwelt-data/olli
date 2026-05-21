@@ -24,7 +24,7 @@ async function mount() {
   svgElement.style.maxWidth = '100%';
   svgElement.style.height = 'auto';
 
-  const spec = { ...architectureDiagramSpec, title: 'Olli architecture' } as Parameters<typeof olli.olliDiagram>[0];
+  const spec = { ...architectureDiagramSpec, title: 'Olli architecture', description: 'A pipeline that converts external visualization/diagram specs into accessible ARIA tree views' } as Parameters<typeof olli.olliDiagram>[0];
   handle = olli.olliDiagram(spec, treeContainer.value);
 
   disposeBridge = createBluefishBridge({ handle, svgElement }).destroy;
