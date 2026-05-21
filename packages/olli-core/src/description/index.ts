@@ -22,7 +22,6 @@ export {
 } from './tokens.js';
 export type {
   Brevity,
-  Duration,
   RecipeEntry,
   Customization,
   CustomizationStore,

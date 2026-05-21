@@ -494,7 +494,7 @@ describe('<TreeView /> — reactivity', () => {
     runtime.customization.setFor('', {
       role: '',
       recipe: [{ token: 'name', brevity: 'short' }],
-      duration: 'persistent',
+
     });
     expect(labelOf(container, 'root/a')).toBe('Group A.');
   });
@@ -518,7 +518,7 @@ describe('<TreeView /> — reactivity', () => {
           { token: 'name', brevity: 'short' },
           { token: 'selSize', brevity: 'short' },
         ],
-        duration: 'persistent',
+  
       });
       return rt;
     });
@@ -583,7 +583,7 @@ describe('<TreeView /> — reactivity', () => {
       rt.customization.setFor('', {
         role: '',
         recipe: [{ token: 'name', brevity: 'short' }],
-        duration: 'persistent',
+  
       });
       return rt;
     });

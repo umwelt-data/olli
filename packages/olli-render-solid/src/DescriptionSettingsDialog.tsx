@@ -304,7 +304,7 @@ export function descriptionSettingsDialog<P>(
           const recipe: RecipeEntry[] = roleEntries
             .filter((e) => e.included)
             .map((e) => ({ token: e.token, brevity: e.brevity }));
-          runtime.customization.setFor(role, { role, recipe, duration: 'persistent' });
+          runtime.customization.setFor(role, { role, recipe });
         }
       };
 

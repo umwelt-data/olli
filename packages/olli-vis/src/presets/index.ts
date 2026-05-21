@@ -31,7 +31,6 @@ function makePreset(
     customizations.push({
       role,
       recipe: makeRecipe(merged, brevity),
-      duration: 'persistent',
     });
   }
   return { name, customizations };

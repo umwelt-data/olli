@@ -41,16 +41,16 @@ olliVis(spec, container, {
         { token: 'name', brevity: 'short' },
         { token: 'index', brevity: 'short' },
       ],
-      duration: 'persistent',
     },
   },
 });
 ```
 
-A `Customization` has three fields:
+A `Customization` has two fields:
 - `role` — which type of node this applies to
 - `recipe` — an ordered list of `{ token: string, brevity: 'short' | 'long' }` entries
-- `duration` — `'persistent'` (stays until explicitly changed) or `'ephemeral'` (resets on next navigation)
+
+Note: if the user has previously saved their own preferences via the description settings dialog, those `localStorage` settings take priority over `initialPreset` and `initialCustomization` on subsequent loads.
 
 ### `initialSelection`
 

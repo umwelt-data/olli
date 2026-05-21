@@ -48,7 +48,7 @@ Press `d` to open the description settings dialog. It has several controls:
 
 ## How long changes last
 
-Your customizations persist for the current session. If you leave the page and come back, they reset to the default. The developer who integrated Olli may set a specific starting configuration.
+Your customizations are saved in your browser and persist across page reloads and sessions. If you clear your browser data, they reset to the default. The developer who integrated Olli may set a specific starting configuration, but your saved preferences take priority on subsequent visits.
 
 ## Next
 

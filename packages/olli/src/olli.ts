@@ -39,6 +39,8 @@ export function olli<P = unknown>(
         runtime.customization.setFor(role, c);
       }
     }
+    runtime.customization.hydrateFromStorage();
+
     if (options?.initialSelection) {
       runtime.setSelection(options.initialSelection);
     }

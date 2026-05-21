@@ -24,7 +24,6 @@ A recipe is simply `RecipeEntry[]`. The order of entries determines the order of
 interface Customization {
   role: string;
   recipe: readonly RecipeEntry[];
-  duration: Duration;
 }
 ```
 
@@ -32,7 +31,8 @@ interface Customization {
 | --- | --- | --- | --- |
 | `role` | `string` | yes | The hyperedge role this customization applies to (e.g., `'root'`, `'xAxis'`, `'filteredData'`). |
 | `recipe` | `RecipeEntry[]` | yes | The ordered token entries. |
-| `duration` | `'persistent' \| 'ephemeral'` | yes | Whether this customization survives across sessions. Currently informational. |
+
+Customizations are automatically persisted to `localStorage` and restored on subsequent page loads.
 
 ## CustomizationStore
 

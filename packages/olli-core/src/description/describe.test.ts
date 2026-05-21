@@ -62,7 +62,7 @@ describe('describe() — customization', () => {
       rt.customization.setFor('', {
         role: '',
         recipe: [{ token: 'name', brevity: 'short' }],
-        duration: 'persistent',
+
       });
       const after = accessor();
       expect(after).toBe('Group A.');
@@ -83,13 +83,13 @@ describe('describe() — customization', () => {
       rt.customization.setFor('', {
         role: '',
         recipe: [{ token: 'children', brevity: 'short' }],
-        duration: 'persistent',
+
       });
       expect(accessor()).toBe('1 child.');
       rt.customization.setFor('', {
         role: '',
         recipe: [{ token: 'children', brevity: 'long' }],
-        duration: 'persistent',
+
       });
       expect(accessor()).toBe('1 child: Leaf A1.');
       dispose();
@@ -106,7 +106,7 @@ describe('describe() — customization', () => {
           { token: 'parent', brevity: 'short' },
           { token: 'name', brevity: 'short' },
         ],
-        duration: 'persistent',
+
       });
       expect(accessor()).toBe('Diagram. Group A.');
       rt.customization.setFor('', {
@@ -115,7 +115,7 @@ describe('describe() — customization', () => {
           { token: 'name', brevity: 'short' },
           { token: 'parent', brevity: 'short' },
         ],
-        duration: 'persistent',
+
       });
       expect(accessor()).toBe('Group A. Diagram.');
       dispose();
@@ -131,7 +131,7 @@ describe('describe() — customization', () => {
           { token: 'nonexistent', brevity: 'short' },
           { token: 'name', brevity: 'short' },
         ],
-        duration: 'persistent',
+
       });
       expect(rt.getDescriptionFor('root/a')()).toBe('Group A.');
       dispose();
@@ -148,7 +148,7 @@ describe('describe() — presets', () => {
         {
           role: '',
           recipe: [{ token: 'name', brevity: 'short' }],
-          duration: 'persistent',
+  
         },
       ]);
       rt.customization.applyPreset('minimal');
@@ -210,7 +210,7 @@ describe('describe() — nextJoinHint override', () => {
           { token: 'sentenceBreaker', brevity: 'short' },
           { token: 'clauseFollower', brevity: 'short' },
         ],
-        duration: 'persistent',
+
       });
       const desc = rt.getDescriptionFor('root/a')();
       expect(desc).toBe('First part. Second part.');
@@ -243,7 +243,7 @@ describe('describe() — nextJoinHint override', () => {
           { token: 'emptyToken', brevity: 'short' },
           { token: 'clauseFollower', brevity: 'short' },
         ],
-        duration: 'persistent',
+
       });
       const desc = rt.getDescriptionFor('root/a')();
       expect(desc).toBe('First part. Second part.');

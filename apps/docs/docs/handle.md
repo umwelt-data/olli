@@ -80,7 +80,8 @@ handle.setCustomization(role: string, customization: Customization): void
 Override the description recipe for a specific role. A `Customization` specifies:
 - `role`: which type of node this applies to (e.g., `'root'`, `'xAxis'`, `'datum'`)
 - `recipe`: an ordered list of `{ token: string, brevity: 'short' | 'long' }` entries
-- `duration`: `'persistent'` (stays until changed) or `'ephemeral'` (resets on next navigation)
+
+Changes made via `setCustomization` are automatically persisted to `localStorage`.
 
 ### `applyPreset(name)`
 

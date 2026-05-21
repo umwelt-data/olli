@@ -83,7 +83,6 @@ export const myDomain: OlliDomain<MySpec, MyPayload> = {
           { token: 'category', brevity: 'short' },
           { token: 'index', brevity: 'short' },
         ],
-        duration: 'persistent',
       },
     ],
   }],

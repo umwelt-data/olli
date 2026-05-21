@@ -73,7 +73,6 @@ runtime.customization.registerPreset('my-preset', [
       { token: 'name', brevity: 'short' },
       { token: 'visType', brevity: 'short' },
     ],
-    duration: 'persistent',
   },
   {
     role: 'filteredData',
@@ -81,7 +80,6 @@ runtime.customization.registerPreset('my-preset', [
       { token: 'visData', brevity: 'long' },
       { token: 'aggregate', brevity: 'long' },
     ],
-    duration: 'persistent',
   },
 ]);
 

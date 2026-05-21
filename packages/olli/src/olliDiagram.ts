@@ -32,6 +32,8 @@ export function olliDiagram(
         runtime.customization.setFor(role, c);
       }
     }
+    runtime.customization.hydrateFromStorage();
+
     if (options?.initialSelection) {
       runtime.setSelection(options.initialSelection);
     }
