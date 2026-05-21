@@ -2,6 +2,7 @@ import type { Theme } from 'vitepress';
 import DefaultTheme from 'vitepress/theme';
 import GalleryIndex from '../../gallery/components/GalleryIndex.vue';
 import ExamplePage from '../../gallery/components/ExamplePage.vue';
+import ArchitectureDiagram from '../../docs/components/ArchitectureDiagram.vue';
 import 'olli/styles.css';
 
 export default {
@@ -9,5 +10,6 @@ export default {
   enhanceApp({ app }) {
     app.component('GalleryIndex', GalleryIndex);
     app.component('ExamplePage', ExamplePage);
+    app.component('ArchitectureDiagram', ArchitectureDiagram);
   },
 } satisfies Theme;

@@ -1,4 +1,4 @@
-# Theming
+# Theming & CSS
 
 Olli ships a single stylesheet for its tree view and dialog components. A developer integrating Olli into a page imports it once, then overrides CSS variables or class rules to match the host site.
 
@@ -25,7 +25,7 @@ The stylesheet defines four variables on `.olli-vis`, the wrapper class on the r
 | `--olli-focus-bg` | `#eee` | Background color of the focused label |
 | `--olli-hover-bg` | `#ddd` | Background color on label hover |
 | `--olli-indent` | `1.5em` | Left padding of each nested tree group |
-| `--olli-virtual-style` | `italic` | `font-style` for virtual parent-context nodes |
+| `--olli-virtual-style` | `italic` | `font-style` for virtual grouping nodes |
 
 Example override, scoped to a single Olli instance:
 
@@ -46,16 +46,24 @@ For anything the variables do not cover, target the class directly. Every style 
 }
 ```
 
-The class names the stylesheet uses are:
+## Class reference
 
-- `.olli-vis` — the root `<ul role="tree">` element
-- `.olli-tree-item` — each `<li role="treeitem">`
-- `.olli-tree-item.olli-focused` — the currently focused item
-- `.olli-tree-item.olli-virtual` — a synthesized virtual parent-context item
-- `.olli-tree-group` — each child `<ul role="group">`
-- `.olli-node-label` — the label `<span>` inside each item
-- `.olli-dialog-overlay`, `.olli-dialog` — the [secondary dialog surface](/guide/extending#dialogs)
+| Class | Element |
+| --- | --- |
+| `.olli-vis` | Root `<ul role="tree">` element |
+| `.olli-tree-item` | Each `<li role="treeitem">` |
+| `.olli-tree-item.olli-focused` | The currently focused item |
+| `.olli-tree-item.olli-virtual` | A synthesized grouping item |
+| `.olli-tree-group` | Each child `<ul role="group">` |
+| `.olli-node-label` | The label `<span>` inside each item |
+| `.olli-dialog-overlay` | Dialog overlay backdrop |
+| `.olli-dialog` | Dialog container |
 
 ## Ship your own stylesheet
 
 If a host site wants full control, it can skip the Olli import and write its own stylesheet against these class names. The renderer does not inject any inline styles, so the class hooks above are the full contract.
+
+## Next
+
+- [Quickstart](/docs/quickstart) — a complete working example.
+- [Installation](/docs/installation) — importing the stylesheet and other setup.

@@ -27,32 +27,48 @@ export default defineConfig({
 
   themeConfig: {
     nav: [
-      { text: 'Guide', link: '/guide/', activeMatch: '/guide/' },
+      { text: 'Using Olli', link: '/using/', activeMatch: '/using/' },
+      { text: 'Developer Docs', link: '/docs/', activeMatch: '/docs/' },
       { text: 'Gallery', link: '/gallery/', activeMatch: '/gallery/' },
     ],
 
     sidebar: {
-      '/guide/': [
-        {
-          text: 'Guide',
-          items: [{ text: 'What is Olli?', link: '/guide/' }],
-        },
+      '/using/': [
         {
           text: 'Using Olli',
           items: [
-            { text: 'Tutorial', link: '/guide/tutorial' },
-            { text: 'Concepts', link: '/guide/concepts' },
-            { text: 'Visualizations', link: '/guide/visualizations' },
-            { text: 'Diagrams', link: '/guide/diagrams' },
+            { text: 'Getting Started', link: '/using/' },
+            { text: 'Keyboard Controls', link: '/using/keyboard-controls' },
+            { text: 'Understanding the Tree', link: '/using/tree-structure' },
+            { text: 'Navigating Charts', link: '/using/charts' },
+            { text: 'Navigating Diagrams', link: '/using/diagrams' },
+            { text: 'Dialogs', link: '/using/dialogs' },
+            { text: 'Customizing Descriptions', link: '/using/descriptions' },
+          ],
+        },
+      ],
+      '/docs/': [
+        {
+          text: 'Getting Started',
+          items: [
+            { text: 'Overview', link: '/docs/' },
+            { text: 'Quickstart', link: '/docs/quickstart' },
+            { text: 'Installation', link: '/docs/installation' },
           ],
         },
         {
-          text: 'Integrating Olli',
+          text: 'API Reference',
           items: [
-            { text: 'Quickstart', link: '/guide/quickstart' },
-            { text: 'Entry points', link: '/guide/entry-points' },
-            { text: 'Theming', link: '/guide/theming' },
-            { text: 'Extending Olli', link: '/guide/extending' },
+            { text: 'Entry Points', link: '/docs/entry-points' },
+            { text: 'OlliHandle', link: '/docs/handle' },
+            { text: 'Options & Callbacks', link: '/docs/options' },
+            { text: 'Adapters', link: '/docs/adapters' },
+          ],
+        },
+        {
+          text: 'Theming',
+          items: [
+            { text: 'Theming & CSS', link: '/docs/theming' },
           ],
         },
       ],
