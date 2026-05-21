@@ -83,6 +83,16 @@ describe('<TreeView /> — ARIA structure', () => {
     expect(a1.getAttribute('aria-level')).toBe('3');
   });
 
+  it('does not steal focus on mount', async () => {
+    const outer = document.createElement('button');
+    document.body.appendChild(outer);
+    outer.focus();
+    renderWith(() => createNavigationRuntime(smallGraph()));
+    await new Promise<void>((r) => queueMicrotask(r));
+    expect(document.activeElement).toBe(outer);
+    document.body.removeChild(outer);
+  });
+
   it('root is initially focused and selected', () => {
     const { container } = renderWith(() => createNavigationRuntime(smallGraph()));
     const root = container.querySelector<HTMLElement>('[data-nav-id="root"]')!;
@@ -313,6 +323,76 @@ describe('<TreeView /> — virtual parent-context siblings', () => {
     fireEvent.keyDown(tree, { key: 'ArrowDown' });
     expect(runtime.focusedNavId()).toBe('root/hangs/x');
     expect(hangsGroup.querySelector('[data-nav-id="root/hangs/y"]')).toBeTruthy();
+  });
+
+  it('DOM focus moves to virtual node on ArrowUp', async () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(multiParentGraph()),
+    );
+    runtime.focus('root/hangs/x');
+    await new Promise<void>((r) => queueMicrotask(r));
+
+    const xItem = container.querySelector<HTMLElement>('[data-nav-id="root/hangs/x"]')!;
+    xItem.focus();
+
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'ArrowUp' });
+    await new Promise<void>((r) => queueMicrotask(r));
+
+    const virtual = container.querySelector<HTMLElement>('[data-nav-id="root/hangs/x/^0"]')!;
+    expect(document.activeElement).toBe(virtual);
+  });
+
+  it('DOM focus moves between virtual siblings', async () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(multiParentGraph()),
+    );
+    runtime.focus('root/hangs/x');
+    await new Promise<void>((r) => queueMicrotask(r));
+
+    const xItem = container.querySelector<HTMLElement>('[data-nav-id="root/hangs/x"]')!;
+    xItem.focus();
+
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'ArrowUp' });
+    await new Promise<void>((r) => queueMicrotask(r));
+    expect(document.activeElement).toBe(
+      container.querySelector<HTMLElement>('[data-nav-id="root/hangs/x/^0"]'),
+    );
+
+    fireEvent.keyDown(tree, { key: 'ArrowRight' });
+    await new Promise<void>((r) => queueMicrotask(r));
+    expect(document.activeElement).toBe(
+      container.querySelector<HTMLElement>('[data-nav-id="root/hangs/x/^1"]'),
+    );
+
+    fireEvent.keyDown(tree, { key: 'ArrowLeft' });
+    await new Promise<void>((r) => queueMicrotask(r));
+    expect(document.activeElement).toBe(
+      container.querySelector<HTMLElement>('[data-nav-id="root/hangs/x/^0"]'),
+    );
+  });
+
+  it('DOM focus moves to committed target on ArrowDown from virtual', async () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(multiParentGraph()),
+    );
+    runtime.focus('root/hangs/x');
+    await new Promise<void>((r) => queueMicrotask(r));
+
+    const xItem = container.querySelector<HTMLElement>('[data-nav-id="root/hangs/x"]')!;
+    xItem.focus();
+
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'ArrowUp' });
+    fireEvent.keyDown(tree, { key: 'ArrowRight' });
+    expect(runtime.focusedNavId()).toBe('root/hangs/x/^1');
+
+    fireEvent.keyDown(tree, { key: 'ArrowDown' });
+    await new Promise<void>((r) => queueMicrotask(r));
+
+    const target = container.querySelector<HTMLElement>('[data-nav-id="root/x"]')!;
+    expect(document.activeElement).toBe(target);
   });
 
   it('ArrowDown on a non-default virtual focuses the regrouped source', () => {

@@ -232,6 +232,7 @@ function processNode(
 
   // Unnamed Line/Arrow with ref children → connection with auto id
   if ((isLine || isArrow) && refKids.length >= 2) {
+    if (olli.skip) return;
     const ep0 = refKids[0]!.props.select as string;
     const ep1 = refKids[1]!.props.select as string;
     if (!isCopyName(ep0) && !isCopyName(ep1)) {

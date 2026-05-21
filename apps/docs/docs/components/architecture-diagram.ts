@@ -18,7 +18,7 @@ export const architectureSpec: BluefishSpecFn = ({ Align, Arrow, Distribute, Gro
   }
 
   function arrow(from: string, to: string) {
-    return Arrow({ ...ARROW_STYLE, customData: { olli: { semantic: 'feeds into' } } }, [
+    return Arrow({ ...ARROW_STYLE, customData: { olli: { skip: true } } }, [
       Ref({ select: from }), Ref({ select: to }),
     ]);
   }

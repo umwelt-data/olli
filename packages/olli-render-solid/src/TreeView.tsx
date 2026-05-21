@@ -35,6 +35,7 @@ export function TreeView<P>(props: { runtime: NavigationRuntime<P> }) {
   registerDialogKeybindings(props.runtime, openDialog);
 
   let treeEl: HTMLUListElement | undefined;
+  let treeOwnsFocus = false;
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (activeDialogId()) return;
@@ -49,6 +50,7 @@ export function TreeView<P>(props: { runtime: NavigationRuntime<P> }) {
     const id = props.runtime.focusedNavId();
     if (!treeEl) return;
     queueMicrotask(() => {
+      if (!treeOwnsFocus && !treeEl!.contains(document.activeElement)) return;
       const el = treeEl!.querySelector<HTMLElement>(
         `[data-nav-id="${CSS.escape(id)}"]`,
       );
@@ -98,6 +100,13 @@ export function TreeView<P>(props: { runtime: NavigationRuntime<P> }) {
         role="tree"
         class="olli-vis olli-tree"
         onKeyDown={handleKeyDown}
+        onFocusIn={() => { treeOwnsFocus = true; }}
+        onFocusOut={(e: FocusEvent) => {
+          const related = e.relatedTarget as Node | null;
+          if (related && !treeEl?.contains(related)) {
+            treeOwnsFocus = false;
+          }
+        }}
       >
         <For each={roots()}>
           {(rootId, i) => (

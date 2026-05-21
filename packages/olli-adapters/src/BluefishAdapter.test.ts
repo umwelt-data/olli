@@ -230,6 +230,24 @@ describe('connection relations', () => {
     expect(conn.endpoints).toEqual(['start', 'end']);
   });
 
+  it('unnamed Line with skip:true generates no connection', () => {
+    const spec = BluefishAdapter(({ Rect, Line, Ref }) => [
+      Rect({ name: 'a' }),
+      Rect({ name: 'b' }),
+      Line({ stroke: 'black', customData: { olli: { skip: true } } }, [Ref({ select: 'a' }), Ref({ select: 'b' })]),
+    ]);
+    expect(spec.relations.filter(r => r.kind === 'connection')).toHaveLength(0);
+  });
+
+  it('unnamed Arrow with skip:true generates no connection', () => {
+    const spec = BluefishAdapter(({ Rect, Arrow, Ref }) => [
+      Rect({ name: 'start' }),
+      Rect({ name: 'end' }),
+      Arrow({ customData: { olli: { skip: true } } }, [Ref({ select: 'start' }), Ref({ select: 'end' })]),
+    ]);
+    expect(spec.relations.filter(r => r.kind === 'connection')).toHaveLength(0);
+  });
+
   it('skips connections involving copy endpoints', () => {
     const spec = BluefishAdapter(({ Rect, Line, Ref }) => [
       Rect({ name: 'a' }),
