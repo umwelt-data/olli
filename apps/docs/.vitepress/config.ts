@@ -71,6 +71,51 @@ export default defineConfig({
             { text: 'Theming & CSS', link: '/docs/theming' },
           ],
         },
+        {
+          text: 'Visualization Specs',
+          items: [
+            { text: 'OlliVisSpec', link: '/docs/vis-spec' },
+            { text: 'Fields, Axes & Legends', link: '/docs/vis-fields' },
+            { text: 'Structure Nodes', link: '/docs/vis-structure' },
+            { text: 'Vis Lowering', link: '/docs/vis-lowering' },
+          ],
+        },
+        {
+          text: 'Diagram Specs',
+          items: [
+            { text: 'DiagramSpec', link: '/docs/diagram-spec' },
+            { text: 'Relations', link: '/docs/diagram-relations' },
+            { text: 'Diagram Lowering', link: '/docs/diagram-lowering' },
+          ],
+        },
+        {
+          text: 'Core Concepts',
+          items: [
+            { text: 'Hypergraph', link: '/docs/hypergraph' },
+            { text: 'Navigation Tree', link: '/docs/navtree' },
+            { text: 'Navigation Runtime', link: '/docs/runtime' },
+            { text: 'Predicates & Selection', link: '/docs/predicates' },
+          ],
+        },
+        {
+          text: 'Description System',
+          items: [
+            { text: 'Tokens', link: '/docs/tokens' },
+            { text: 'Recipes & Customization', link: '/docs/recipes' },
+            { text: 'Presets', link: '/docs/presets' },
+          ],
+        },
+        {
+          text: 'Extending Olli',
+          items: [
+            { text: 'Domain Architecture', link: '/docs/domains' },
+            { text: 'Creating a Domain', link: '/docs/creating-domain' },
+            { text: 'Contributing Tokens', link: '/docs/domain-tokens' },
+            { text: 'Contributing Dialogs', link: '/docs/domain-dialogs' },
+            { text: 'Contributing Keybindings', link: '/docs/domain-keybindings' },
+            { text: 'Contributing Predicates', link: '/docs/domain-predicates' },
+          ],
+        },
       ],
       '/gallery/': [
         {

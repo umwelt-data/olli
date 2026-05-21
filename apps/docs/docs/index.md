@@ -26,5 +26,7 @@ Olli converts data visualizations and diagrams into accessible, keyboard-navigab
 
 - **Integrate Olli into a page:** Start with the [Quickstart](/docs/quickstart), then read [Entry Points](/docs/entry-points) and [OlliHandle](/docs/handle).
 - **Customize the look:** See [Theming & CSS](/docs/theming).
-- **Understand the spec types:** See [Entry Points](/docs/entry-points) for which spec each function accepts, and the [Adapters](/docs/adapters) page for converting from external formats.
-- **Build a new domain:** Coming in Phase 2 — domain architecture, tokens, dialogs, keybindings, predicates.
+- **Understand the spec types:** See [OlliVisSpec](/docs/vis-spec) for charts or [DiagramSpec](/docs/diagram-spec) for diagrams.
+- **Learn the internals:** Read [Hypergraph](/docs/hypergraph), [Navigation Tree](/docs/navtree), and [Navigation Runtime](/docs/runtime).
+- **Customize descriptions:** See [Tokens](/docs/tokens), [Recipes](/docs/recipes), and [Presets](/docs/presets).
+- **Build a new domain:** Start with [Domain Architecture](/docs/domains), then follow [Creating a Domain](/docs/creating-domain).
