@@ -51,7 +51,6 @@ export function lowerDiagramSpec(spec: DiagramSpec): Hypergraph<DiagramPayload> 
     const edge: Hyperedge<DiagramPayload> = {
       id: rel.id,
       displayName: generateDisplayName(rel, elementsById),
-      description: `Contains ${memberIds.length} objects.`,
       role: rel.kind,
       children,
       parents,

@@ -31,9 +31,9 @@ export interface CustomizationStore {
 
 export const DEFAULT_RECIPE: readonly RecipeEntry[] = [
   { token: 'name', brevity: 'long' },
-  { token: 'index', brevity: 'long' },
+  { token: 'index', brevity: 'short' },
   { token: 'parent', brevity: 'long' },
-  { token: 'children', brevity: 'long' },
+  { token: 'children', brevity: 'short' },
 ];
 
 export const DEFAULT_VIRTUAL_RECIPE: readonly RecipeEntry[] = [

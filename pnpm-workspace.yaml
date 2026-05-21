@@ -4,3 +4,6 @@ packages:
   - apps/*
 allowBuilds:
   esbuild: true
+minimumReleaseAgeExclude:
+  - bluefish-js@0.0.39
+  - bluefish-solid@0.0.39

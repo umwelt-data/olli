@@ -46,7 +46,7 @@ describe('lowerDiagramSpec', () => {
 
     const sysA = g.edges.get('sysA')!;
     expect(sysA.displayName).toBe('Pulley System A');
-    expect(sysA.description).toBe('Contains 3 objects.');
+    expect(sysA.description).toBeUndefined();
     expect(sysA.role).toBe('grouping');
     expect(sysA.children).toEqual(['p', 'A', 'r']);
     expect(sysA.parents).toEqual(['root']);
@@ -82,7 +82,7 @@ describe('lowerDiagramSpec', () => {
 
     const hAq = g.edges.get('h-A-q')!;
     expect(hAq.displayName).toBe('Pulley A hangs from Rope q');
-    expect(hAq.description).toBe('Contains 2 objects.');
+    expect(hAq.description).toBeUndefined();
     expect(hAq.role).toBe('connection');
     expect(hAq.children).toEqual(['A', 'q']);
     expect(hAq.parents).toEqual([]);
