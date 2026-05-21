@@ -34,7 +34,7 @@ function toggleTag(t: string) {
         <legend>Domain</legend>
         <label v-for="d in ['all', 'visualization', 'diagram'] as const" :key="d">
           <input type="radio" :value="d" v-model="domainFilter" />
-          <span>{{ d }}</span>
+          {{ d }}
         </label>
       </fieldset>
 

@@ -66,7 +66,9 @@ watch(
 
 <template>
   <div class="diagram-renderer">
-    <div ref="chartContainer" class="diagram-chart" role="img" :aria-label="props.example.title" />
+    <div class="diagram-chart" role="img" :aria-label="props.example.title" >
+      <div aria-hidden="true" ref="chartContainer"/>
+    </div>
     <div ref="treeContainer" class="diagram-tree" />
   </div>
 </template>

@@ -47,7 +47,9 @@ export function DiagramRenderer(props: { example: DiagramExample }) {
 
   return (
     <div class="renderer-grid">
-      <div ref={chartRef} class="panel" role="img" aria-label={props.example.title} />
+      <div class="panel" role="img" aria-label={props.example.title}>
+        <div aria-hidden="true" ref={chartRef} />
+      </div>
       <div ref={treeRef} class="panel" />
     </div>
   );

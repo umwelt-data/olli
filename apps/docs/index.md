@@ -45,6 +45,9 @@ Contributors:
 
 Olli is based on [award-winning research](https://vis.csail.mit.edu/pubs/rich-screen-reader-vis-experiences/) involving participatory co-design led by blind and low-vision collaborators and research participants. Learn more about the [research behind Olli](https://data-and-design.org/projects/olli/).
 
+## Feedback or suggestions?
+
+Fill out the [feedback form on Github](https://github.com/umwelt-data/olli/issues/new?labels=user%20feedback).
 
 ## Support our work
 

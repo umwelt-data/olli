@@ -31,7 +31,7 @@ async function mountVegaLite() {
   const compiled = vegaLite.compile(injected as any).spec;
   const runtime = vega.parse(compiled);
 
-  view = await new vega.View(runtime, { renderer: 'svg' })
+  view = await new vega.View(runtime, { renderer: 'canvas' })
     .initialize(chartContainer.value)
     .runAsync();
 
@@ -78,7 +78,9 @@ watch(
 
 <template>
   <div class="viz-renderer">
-    <div ref="chartContainer" class="viz-chart" role="img" :aria-label="props.example.title" />
+    <div class="viz-chart" role="img" :aria-label="props.example.title">
+      <div aria-hidden="true" ref="chartContainer" />
+    </div>
     <div ref="treeContainer" class="viz-tree" />
   </div>
 </template>
