@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@umwelt-data/umwelt-utils": "link:../../../umwelt-utils",
-    "bluefish-js": "link:../../../bluefish/packages/bluefish-js",
+    "bluefish-js": "^0.0.39",
     "olli": "workspace:*",
     "olli-adapters": "workspace:*",
     "olli-render-solid": "workspace:*",
