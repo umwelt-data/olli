@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { findExample } from '../examples/index.js';
 import VisualizationRenderer from './VisualizationRenderer.vue';
 import DiagramRenderer from './DiagramRenderer.vue';
+import CodeDisplay from './CodeDisplay.vue';
 
 const props = defineProps<{
   /** URL slug from the dynamic route. */
@@ -21,6 +22,8 @@ const example = computed(() => findExample(props.id));
 
     <VisualizationRenderer v-if="example.domain === 'visualization'" :example="example" />
     <DiagramRenderer v-else-if="example.domain === 'diagram'" :example="example" />
+
+    <CodeDisplay :example="example" />
   </article>
 
   <article v-else>

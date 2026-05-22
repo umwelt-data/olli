@@ -1,6 +1,8 @@
 import { BluefishAdapter } from 'olli-adapters';
 import type { BluefishKit, BluefishSpecFn } from 'olli-adapters';
+// @gallery-hide-start
 import type { DiagramExample } from '../types.js';
+// @gallery-hide-end
 
 const r = 25;
 
@@ -130,6 +132,7 @@ const pulleySpec: BluefishSpecFn = ({ Align, Circle, Distribute, Group, Line, Re
   ];
 };
 
+// @gallery-hide-start
 export const pulley: DiagramExample = {
   id: 'pulley',
   title: 'Pulley diagram',
@@ -143,3 +146,4 @@ export const pulley: DiagramExample = {
     return { render: bf.render, elements: pulleySpec(bf as unknown as BluefishKit) };
   },
 };
+// @gallery-hide-end
