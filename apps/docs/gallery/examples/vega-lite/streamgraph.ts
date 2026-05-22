@@ -5,7 +5,7 @@ export const streamgraph: VisualizationExample = {
   title: 'Streamgraph',
   domain: 'visualization',
   toolkit: 'vega-lite',
-  tags: ['area', 'streamgraph', 'temporal'],
+
   description: 'A streamgraph of unemployment across industries.',
   spec: {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',

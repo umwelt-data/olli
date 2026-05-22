@@ -5,7 +5,7 @@ export const populationPyramid: VisualizationExample = {
   title: 'Population pyramid',
   domain: 'visualization',
   toolkit: 'vega-lite',
-  tags: ['bar', 'diverging', 'demographic'],
+
   description: 'A US population pyramid for 2000, rendered as a diverging bar chart.',
   spec: {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',

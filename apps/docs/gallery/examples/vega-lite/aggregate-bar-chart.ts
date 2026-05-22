@@ -5,7 +5,7 @@ export const aggregateBarChart: VisualizationExample = {
   title: 'Aggregate bar chart',
   domain: 'visualization',
   toolkit: 'vega-lite',
-  tags: ['bar', 'aggregate', 'temporal'],
+
   description: 'Mean precipitation per month in Seattle.',
   spec: {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',

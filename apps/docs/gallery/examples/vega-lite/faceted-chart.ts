@@ -5,7 +5,7 @@ export const facetedChart: VisualizationExample = {
   title: 'Faceted chart',
   domain: 'visualization',
   toolkit: 'vega-lite',
-  tags: ['faceted', 'multi-view', 'point'],
+
   description: "Becker's barley trellis plot, one panel per site.",
   spec: {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',

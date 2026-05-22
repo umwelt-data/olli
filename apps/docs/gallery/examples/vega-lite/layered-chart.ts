@@ -5,7 +5,7 @@ export const layeredChart: VisualizationExample = {
   title: 'Layered chart',
   domain: 'visualization',
   toolkit: 'vega-lite',
-  tags: ['layer', 'multi-view', 'temporal'],
+
   description: 'Google stock prices with raw points and a yearly mean line overlaid.',
   spec: {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',

@@ -5,7 +5,7 @@ export const heatmap: VisualizationExample = {
   title: 'Heatmap',
   domain: 'visualization',
   toolkit: 'vega-lite',
-  tags: ['heatmap', 'temporal'],
+
   description: 'Daily max temperatures in Seattle, as a month-by-day heatmap.',
   spec: {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',

@@ -5,7 +5,7 @@ export const lineChart: VisualizationExample = {
   title: 'Line chart',
   domain: 'visualization',
   toolkit: 'vega-lite',
-  tags: ['line', 'temporal'],
+
   description: "Google's stock price over time.",
   spec: {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',

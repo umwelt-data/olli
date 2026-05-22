@@ -5,7 +5,7 @@ export const histogram: VisualizationExample = {
   title: 'Histogram',
   domain: 'visualization',
   toolkit: 'vega-lite',
-  tags: ['bar', 'histogram', 'binned'],
+
   description: 'Distribution of IMDB ratings, binned.',
   spec: {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',

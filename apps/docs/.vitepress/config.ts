@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitepress';
 import solidPlugin from 'vite-plugin-solid';
+import { galleryGroups } from '../gallery/examples/groups.js';
 
 export default defineConfig({
   vite: {
@@ -118,10 +119,11 @@ export default defineConfig({
         },
       ],
       '/gallery/': [
-        {
-          text: 'Gallery',
-          items: [{ text: 'All examples', link: '/gallery/' }],
-        },
+        { text: 'Gallery', link: '/gallery/' },
+        ...galleryGroups.map((g) => ({
+          text: g.label,
+          items: g.items.map((ex) => ({ text: ex.title, link: `/gallery/${ex.id}/` })),
+        })),
       ],
     },
 

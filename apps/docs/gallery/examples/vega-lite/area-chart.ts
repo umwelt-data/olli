@@ -5,7 +5,7 @@ export const areaChart: VisualizationExample = {
   title: 'Area chart',
   domain: 'visualization',
   toolkit: 'vega-lite',
-  tags: ['area', 'temporal', 'aggregate'],
+
   description: 'Unemployment across industries, summed over time.',
   spec: {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',

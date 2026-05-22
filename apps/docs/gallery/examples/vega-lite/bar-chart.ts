@@ -5,7 +5,7 @@ export const barChart: VisualizationExample = {
   title: 'Bar chart',
   domain: 'visualization',
   toolkit: 'vega-lite',
-  tags: ['bar', 'categorical'],
+
   description: 'A simple bar chart of values per category.',
   spec: {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',

@@ -5,7 +5,7 @@ export const scatterplot: VisualizationExample = {
   title: 'Scatterplot',
   domain: 'visualization',
   toolkit: 'vega-lite',
-  tags: ['point', 'scatter', 'quantitative'],
+
   description: 'Penguin flipper length vs. body mass, colored and shaped by species.',
   spec: {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',

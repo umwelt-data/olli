@@ -5,7 +5,7 @@ export const stripPlot: VisualizationExample = {
   title: 'Strip plot',
   domain: 'visualization',
   toolkit: 'vega-lite',
-  tags: ['tick', 'strip', 'quantitative'],
+
   description: 'Tick marks showing horsepower by cylinder count.',
   spec: {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',

@@ -5,7 +5,7 @@ export const stackedBarChart: VisualizationExample = {
   title: 'Stacked bar chart',
   domain: 'visualization',
   toolkit: 'vega-lite',
-  tags: ['bar', 'stacked', 'aggregate'],
+
   description: 'Barley yield by variety, stacked by site.',
   spec: {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',

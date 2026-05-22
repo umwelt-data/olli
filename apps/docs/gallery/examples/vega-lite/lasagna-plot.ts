@@ -5,7 +5,7 @@ export const lasagnaPlot: VisualizationExample = {
   title: 'Lasagna plot',
   domain: 'visualization',
   toolkit: 'vega-lite',
-  tags: ['heatmap', 'temporal', 'multi-series'],
+
   description: 'Stock prices as a time-by-symbol lasagna plot.',
   spec: {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',

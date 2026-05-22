@@ -5,7 +5,7 @@ export const concatChart: VisualizationExample = {
   title: 'Concatenated chart',
   domain: 'visualization',
   toolkit: 'vega-lite',
-  tags: ['concat', 'multi-view'],
+
   description: 'A Seattle precipitation histogram stacked above a temperature scatterplot.',
   spec: {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',

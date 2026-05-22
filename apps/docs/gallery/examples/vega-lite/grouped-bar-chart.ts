@@ -5,7 +5,7 @@ export const groupedBarChart: VisualizationExample = {
   title: 'Grouped bar chart',
   domain: 'visualization',
   toolkit: 'vega-lite',
-  tags: ['bar', 'grouped', 'categorical'],
+
   description: 'A bar chart split into groups by a nominal field.',
   spec: {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',

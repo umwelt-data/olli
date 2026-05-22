@@ -10,8 +10,6 @@ export interface BaseExample {
   /** kebab-case; also used as the URL slug at `/gallery/:id/`. */
   id: string;
   title: string;
-  /** Free-form tags used by the gallery index's filter UI. */
-  tags: string[];
   /** 1–2 sentences shown in the index card. */
   description?: string;
 }

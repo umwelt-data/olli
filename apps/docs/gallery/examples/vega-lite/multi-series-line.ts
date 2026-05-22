@@ -5,7 +5,7 @@ export const multiSeriesLine: VisualizationExample = {
   title: 'Multi-series line chart',
   domain: 'visualization',
   toolkit: 'vega-lite',
-  tags: ['line', 'temporal', 'multi-series'],
+
   description: 'Stock prices of five tech companies over time.',
   spec: {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',

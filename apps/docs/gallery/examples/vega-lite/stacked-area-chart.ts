@@ -5,7 +5,7 @@ export const stackedAreaChart: VisualizationExample = {
   title: 'Stacked area chart',
   domain: 'visualization',
   toolkit: 'vega-lite',
-  tags: ['area', 'stacked', 'temporal'],
+
   description: 'Unemployment across industries, stacked by series.',
   spec: {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',

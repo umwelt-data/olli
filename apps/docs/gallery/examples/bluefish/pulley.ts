@@ -135,7 +135,7 @@ export const pulley: DiagramExample = {
   title: 'Pulley diagram',
   domain: 'diagram',
   toolkit: 'bluefish',
-  tags: ['diagram', 'physics'],
+
   description: 'A mechanical system consisting of pulleys, ropes, and boxes.',
   spec: BluefishAdapter(pulleySpec),
   children: async () => {
