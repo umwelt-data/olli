@@ -4,9 +4,9 @@ Layer 5: Adapters that convert visualization library specs into `OlliVisSpec`.
 
 ## Adapters
 
-- **`VegaLiteAdapter`** — Compiles a Vega-Lite spec, extracts scenegraph data, produces `OlliVisSpec`
-- **`VegaAdapter`** — Parses a Vega spec, extracts axes/legends/data from the scenegraph
-- **`ObservablePlotAdapter`** — Renders an Observable Plot spec, extracts structure from the SVG
+- **`VegaLiteAdapter`** — Compiles a Vega-Lite spec, extracts scenegraph data, produces `OlliVisSpec`. This is the primary adapter.
+- **`VegaAdapter`** — Parses a Vega spec, extracts axes/legends/data from the scenegraph.
+- **`ObservablePlotAdapter`** — Renders an Observable Plot spec, extracts structure from the SVG.
 
 All adapters are async (they render the spec to extract runtime data).
 

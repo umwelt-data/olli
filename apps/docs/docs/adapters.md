@@ -1,9 +1,9 @@
 # Adapters
 
-An adapter converts an external visualization specification into an `OlliVisSpec` that `olliVis` can render. All adapters are re-exported from the `olli` package.
+An adapter converts an external visualization specification into an `OlliVisSpec` that `olliVis` can render. The primary adapter is for Vega-Lite. All adapters are re-exported from the `olli` package.
 
 ```ts
-import { VegaLiteAdapter, VegaAdapter, ObservablePlotAdapter } from 'olli';
+import { VegaLiteAdapter } from 'olli';
 ```
 
 ## `VegaLiteAdapter`
@@ -31,47 +31,16 @@ function VegaLiteAdapterSync(spec: object): OlliVisSpec
 
 Synchronous variant. Use when the spec contains inline data (no URL-based data sources that need fetching).
 
-## `VegaAdapter`
+## Other visualization adapters
+
+Adapters also exist for Vega and Observable Plot. They follow the same pattern as the Vega-Lite adapter.
+
+- **`VegaAdapter(spec: object): Promise<OlliVisSpec>`** — converts a Vega specification. Requires `vega` as a peer dependency. A synchronous variant `VegaAdapterSync` is also available.
+- **`ObservablePlotAdapter(spec: object): Promise<OlliVisSpec>`** — converts an Observable Plot specification. Requires `@observablehq/plot` as a peer dependency.
 
 ```ts
-function VegaAdapter(spec: object): Promise<OlliVisSpec>
+import { VegaAdapter, ObservablePlotAdapter } from 'olli';
 ```
-
-Converts a Vega specification directly. Evaluates the data pipeline and extracts axes, legends, marks, and data.
-
-```ts
-import { olliVis, VegaAdapter } from 'olli';
-
-const olliSpec = await VegaAdapter(vegaSpec);
-const handle = olliVis(olliSpec, container);
-```
-
-**Requires:** `vega` as a peer dependency.
-
-### `VegaAdapterSync`
-
-```ts
-function VegaAdapterSync(spec: object): OlliVisSpec
-```
-
-Synchronous variant for specs with inline data.
-
-## `ObservablePlotAdapter`
-
-```ts
-function ObservablePlotAdapter(spec: object): Promise<OlliVisSpec>
-```
-
-Converts an Observable Plot specification. Renders the plot to SVG internally to extract axis structure, then builds an `OlliVisSpec`.
-
-```ts
-import { olliVis, ObservablePlotAdapter } from 'olli';
-
-const olliSpec = await ObservablePlotAdapter(plotSpec);
-const handle = olliVis(olliSpec, container);
-```
-
-**Requires:** `@observablehq/plot` as a peer dependency.
 
 ## `BluefishAdapter`
 

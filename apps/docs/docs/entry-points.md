@@ -89,4 +89,4 @@ mount(runtime, container);
 
 - [OlliHandle](/docs/handle) — the handle API returned by all entry points.
 - [Options & Callbacks](/docs/options) — the optional third argument.
-- [Adapters](/docs/adapters) — converting from Vega-Lite, Vega, and Observable Plot.
+- [Adapters](/docs/adapters) — converting from Vega-Lite and other visualization formats.

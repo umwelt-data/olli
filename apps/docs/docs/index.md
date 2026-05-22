@@ -6,7 +6,7 @@ Olli converts data visualizations and diagrams into accessible, keyboard-navigab
 
 <ArchitectureDiagram />
 
-1. An **adapter** converts an external format (Vega-Lite, Vega, Observable Plot) into Olli's own spec type.
+1. An **adapter** converts an external format (primarily Vega-Lite) into Olli's own spec type.
 2. A **lowerer** (part of a domain) converts the spec into a **hypergraph** — a directed, multi-parent graph.
 3. The **navigation runtime** manages focus, selection, expansion state, and builds a **nav tree** from the hypergraph.
 4. The **renderer** produces an accessible ARIA tree view from the nav tree.
@@ -19,7 +19,7 @@ Olli converts data visualizations and diagrams into accessible, keyboard-navigab
 | `olli-core` | Hypergraph data model, navigation runtime, description framework |
 | `olli-vis` | Visualization domain: spec types, lowerer, tokens, dialogs, keybindings, presets |
 | `olli-diagram` | Diagram domain: spec types, lowerer, tokens |
-| `olli-adapters` | Adapters from Vega-Lite, Vega, Observable Plot, Bluefish |
+| `olli-adapters` | Adapters for Vega-Lite, Bluefish, and other visualization formats |
 | `olli-render-solid` | Solid.js ARIA tree renderer, keyboard handling, dialog system |
 
 ## Where to go next

@@ -2,7 +2,7 @@
 
 `OlliVisSpec` is Olli's normalized description of a data visualization. It comes in two forms: `UnitOlliVisSpec` for a single chart, and `MultiOlliVisSpec` for layered or concatenated views.
 
-You rarely write an `OlliVisSpec` by hand — [adapters](/docs/adapters) generate it from Vega-Lite, Vega, or Observable Plot. But understanding the shape is useful for debugging, writing tests, or building a custom adapter.
+You rarely write an `OlliVisSpec` by hand — the [Vega-Lite adapter](/docs/adapters) generates it for you. But understanding the shape is useful for debugging, writing tests, or building a custom adapter.
 
 ## UnitOlliVisSpec
 
