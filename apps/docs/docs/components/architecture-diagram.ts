@@ -2,12 +2,12 @@ import { BluefishAdapter } from 'olli-adapters';
 import type { BluefishKit, BluefishSpecFn } from 'olli-adapters';
 
 const BOX_H = 30;
-const V_GAP = 40;
 const H_GAP = 40;
+const ROW_GAP = 100;
 
 const BOX_STYLE = { fill: 'white', stroke: '#94a3b8', 'stroke-width': 1.5, rx: 6 };
 const TEXT_STYLE = { 'font-size': '13', fill: '#334155' };
-const ARROW_STYLE = { stroke: '#64748b', 'stroke-width': 1.5, bow: 0, straights: true, padStart: 0, padEnd: 15 };
+const ARROW_STYLE = { stroke: '#64748b', 'stroke-width': 1.5, bow: -0.25, flip: true, straights: true, padStart: 0, padEnd: 15 };
 
 export const architectureSpec: BluefishSpecFn = ({ Align, Arrow, Distribute, Group, Rect, Ref, Text }: BluefishKit) => {
   function box(name: string, label: string, w: number, description?: string) {
@@ -35,24 +35,20 @@ export const architectureSpec: BluefishSpecFn = ({ Align, Arrow, Distribute, Gro
     box('renderer', 'Renderer (Solid.js)', 175, 'Produces the final accessible output'),
     box('aria', 'ARIA tree view', 140, 'The screen-reader-accessible tree view widget'),
 
-    // Horizontal positioning (order matters: each step depends on prior left values).
-    // Use 'left' alignment (not 'centerX') so bboxOwners.left is set directly —
-    // the Bluefish root forces left=0 on elements whose left isn't directly owned.
-    Distribute({ direction: 'horizontal', spacing: H_GAP }, [Ref({ select: 'adapter' }), Ref({ select: 'spec' })]),
-    Align({ alignment: 'left' }, [Ref({ select: 'spec' }), Ref({ select: 'lower' }), Ref({ select: 'hg' }), Ref({ select: 'runtime' })]),
+    // Horizontal: left-align row leaders first (establishes anchors), then distribute within rows.
+    Align({ alignment: 'left' }, [Ref({ select: 'ext' }), Ref({ select: 'spec' }), Ref({ select: 'runtime' }), Ref({ select: 'renderer' })]),
+    Distribute({ direction: 'horizontal', spacing: H_GAP }, [Ref({ select: 'ext' }), Ref({ select: 'adapter' })]),
+    Distribute({ direction: 'horizontal', spacing: H_GAP }, [Ref({ select: 'spec' }), Ref({ select: 'lower' }), Ref({ select: 'hg' })]),
     Distribute({ direction: 'horizontal', spacing: H_GAP }, [Ref({ select: 'runtime' }), Ref({ select: 'navtree' })]),
-    Align({ alignment: 'left' }, [Ref({ select: 'navtree' }), Ref({ select: 'renderer' })]),
     Distribute({ direction: 'horizontal', spacing: H_GAP }, [Ref({ select: 'renderer' }), Ref({ select: 'aria' })]),
-    Align({ alignment: 'left' }, [Ref({ select: 'ext' }), Ref({ select: 'adapter' })]),
 
-    // Vertical positioning (same pattern: use 'top' not 'centerY')
-    Distribute({ direction: 'vertical', spacing: V_GAP }, [Ref({ select: 'ext' }), Ref({ select: 'adapter' })]),
-    Align({ alignment: 'top' }, [Ref({ select: 'adapter' }), Ref({ select: 'spec' })]),
-    Distribute({ direction: 'vertical', spacing: V_GAP }, [Ref({ select: 'spec' }), Ref({ select: 'lower' })]),
-    Distribute({ direction: 'vertical', spacing: V_GAP }, [Ref({ select: 'lower' }), Ref({ select: 'hg' })]),
-    Distribute({ direction: 'vertical', spacing: V_GAP }, [Ref({ select: 'hg' }), Ref({ select: 'runtime' })]),
+    // Vertical: chain rows top-to-bottom first (establishes anchors), then align within-row items.
+    Distribute({ direction: 'vertical', spacing: ROW_GAP }, [Ref({ select: 'ext' }), Ref({ select: 'spec' })]),
+    Distribute({ direction: 'vertical', spacing: ROW_GAP }, [Ref({ select: 'spec' }), Ref({ select: 'runtime' })]),
+    Distribute({ direction: 'vertical', spacing: ROW_GAP }, [Ref({ select: 'runtime' }), Ref({ select: 'renderer' })]),
+    Align({ alignment: 'top' }, [Ref({ select: 'ext' }), Ref({ select: 'adapter' })]),
+    Align({ alignment: 'top' }, [Ref({ select: 'spec' }), Ref({ select: 'lower' }), Ref({ select: 'hg' })]),
     Align({ alignment: 'top' }, [Ref({ select: 'runtime' }), Ref({ select: 'navtree' })]),
-    Distribute({ direction: 'vertical', spacing: V_GAP }, [Ref({ select: 'navtree' }), Ref({ select: 'renderer' })]),
     Align({ alignment: 'top' }, [Ref({ select: 'renderer' }), Ref({ select: 'aria' })]),
 
     // Arrows (unnamed so the adapter creates direct connection relations, not connector elements)
