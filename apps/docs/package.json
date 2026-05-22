@@ -4,8 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build:examples": "tsc -p gallery/examples/tsconfig.json",
     "dev": "vitepress dev",
-    "build": "vitepress build",
+    "build": "npm run build:examples && vitepress build",
     "preview": "vitepress preview"
   },
   "dependencies": {

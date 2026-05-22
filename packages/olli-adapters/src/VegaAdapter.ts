@@ -1,4 +1,5 @@
 import type { UnitOlliVisSpec, OlliDataset, OlliAxis, OlliLegend, OlliMark } from 'olli-vis';
+import { getMarkType as olliGetMarkType } from 'olli-vis';
 import { filterUniqueObjects, inferFormatFromUrl, parseCsv } from './utils.js';
 import { evaluateVegaData } from './vegaDataEval.js';
 import { computeAxisTicks } from '@umwelt-data/umwelt-utils/vega';
@@ -35,8 +36,11 @@ export function VegaAdapterSync(spec: any): UnitOlliVisSpec {
   const hasStackTransform = Array.isArray(spec.data) && spec.data.some((d: any) =>
     Array.isArray(d.transform) && d.transform.some((t: any) => t.type === 'stack'),
   );
-  if (hasStackTransform) {
-    result.stack = 'stacked';
+  const mt = olliGetMarkType(mark);
+  if (hasStackTransform && mt) {
+    result.mark = typeof result.mark === 'object'
+      ? { ...result.mark, stack: 'stacked' }
+      : { type: mt, stack: 'stacked' };
   }
 
   return result;

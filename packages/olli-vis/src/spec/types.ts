@@ -5,7 +5,20 @@ import type { FieldPredicate, LogicalComposition, Selection } from 'olli-core';
 export type OlliValue = string | number | Date;
 export type OlliDatum = Record<string, OlliValue>;
 export type OlliDataset = OlliDatum[];
-export type OlliMark = 'point' | 'bar' | 'line' | 'area' | 'rect' | 'tick';
+export type OlliMarkType = 'point' | 'bar' | 'line' | 'area' | 'rect' | 'tick' | 'arc';
+
+export interface OlliMarkDef {
+  type: OlliMarkType;
+  innerRadius?: number;
+  stack?: 'stacked' | 'grouped';
+}
+
+export type OlliMark = OlliMarkType | OlliMarkDef;
+
+export function getMarkType(mark?: OlliMark): OlliMarkType | undefined {
+  if (!mark) return undefined;
+  return typeof mark === 'string' ? mark : mark.type;
+}
 
 // ---- Field definitions ----
 
@@ -82,7 +95,6 @@ export interface UnitOlliVisSpec {
   legends?: OlliLegend[];
   guides?: OlliGuide[];
   facet?: string;
-  stack?: 'stacked' | 'grouped';
   selection?: Selection;
   title?: string;
   description?: string;

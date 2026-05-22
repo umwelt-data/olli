@@ -1,4 +1,5 @@
 import type { OlliAxis, OlliGuide, OlliLegend, OlliNode, UnitOlliVisSpec } from './types.js';
+import { getMarkType } from './types.js';
 import { getFieldDef } from '../util/data.js';
 
 export function inferStructure(spec: UnitOlliVisSpec): OlliNode | OlliNode[] {
@@ -35,7 +36,7 @@ export function inferStructure(spec: UnitOlliVisSpec): OlliNode | OlliNode[] {
     };
   }
 
-  if (spec.mark === 'line' && spec.legends?.length) {
+  if (getMarkType(spec.mark) === 'line' && spec.legends?.length) {
     const colorLegend = spec.legends.find((l) => l.channel === 'color');
     if (colorLegend) {
       return {
@@ -49,7 +50,7 @@ export function inferStructure(spec: UnitOlliVisSpec): OlliNode | OlliNode[] {
     }
   }
 
-  if (spec.mark === 'bar') {
+  if (getMarkType(spec.mark) === 'bar') {
     if (spec.axes?.length) {
       const quantAxis = spec.axes.find((a) => {
         const fd = getFieldDef(a.field, spec.fields ?? []);

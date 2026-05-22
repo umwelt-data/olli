@@ -51,6 +51,7 @@ olliVis(olliSpec, document.getElementById('olli-tree'));`;
   return `import { BluefishAdapter } from 'olli-adapters';
 import { olliDiagram } from 'olli';
 
+// mySpecFn is your Bluefish specification (shown above)
 const spec = BluefishAdapter(mySpecFn);
 olliDiagram(spec, document.getElementById('olli-tree'));`;
 });

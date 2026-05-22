@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { VegaAdapter } from './index.js';
+import { getMarkType } from 'olli-vis';
 import type { UnitOlliVisSpec } from 'olli-vis';
 
 const stackedBarSpec = {
@@ -290,9 +291,10 @@ describe('VegaAdapter', () => {
       expect(yAxis!.field).toBe('y1');
     });
 
-    it('mark is bar', async () => {
+    it('mark is bar with stack', async () => {
       const result = await VegaAdapter(stackedBarSpec) as UnitOlliVisSpec;
-      expect(result.mark).toBe('bar');
+      expect(getMarkType(result.mark)).toBe('bar');
+      expect(typeof result.mark === 'object' && result.mark.stack).toBe('stacked');
     });
 
     it('description is preserved', async () => {

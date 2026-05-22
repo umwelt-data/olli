@@ -15,6 +15,7 @@ export const galleryPathsMetadata: { id: string; title: string }[] = [
   { id: 'population-pyramid', title: 'Population pyramid' },
   { id: 'histogram', title: 'Histogram' },
   { id: 'scatterplot', title: 'Scatterplot' },
+  { id: 'bubble-plot', title: 'Bubble plot' },
   { id: 'strip-plot', title: 'Strip plot' },
   { id: 'line-chart', title: 'Line chart' },
   { id: 'multi-series-line', title: 'Multi-series line chart' },
@@ -26,5 +27,7 @@ export const galleryPathsMetadata: { id: string; title: string }[] = [
   { id: 'faceted-chart', title: 'Faceted chart' },
   { id: 'layered-chart', title: 'Layered chart' },
   { id: 'concat-chart', title: 'Concatenated chart' },
+  { id: 'pie-chart', title: 'Pie chart' },
+  { id: 'donut-chart', title: 'Donut chart' },
   { id: 'pulley', title: 'Pulley diagram' },
 ];

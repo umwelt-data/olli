@@ -1,6 +1,7 @@
 import type { DescriptionToken, JoinHint, TokenContext } from 'olli-core';
 import { selectionTest } from 'olli-core';
 import type { VisPayload, OlliNodeType, UnitOlliVisSpec, OlliValue, OlliFieldDef } from '../spec/types.js';
+import { getMarkType } from '../spec/types.js';
 import { getFieldDef, getDomain, getBins } from '../util/data.js';
 import { fmtDataValue, wrapForMonospace, pluralize, averageValue, ordinalSuffix, dataPrecision } from '../util/values.js';
 import { predicateToDescription } from '../lower/describe.js';
@@ -12,8 +13,9 @@ function roles(...types: OlliNodeType[]): string[] {
 }
 
 function getChartType(spec: UnitOlliVisSpec): string {
-  if (!spec.mark) return 'dataset';
-  if (spec.mark === 'point' && spec.axes?.length === 2) {
+  const mt = getMarkType(spec.mark);
+  if (!mt) return 'dataset';
+  if (mt === 'point' && spec.axes?.length === 2) {
     const allQuant = spec.axes.every(
       (a) => getFieldDef(a.field, spec.fields ?? []).type === 'quantitative',
     );
@@ -26,17 +28,21 @@ function getChartType(spec: UnitOlliVisSpec): string {
     );
     if (hasQuant && noTemporal) return 'dotplot';
   }
-  if (spec.mark === 'rect') {
+  if (mt === 'arc') {
+    return typeof spec.mark === 'object' && spec.mark.innerRadius ? 'donut chart' : 'pie chart';
+  }
+  if (mt === 'rect') {
     const colorLegend = spec.legends?.find((l) => l.channel === 'color');
     if (colorLegend) {
       const fd = getFieldDef(colorLegend.field, spec.fields ?? []);
       if (fd.type === 'quantitative') return 'heatmap';
     }
   }
-  if (spec.stack) {
-    return `${spec.stack} ${spec.mark} chart`;
+  const stack = typeof spec.mark === 'object' ? spec.mark.stack : undefined;
+  if (stack) {
+    return `${stack} ${mt} chart`;
   }
-  return `${spec.mark} chart`;
+  return `${mt} chart`;
 }
 
 export function nameToken(): DescriptionToken<VisPayload> {
@@ -130,7 +136,7 @@ export function visTypeToken(): DescriptionToken<VisPayload> {
           return { short: s, long: s, joinHint };
         }
         case 'view': {
-          const ct = (p.viewType === 'facet' && spec.mark === 'line')
+          const ct = (p.viewType === 'facet' && getMarkType(spec.mark) === 'line')
             ? 'line'
             : getChartType(spec);
           const s = `a ${ct}`;

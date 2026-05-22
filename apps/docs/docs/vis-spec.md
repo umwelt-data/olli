@@ -18,7 +18,6 @@ interface UnitOlliVisSpec {
   legends?: OlliLegend[];
   guides?: OlliGuide[];
   facet?: string;
-  stack?: 'stacked' | 'grouped';
   selection?: Selection;
   title?: string;
   description?: string;
@@ -30,12 +29,11 @@ interface UnitOlliVisSpec {
 | `data` | `OlliDatum[]` | yes | The dataset. Each datum is a `Record<string, OlliValue>`. |
 | `fields` | `OlliFieldDef[]` | no | Field definitions with types, labels, binning, time units. Auto-inferred if omitted. |
 | `structure` | `OlliNode \| OlliNode[]` | no | How the tree is organized — groupby, predicate, and annotation nodes. Auto-inferred from axes/legends if omitted. |
-| `mark` | `OlliMark` | no | `'point'`, `'bar'`, `'line'`, `'area'`, `'rect'`, or `'tick'`. Used for chart-type descriptions. |
+| `mark` | `OlliMark` | no | A mark type string or `OlliMarkDef` object. Used for chart-type descriptions. See [OlliMark](#ollimark). |
 | `axes` | `OlliAxis[]` | no | X and Y axis guides with field, title, scale type, and tick values. |
 | `legends` | `OlliLegend[]` | no | Color, opacity, or size legend guides. |
 | `guides` | `OlliGuide[]` | no | Generic guides that don't fit axis or legend. |
 | `facet` | `string` | no | Field name for faceting. The top-level groupby becomes facet views. |
-| `stack` | `'stacked' \| 'grouped'` | no | Stacking mode. Affects chart-type descriptions. |
 | `selection` | `Selection` | no | Pre-filter applied to the data before lowering. |
 | `title` | `string` | no | Chart title. |
 | `description` | `string` | no | Longer description, announced at the root node. |
@@ -65,10 +63,30 @@ function isMultiSpec(spec: OlliVisSpec): spec is MultiOlliVisSpec
 ## OlliMark
 
 ```ts
-type OlliMark = 'point' | 'bar' | 'line' | 'area' | 'rect' | 'tick';
+type OlliMarkType = 'point' | 'bar' | 'line' | 'area' | 'rect' | 'tick' | 'arc';
+
+interface OlliMarkDef {
+  type: OlliMarkType;
+  innerRadius?: number;
+  stack?: 'stacked' | 'grouped';
+}
+
+type OlliMark = OlliMarkType | OlliMarkDef;
 ```
 
-The mark type drives chart-type inference in description tokens. A `point` mark with two quantitative axes becomes "scatterplot"; a `rect` with a color legend becomes "heatmap".
+The mark can be a plain type string (`'bar'`) or an object with additional properties (`{ type: 'arc', innerRadius: 50 }`). Mark-level properties like `innerRadius` and `stack` live on the `OlliMarkDef` object rather than the top-level spec.
+
+Use the `getMarkType` helper to extract the type string from either form:
+
+```ts
+import { getMarkType } from 'olli-vis';
+
+getMarkType('bar');                          // 'bar'
+getMarkType({ type: 'arc', innerRadius: 50 }); // 'arc'
+getMarkType(undefined);                      // undefined
+```
+
+The mark type drives chart-type inference in description tokens. A `point` mark with two quantitative axes becomes "scatterplot"; a `rect` with a color legend becomes "heatmap"; an `arc` mark becomes "pie chart" or "donut chart" depending on `innerRadius`.
 
 ## Value types
 

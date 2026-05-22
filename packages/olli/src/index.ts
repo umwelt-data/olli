@@ -18,7 +18,7 @@ export type {
 } from 'olli-core';
 
 // Re-export vis spec types
-export { isMultiSpec } from 'olli-vis';
+export { isMultiSpec, getMarkType } from 'olli-vis';
 export type {
   OlliVisSpec,
   UnitOlliVisSpec,
@@ -28,6 +28,8 @@ export type {
   OlliAxis,
   OlliLegend,
   OlliGuide,
+  OlliMarkType,
+  OlliMarkDef,
   OlliMark,
   OlliDataset,
   OlliDatum,

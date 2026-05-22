@@ -12,7 +12,7 @@ import type {
   UnitOlliVisSpec,
   VisPayload,
 } from '../spec/types.js';
-import { isMultiSpec } from '../spec/types.js';
+import { isMultiSpec, getMarkType } from '../spec/types.js';
 import { elaborateSpec } from '../spec/elaborate.js';
 import { fieldToPredicates, getFieldDef } from '../util/data.js';
 import { fmtValue, pluralize } from '../util/values.js';
@@ -89,13 +89,13 @@ export function lowerVisSpec(rawSpec: OlliVisSpec): Hypergraph<VisPayload> {
         const child = edges.find((e) => e.id === childIds[0])!;
         child.parents = [];
         // root replaces; re-id
-        const label = spec.description || spec.title || spec.mark ? `${spec.mark} chart` : 'Chart';
+        const label = spec.description || spec.title || getMarkType(spec.mark) ? `${getMarkType(spec.mark)} chart` : 'Chart';
         child.displayName = label;
         child.role = 'root';
         if (child.payload) child.payload.nodeType = 'root';
         // remove rootId since it's collapsed
       } else {
-        const label = spec.description || spec.title || (spec.mark ? `${spec.mark} chart` : 'Dataset');
+        const label = spec.description || spec.title || (getMarkType(spec.mark) ? `${getMarkType(spec.mark)} chart` : 'Dataset');
         edges.push({
           id: rootId,
           displayName: label,

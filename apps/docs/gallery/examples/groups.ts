@@ -23,6 +23,7 @@ export const galleryGroups: { label: string; items: { id: string; title: string 
     label: 'Scatter & Strip Plots',
     items: [
       { id: 'scatterplot', title: 'Scatterplot' },
+      { id: 'bubble-plot', title: 'Bubble plot' },
       { id: 'strip-plot', title: 'Strip plot' },
     ],
   },
@@ -54,6 +55,13 @@ export const galleryGroups: { label: string; items: { id: string; title: string 
       { id: 'faceted-chart', title: 'Faceted chart' },
       { id: 'layered-chart', title: 'Layered chart' },
       { id: 'concat-chart', title: 'Concatenated chart' },
+    ],
+  },
+  {
+    label: 'Pie & Donut Charts',
+    items: [
+      { id: 'pie-chart', title: 'Pie chart' },
+      { id: 'donut-chart', title: 'Donut chart' },
     ],
   },
   {

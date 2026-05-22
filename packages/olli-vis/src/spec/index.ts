@@ -2,6 +2,8 @@ export type {
   OlliValue,
   OlliDatum,
   OlliDataset,
+  OlliMarkType,
+  OlliMarkDef,
   OlliMark,
   MeasureType,
   OlliTimeUnit,
@@ -20,6 +22,6 @@ export type {
   OlliVisSpec,
   VisPayload,
 } from './types.js';
-export { isMultiSpec } from './types.js';
+export { isMultiSpec, getMarkType } from './types.js';
 export { elaborateSpec } from './elaborate.js';
 export { inferStructure } from './infer.js';

@@ -7,6 +7,7 @@ import { stackedBarChart } from './vega-lite/stacked-bar-chart.js';
 import { populationPyramid } from './vega-lite/population-pyramid.js';
 import { histogram } from './vega-lite/histogram.js';
 import { scatterplot } from './vega-lite/scatterplot.js';
+import { bubblePlot } from './vega-lite/bubble-plot.js';
 import { stripPlot } from './vega-lite/strip-plot.js';
 import { lineChart } from './vega-lite/line-chart.js';
 import { multiSeriesLine } from './vega-lite/multi-series-line.js';
@@ -18,6 +19,8 @@ import { lasagnaPlot } from './vega-lite/lasagna-plot.js';
 import { facetedChart } from './vega-lite/faceted-chart.js';
 import { layeredChart } from './vega-lite/layered-chart.js';
 import { concatChart } from './vega-lite/concat-chart.js';
+import { pieChart } from './vega-lite/pie-chart.js';
+import { donutChart } from './vega-lite/donut-chart.js';
 
 /**
  * All gallery examples, in display order.
@@ -31,6 +34,7 @@ export const examples: GalleryExample[] = [
   populationPyramid,
   histogram,
   scatterplot,
+  bubblePlot,
   stripPlot,
   lineChart,
   multiSeriesLine,
@@ -42,6 +46,8 @@ export const examples: GalleryExample[] = [
   facetedChart,
   layeredChart,
   concatChart,
+  pieChart,
+  donutChart,
   pulley,
 ];
 

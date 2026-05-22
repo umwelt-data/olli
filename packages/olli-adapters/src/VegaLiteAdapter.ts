@@ -1,5 +1,5 @@
 import type { UnitOlliVisSpec, OlliVisSpec, OlliDataset, OlliAxis, OlliMark } from 'olli-vis';
-import { typeInference } from 'olli-vis';
+import { typeInference, getMarkType } from 'olli-vis';
 import { typeCoerceData } from '@umwelt-data/umwelt-utils/data';
 import { describeField } from '@umwelt-data/umwelt-utils/description';
 import { evaluateVegaData, extractOutputDatasets } from './vegaDataEval.js';
@@ -233,15 +233,22 @@ function adaptUnitSpec(spec: any, data: OlliDataset): UnitOlliVisSpec {
   const getMark = (spec: any): OlliMark | undefined => {
     const mark = spec.mark;
     const raw = mark && mark.type ? mark.type : mark;
+    let olliMark: OlliMark | undefined;
     switch (raw) {
       case 'circle':
       case 'square':
-        return 'point';
+        olliMark = 'point';
+        break;
       case 'trail':
-        return 'line';
+        olliMark = 'line';
+        break;
       default:
-        return raw;
+        olliMark = raw;
     }
+    if (olliMark === 'arc' && mark && typeof mark === 'object' && mark.innerRadius) {
+      olliMark = { type: 'arc', innerRadius: mark.innerRadius };
+    }
+    return olliMark;
   };
   const mark = getMark(spec);
   if (mark !== undefined) olliSpec.mark = mark;
@@ -262,12 +269,12 @@ function adaptUnitSpec(spec: any, data: OlliDataset): UnitOlliVisSpec {
       }
       if (['row', 'column', 'facet'].includes(channel)) {
         olliSpec.facet = fieldDef.field;
-      } else if (olliSpec.mark === 'line' && ['color', 'detail'].includes(channel)) {
+      } else if (getMarkType(olliSpec.mark) === 'line' && ['color', 'detail'].includes(channel)) {
         olliSpec.facet = fieldDef.field;
       } else if (['x', 'y'].includes(channel)) {
         const isStackedCumulativeAxis = encoding.aggregate
           && encoding.stack !== null && encoding.stack !== false
-          && ['area', 'bar'].includes(mark ?? '')
+          && ['area', 'bar'].includes(getMarkType(mark) ?? '')
           && spec.encoding && ('color' in spec.encoding || 'detail' in spec.encoding);
         const tickConfig: AxisTicksConfig = {
           field: fieldDef.field,
@@ -297,7 +304,7 @@ function adaptUnitSpec(spec: any, data: OlliDataset): UnitOlliVisSpec {
           field: fieldDef.field,
           title: encoding.title,
         });
-      } else if (channel === 'order') {
+      } else if (['order', 'theta'].includes(channel)) {
         olliSpec.guides!.push({
           field: fieldDef.field,
           title: encoding.title,
@@ -311,11 +318,13 @@ function adaptUnitSpec(spec: any, data: OlliDataset): UnitOlliVisSpec {
     }
   }
 
-  if (['bar', 'area'].includes(mark ?? '') && spec.encoding) {
+  const mt = getMarkType(mark);
+  if (mt && ['bar', 'area'].includes(mt) && spec.encoding) {
     const hasColorOrDetail = 'color' in spec.encoding || 'detail' in spec.encoding;
     const hasOffset = 'xOffset' in spec.encoding || 'yOffset' in spec.encoding;
-    if (mark === 'bar' && hasOffset) {
-      olliSpec.stack = 'grouped';
+    let stack: 'stacked' | 'grouped' | undefined;
+    if (mt === 'bar' && hasOffset) {
+      stack = 'grouped';
     } else if (hasColorOrDetail) {
       const quantChannel = (['x', 'y'] as const).find((ch) => {
         const enc = spec.encoding?.[ch];
@@ -324,8 +333,13 @@ function adaptUnitSpec(spec: any, data: OlliDataset): UnitOlliVisSpec {
       const quantEnc = quantChannel ? spec.encoding[quantChannel] : undefined;
       const stackDisabled = quantEnc?.stack === false || quantEnc?.stack === null;
       if (!stackDisabled) {
-        olliSpec.stack = 'stacked';
+        stack = 'stacked';
       }
+    }
+    if (stack) {
+      olliSpec.mark = typeof olliSpec.mark === 'object'
+        ? { ...olliSpec.mark, stack }
+        : { type: mt, stack };
     }
   }
 

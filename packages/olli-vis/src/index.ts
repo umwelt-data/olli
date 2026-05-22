@@ -12,6 +12,8 @@ export type {
   OlliValue,
   OlliDatum,
   OlliDataset,
+  OlliMarkType,
+  OlliMarkDef,
   OlliMark,
   OlliFieldDef,
   OlliGuide,
@@ -30,7 +32,7 @@ export type {
   OlliTimeUnit,
   MultiSpecOperator,
 } from './spec/types.js';
-export { isMultiSpec } from './spec/types.js';
+export { isMultiSpec, getMarkType } from './spec/types.js';
 export { elaborateSpec } from './spec/elaborate.js';
 export { inferStructure } from './spec/infer.js';
 export { fmtValue, serializeValue, pluralize, averageValue, dataPrecision, ordinalSuffix, capitalizeFirst, removeFinalPeriod, wrapForMonospace as fieldName } from './util/values.js';
