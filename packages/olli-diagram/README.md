@@ -2,27 +2,16 @@
 
 Layer 4: Diagram domain module. Supports direct hyperedge authoring for non-visualization domains (system diagrams, pulley systems, etc.).
 
-## Usage
+**Docs:** [DiagramSpec](https://umwelt-data.github.io/olli/docs/diagram-spec), [Diagram relations](https://umwelt-data.github.io/olli/docs/diagram-relations)
 
-```ts
-import { diagramDomain, type DiagramSpec } from 'olli-diagram';
-import { createNavigationRuntime, registerDomain } from 'olli-core';
+## Features
 
-const spec: DiagramSpec = {
-  edges: [
-    { id: 'root', displayName: 'System', children: ['a', 'b'], parents: [] },
-    { id: 'a', displayName: 'Part A', children: [], parents: ['root'] },
-    { id: 'b', displayName: 'Part B', children: [], parents: ['root'] },
-  ],
-};
-
-const graph = diagramDomain.toHypergraph(spec);
-const runtime = createNavigationRuntime(graph);
-registerDomain(runtime, diagramDomain);
-```
-
-Relies on generic L2 tokens (name, index, level, parent, children) for descriptions. No domain-specific tokens, dialogs, or keybindings.
+- **Spec types** — `DiagramSpec` with `DiagramElement` and relation types (`ConnectionRelation`, `ContainmentRelation`, `AlignmentRelation`, `DistributionRelation`, `GroupingRelation`)
+- **Lowerer** — `lowerDiagramSpec` converts a `DiagramSpec` into a `Hypergraph<DiagramPayload>`
+- **Tokens** — `elementKindToken` plus generic core tokens (name, index, level, parent, children)
+- **Predicate provider** — `diagramPredicateProvider`
+- **Description Settings** dialog registered
 
 ## Dependencies
 
-- `olli-core`
+- `olli-core`, `olli-render-solid`, `solid-js`

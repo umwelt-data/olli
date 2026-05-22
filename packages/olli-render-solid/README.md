@@ -5,15 +5,17 @@ Layer 3: Solid components that render a `NavigationRuntime` as an accessible ARI
 ## Components
 
 - **`TreeView`** — Root `<ul role="tree">` container, keydown dispatch to runtime keybinding registry
-- **`TreeItem`** — Recursive `<li role="treeitem">` with ARIA attributes (`aria-expanded`, `aria-selected`, `aria-level`, `aria-setsize`, `aria-posinset`)
+- **`TreeItem`** — Recursive `<li role="treeitem">` with ARIA attributes
 - **`NodeLabel`** — Renders reactive `describe(navId)` as the announced label
 - **`Dialog`** — Focus-trapping modal shell, handles Escape
+- **`descriptionSettingsDialog`** — Preset/customization settings dialog
+- **`helpDialog`** — Keyboard shortcut help dialog
 
 ## API
 
-- `mount(runtime, container)` — Renders the tree view, returns a dispose function
+- `mount(runtime, container, options?)` — Renders the tree view, returns a dispose function
 - `registerDefaultKeybindings(runtime)` — Registers arrow key navigation, Enter expand/collapse
 
 ## Dependencies
 
-- `olli-core`, `solid-js`
+- `olli-core`, `solid-js`, `ua-parser-js`

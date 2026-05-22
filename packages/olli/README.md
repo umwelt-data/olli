@@ -1,39 +1,18 @@
 # olli
 
-Vanilla-JS consumer wrapper. Exposes an imperative API over the Solid-based internals so downstream users in any framework can use Olli without knowing about Solid.
+Vanilla-JS consumer wrapper — the sole public npm package. Exposes an imperative API over the Solid-based internals so downstream users in any framework can use Olli without knowing about Solid.
+
+Re-exports all adapters (`VegaLiteAdapter`, `VegaAdapter`, `ObservablePlotAdapter`, `BluefishAdapter`, sync variants) and core types so consumers only need `npm install olli`.
+
+**Docs:** [Quickstart](https://umwelt-data.github.io/olli/docs/quickstart), [Entry points](https://umwelt-data.github.io/olli/docs/entry-points), [OlliHandle](https://umwelt-data.github.io/olli/docs/handle), [Options](https://umwelt-data.github.io/olli/docs/options)
 
 ## Entry points
 
-- **`olli(graph, container, options?)`** — Domain-agnostic: mount a raw `Hypergraph` with generic descriptions
-- **`olliVis(spec, container, options?)`** — Visualization domain: mount an `OlliVisSpec` with vis tokens, dialogs, keybindings
+- **`olli(graph, container, options?)`** — Domain-agnostic: mount a raw `Hypergraph`
+- **`olliVis(spec, container, options?)`** — Visualization domain: mount an `OlliVisSpec`
 - **`olliDiagram(spec, container, options?)`** — Diagram domain: mount a `DiagramSpec`
 
-All return an `OlliHandle` for imperative control.
-
-## OlliHandle
-
-```ts
-interface OlliHandle {
-  focus(navId): void;
-  getFocusedNavId(): NavNodeId;
-  setSelection(selection): void;
-  getSelection(): Selection;
-  getDescription(navId): string;
-  setCustomization(role, customization): void;
-  applyPreset(name): void;
-  onFocusChange(cb): () => void;    // returns unsubscribe
-  onSelectionChange(cb): () => void; // returns unsubscribe
-  destroy(): void;
-}
-```
-
-## Re-exports
-
-For convenience, `olli` re-exports:
-- Adapters: `VegaAdapter`, `VegaLiteAdapter`, `ObservablePlotAdapter`
-- Core types: `NavNodeId`, `Selection`, `Customization`, `Hypergraph`, etc.
-- Vis spec types: `OlliVisSpec`, `UnitOlliVisSpec`, `OlliFieldDef`, etc.
-- Diagram types: `DiagramSpec`, `DiagramPayload`
+All return an `OlliHandle` for imperative control. See the [docs](https://umwelt-data.github.io/olli/docs/handle) for the full interface.
 
 ## Dependencies
 
