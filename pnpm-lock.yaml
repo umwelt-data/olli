@@ -37,8 +37,8 @@ importers:
   apps/docs:
     dependencies:
       '@umwelt-data/umwelt-utils':
-        specifier: link:../../../umwelt-utils
-        version: link:../../../umwelt-utils
+        specifier: ^0.1.1
+        version: 0.1.1
       bluefish-js:
         specifier: ^0.0.39
         version: 0.0.39
@@ -80,8 +80,8 @@ importers:
   apps/playground:
     dependencies:
       '@umwelt-data/umwelt-utils':
-        specifier: link:../../../umwelt-utils
-        version: link:../../../umwelt-utils
+        specifier: ^0.1.1
+        version: 0.1.1
       bluefish-js:
         specifier: ^0.0.39
         version: 0.0.39
