@@ -14,5 +14,5 @@ Layers 0–2 of the Olli architecture: hypergraph data model, predicate evaluati
 ## Dependencies
 
 - `solid-js` (signals only, no DOM)
-- `@umwelt-data/umwelt-utils` (workspace link — predicate types and evaluation)
+- `@umwelt-data/umwelt-utils` (predicate types and evaluation)
 - No other workspace dependencies (this is the bottom layer)

@@ -14,7 +14,59 @@ Re-exports all adapters (`VegaLiteAdapter`, `VegaAdapter`, `ObservablePlotAdapte
 
 All return an `OlliHandle` for imperative control. See the [docs](https://umwelt-data.github.io/olli/docs/handle) for the full interface.
 
+## Build pipeline
+
+This package bundles all internal workspace packages into a single publishable output so consumers don't need to install `olli-core`, `olli-vis`, etc. The build has four sequential steps:
+
+```bash
+pnpm run build          # runs all steps below in order
+```
+
+| Step | Script | Tool | What it does |
+|------|--------|------|-------------|
+| 1 | `build:deps` | `tsc -b` | Compiles all workspace packages (produces `.js` and `.d.ts` in each package's `dist/`) |
+| 2 | `build:bundle` | `tsup` | Bundles JS entry point, inlining all workspace imports into a single `dist/index.js`. Configured in `tsup.config.ts`. |
+| 3 | `build:dts` | `rollup -c rollup.dts.config.mjs` | Bundles type declarations, inlining workspace `.d.ts` into a single `dist/index.d.ts`. Uses `rollup-plugin-dts`. |
+| 4 | `build:css` | `cat` | Copies `olli-render-solid/src/styles.css` → `dist/styles.css` |
+
+### What gets bundled vs. kept external
+
+**Bundled (inlined into `dist/`):** `olli-core`, `olli-render-solid`, `olli-vis`, `olli-diagram`, `olli-adapters` — these are workspace packages that are never published to npm.
+
+**External (listed as `dependencies` or `peerDependencies`):** `solid-js`, `@umwelt-data/umwelt-utils`, `vega-expression`, `topojson-client`, `papaparse`, `ua-parser-js`, `vega-lite` (optional peer), `@observablehq/plot` (optional peer).
+
+### Verifying the bundle
+
+After building, confirm no internal package references leak into the published output:
+
+```bash
+grep 'from.*olli-core\|from.*olli-vis\|from.*olli-diagram\|from.*olli-adapters\|from.*olli-render' dist/index.js dist/index.d.ts
+```
+
+This should produce no output. If it does, the bundle is broken and consumers will get import errors.
+
 ## Dependencies
 
-- `olli-core`, `olli-render-solid`, `olli-vis`, `olli-diagram`, `olli-adapters`, `solid-js`
-- Solid is bundled as a regular dependency (consumers don't need to install it)
+**Runtime** (installed by consumers):
+- `solid-js` — reactive primitives (signals, effects)
+- `@umwelt-data/umwelt-utils` — shared predicate, data, and description utilities
+- `vega-expression`, `topojson-client`, `papaparse`, `ua-parser-js`
+
+**Peer** (optional, only needed for specific adapters):
+- `vega-lite` — required for `VegaLiteAdapter`
+- `@observablehq/plot` — required for `ObservablePlotAdapter`
+
+**Dev** (workspace packages inlined at build time):
+- `olli-core`, `olli-render-solid`, `olli-vis`, `olli-diagram`, `olli-adapters`
+- `tsup`, `esbuild-plugin-solid`, `rollup`, `rollup-plugin-dts`
+
+## Publishing
+
+See the [root README](../../README.md#publishing-to-npm) for the full pre-publish checklist. The short version:
+
+```bash
+pnpm run check            # from repo root — must pass
+pnpm --filter olli build  # build the bundle
+cd packages/olli
+npm publish --access public
+```

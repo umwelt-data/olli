@@ -15,7 +15,7 @@
     "build": "tsc -b"
   },
   "dependencies": {
-    "@umwelt-data/umwelt-utils": "link:../../../umwelt-utils",
+    "@umwelt-data/umwelt-utils": "^0.1.1",
     "solid-js": "^1.9.3"
   }
 }

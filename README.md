@@ -40,7 +40,7 @@ pnpm install
 
 ```bash
 pnpm run check          # Full verification: boundaries + build + test (run before pushing)
-pnpm run build          # tsc -b across all packages
+pnpm run build          # Build all packages (tsc -b for internals, bundled build for olli)
 pnpm test               # vitest (single run)
 pnpm test:watch         # vitest in watch mode
 pnpm run check:boundaries  # Verify import layer rules
@@ -73,10 +73,44 @@ See [apps/docs/README.md](apps/docs/README.md) for the step-by-step guide.
 
 ### Publishing to npm
 
-`olli` is the sole public npm package — it re-exports everything including adapters, so consumers only need `npm install olli`.
+`olli` is the sole public npm package — it re-exports everything including adapters, so consumers only need `npm install olli`. All internal workspace packages (`olli-core`, `olli-render-solid`, `olli-vis`, `olli-diagram`, `olli-adapters`) are bundled into the published `olli` package at build time — they are never published separately.
 
-```bash
-pnpm run check          # Must pass first
-cd packages/olli
-npm publish
-```
+`olli` also depends on `@umwelt-data/umwelt-utils`, which is a separate published package shared with the Umwelt project. If you've made changes to umwelt-utils, publish it first.
+
+#### Pre-publish checklist
+
+1. **Ensure `@umwelt-data/umwelt-utils` is published** and the version in `packages/olli/package.json` points to a real npm version (not a `link:` path). The same applies for `packages/olli-core/package.json`, `packages/olli-vis/package.json`, and `packages/olli-adapters/package.json`.
+
+2. **Run the full check:**
+   ```bash
+   pnpm run check          # boundaries + build + test — must pass
+   ```
+
+3. **Build the publishable bundle:**
+   ```bash
+   pnpm --filter olli run build
+   ```
+   This runs four steps (see `packages/olli/README.md` for details):
+   - `tsc -b` — compiles all workspace packages
+   - `tsup` — bundles JS, inlining all workspace packages
+   - `rollup` — bundles `.d.ts`, inlining all workspace type declarations
+   - CSS copy from `olli-render-solid`
+
+4. **Verify the bundle has no internal references:**
+   ```bash
+   grep 'from.*olli-core\|from.*olli-vis\|from.*olli-diagram\|from.*olli-adapters\|from.*olli-render' packages/olli/dist/index.js packages/olli/dist/index.d.ts
+   ```
+   This should produce no output.
+
+5. **Publish:**
+   ```bash
+   cd packages/olli
+   npm publish --access public
+   ```
+
+6. **Smoke test** in a fresh directory:
+   ```bash
+   mkdir /tmp/olli-test && cd /tmp/olli-test
+   npm init -y && npm install olli
+   node -e "import('olli').then(m => console.log(Object.keys(m)))"
+   ```

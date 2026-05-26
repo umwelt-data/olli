@@ -1,6 +1,7 @@
 {
   "name": "olli",
   "version": "3.0.0",
+  "description": "Olli is a library for converting web visualizations into accessible text structures for blind and low-vision screen reader users.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -9,17 +10,67 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./styles.css": "./src/styles.css"
+    "./styles.css": "./dist/styles.css"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "build": "tsc -b"
+    "build:deps": "tsc -b",
+    "build:bundle": "tsup",
+    "build:dts": "rollup -c rollup.dts.config.mjs",
+    "build:css": "cat ../olli-render-solid/src/styles.css > dist/styles.css",
+    "build": "pnpm run build:deps && pnpm run build:bundle && pnpm run build:dts && pnpm run build:css",
+    "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
+    "@umwelt-data/umwelt-utils": "^0.1.1",
+    "papaparse": "^5.4.0",
+    "solid-js": "^1.9.3",
+    "topojson-client": "^3.1.0",
+    "ua-parser-js": "^2.0.9",
+    "vega-expression": "^5.0.0"
+  },
+  "peerDependencies": {
+    "@observablehq/plot": ">=0.6.0",
+    "vega-lite": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "vega-lite": {
+      "optional": true
+    },
+    "@observablehq/plot": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/papaparse": "^5.3.0",
+    "@types/topojson-client": "^3.1.0",
+    "esbuild-plugin-solid": "^0.6.0",
     "olli-adapters": "workspace:*",
     "olli-core": "workspace:*",
     "olli-diagram": "workspace:*",
     "olli-render-solid": "workspace:*",
     "olli-vis": "workspace:*",
-    "solid-js": "^1.9.3"
-  }
+    "rollup": "^4.60.4",
+    "rollup-plugin-dts": "^6.4.1",
+    "tsup": "^8.5.1"
+  },
+  "license": "BSD-3-Clause",
+  "contributors": [
+    {
+      "name": "Jonathan Zong",
+      "email": "jonathan@jonathanzong.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/umwelt-data/olli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/umwelt-data/olli/issues"
+  },
+  "homepage": "https://umwelt-data.github.io/olli/"
 }
