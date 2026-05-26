@@ -1,50 +1,116 @@
-# Olli - Screen Reader Accessibility for Data Visualization
+# Olli
 
-Olli is an open-source library for converting data visualizations into accessible text structures for screen reader users. Starting with an existing visualization specification created with a supported toolkit, Olli produces a keyboard-navigable tree view with descriptions at varying levels of detail. Users can explore these structures both to get an initial overview, and to dive into the data in more detail.
+Olli is a library for converting data representations into accessible text structures for screen reader users. It features a hypergraph core that supports both data visualizations and arbitrary diagrams.
 
-## Using Olli
+**Docs & examples:** https://umwelt-data.github.io/olli/
 
-For a [user tutorial](https://umwelt-data.github.io/olli/tutorial), [quickstart guide](https://umwelt-data.github.io/olli/quickstart), and [examples](https://umwelt-data.github.io/olli/examples), see the [Olli website](https://umwelt-data.github.io/olli/).
+## Architecture
 
-## Development instructions
+Five layers, strict bottom-up dependency:
 
-- Fork and clone the `umwelt-data/olli` repository.
-- In the `olli` directory, run `npm install` to install dependencies for all packages. We use [npm workspaces](https://docs.npmjs.com/cli/v8/using-npm/workspaces) to manage the two packages in this repo.
-- In the `core` or `adapters` package directories, run `npm run start` to start the webpack bundler in development mode with file watching.
-    - Note: `olli` must be built before `olli-adapters` the first time you run the build scripts.
-    - Run `npm run build` to run webpack for production. 
-- To run scripts for both packages at the same time, run commands from the `olli` directory using the `-ws` flag, e.g. `npm run build -ws`.
+```
+L5  olli-adapters     Vega, Vega-Lite, Observable Plot, Bluefish → specs
+L4  olli-vis           Visualization domain (tokens, dialogs, keybindings, presets)
+    olli-diagram       Diagram domain (generic hypergraph authoring)
+L3  olli-render-solid  Accessible ARIA tree view (Solid components)
+L2  olli-core          Description framework (token registry, customization, reactive describe)
+L1  olli-core          Navigation runtime (nav tree, focus, selection, plugin registries)
+L0  olli-core          Hypergraph data model + predicate evaluation
+    olli            Vanilla-JS consumer wrapper (imperative API over Solid internals)
+```
 
-### Running the docsite locally
+| Package | Description |
+|---------|-------------|
+| `olli-core` | Hypergraph, predicates, navigation runtime, description framework |
+| `olli-render-solid` | Solid components: TreeView, TreeItem, NodeLabel, Dialog |
+| `olli-vis` | Visualization domain: spec types, lowerer, tokens, dialogs, keybindings, presets |
+| `olli-diagram` | Diagram domain: direct hyperedge authoring |
+| `olli-adapters` | Adapters for Vega, Vega-Lite, Observable Plot, Bluefish |
+| `olli` | Vanilla-JS entry point with imperative OlliHandle API |
 
-- The documentation site uses jekyll, and is served on github pages from the `docs/` folder. See more about jekyll and gh-pages [here](https://docs.github.com/en/pages/setting-up-a-github-pages-site-with-jekyll/testing-your-github-pages-site-locally-with-jekyll).
-- Run `bundle exec jekyll serve` in `docs` to serve the page at `localhost:4000/olli`.
+## Development
 
-### Testing local changes on the docsite
+### Setup
 
-- Run `npm run start` in the package(s) you are developing (i.e. in `core` and/or `adapters`). This starts webpack in watch mode with the dev config.
-- Run `bundle exec jekyll serve --livereload` to serve the page at `localhost:4000/olli` with live reloading.
-- Use the example gallery at `localhost:4000/olli/examples` to test changes locally.
-    - When testing features, it's recommended to do initial testing on the multi-series line chart and scatterplot.
-    - Validate across more examples before putting features into production.
+```bash
+pnpm install
+```
 
-## Current Visualization Library Support
+### Key commands
 
-- [Vega](https://vega.github.io/vega/)
-- [Vega-Lite](https://vega.github.io/vega-lite)
-- [ObservablePlot](https://observablehq.com/@observablehq/plot)
+```bash
+pnpm run check          # Full verification: boundaries + build + test (run before pushing)
+pnpm run build          # Build all packages (tsc -b for internals, bundled build for olli)
+pnpm test               # vitest (single run)
+pnpm test:watch         # vitest in watch mode
+pnpm run check:boundaries  # Verify import layer rules
+```
 
-## Related Links
+### Updating snapshots
 
-- [Making data visualization more accessible for blind and low-vision individuals | MIT News](https://news.mit.edu/2022/data-visualization-accessible-blind-0602)
-- [Rich Screen Reader Experiences for Accessible Data Visualization | MIT Visualization Group](http://vis.csail.mit.edu/pubs/rich-screen-reader-vis-experiences/)
+Adapter snapshot tests capture the structural skeleton of each adapter's output to guard against silent changes. Snapshots live in `packages/olli-adapters/src/__snapshots__/`. When you intentionally change adapter output:
 
-## Reporting an Issue
+```bash
+pnpm test -- --update
+```
 
-If you encounter issues when using Olli, please [file an issue on GitHub](https://github.com/umwelt-data/olli/issues). Please include enough information to reproduce the issue. For example, if the issue is a bug with a chart that Olli should support with one of its adapters, please include the spec and dataset for the chart. For accessibility issues, please share what browser and screen reader you are using.
+Review the diff in the `.snap` file to confirm only expected changes.
 
-## Contributions, Development, and Support
+### Import boundaries
 
-Interested in contributing to Olli? Please see our [contribution and development guidelines](https://github.com/umwelt-data/olli/blob/main/CONTRIBUTING.md), and our [code of conduct](https://vega.github.io/vega/about/code-of-conduct/).
+`check:boundaries` enforces the layer architecture — a package can only import from packages in lower layers. If you add a new import and this check fails, you're violating the dependency direction.
 
-Olli was originally created by [Matt Blanco](https://mattblanco.me/) and the library is maintained by the [MIT Visualization Group](http://vis.csail.mit.edu/).
+### Running apps locally
+
+```bash
+pnpm --filter playground dev    # Interactive dev environment for testing olli
+pnpm --filter docs dev          # Docs site at http://localhost:5173/olli/
+```
+
+### Adding gallery examples
+
+See [apps/docs/README.md](apps/docs/README.md) for the step-by-step guide.
+
+### Publishing to npm
+
+`olli` is the sole public npm package — consumers only need `npm install olli`. All internal workspace packages (`olli-core`, `olli-render-solid`, `olli-vis`, `olli-diagram`, `olli-adapters`) are bundled into the published `olli` package at build time — they are never published separately. The package exposes two entry points: `olli` (core + renderer + types) and `olli/adapters` (all adapters). This split keeps adapter dependencies like `vega-lite` lazy — they're only loaded when `olli/adapters` is imported.
+
+`olli` also depends on `@umwelt-data/umwelt-utils`, which is a separate published package shared with the Umwelt project. If you've made changes to umwelt-utils, publish it first.
+
+#### Pre-publish checklist
+
+1. **Ensure `@umwelt-data/umwelt-utils` is published** and the version in `packages/olli/package.json` points to a real npm version (not a `link:` path). The same applies for `packages/olli-core/package.json`, `packages/olli-vis/package.json`, and `packages/olli-adapters/package.json`.
+
+2. **Run the full check:**
+   ```bash
+   pnpm run check          # boundaries + build + test — must pass
+   ```
+
+3. **Build the publishable bundle:**
+   ```bash
+   pnpm --filter olli run build
+   ```
+   This runs four steps (see `packages/olli/README.md` for details):
+   - `tsc -b` — compiles all workspace packages
+   - `tsup` — bundles JS, inlining all workspace packages
+   - `rollup` — bundles `.d.ts`, inlining all workspace type declarations
+   - CSS copy from `olli-render-solid`
+
+4. **Verify the bundle has no internal references:**
+   ```bash
+   grep 'from.*olli-core\|from.*olli-vis\|from.*olli-diagram\|from.*olli-adapters\|from.*olli-render' packages/olli/dist/index.js packages/olli/dist/index.d.ts packages/olli/dist/adapters.js packages/olli/dist/adapters.d.ts
+   ```
+   This should produce no output.
+
+5. **Publish:**
+   ```bash
+   cd packages/olli
+   npm publish --access public
+   ```
+
+6. **Smoke test** in a fresh directory:
+   ```bash
+   mkdir /tmp/olli-test && cd /tmp/olli-test
+   npm init -y && npm install olli
+   node -e "import('olli').then(m => console.log(Object.keys(m)))"
+   ```

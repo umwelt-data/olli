@@ -1,0 +1,35 @@
+import type { DiagramSpec } from '../spec/types.js';
+
+export const pulleySpec: DiagramSpec = {
+  title: 'Pulley diagram',
+  description: 'A mechanical system consisting of pulleys, ropes, and boxes.',
+  elements: [
+    { id: 'ceiling', label: 'Ceiling' },
+    { id: 'floor', label: 'Floor' },
+    { id: 'A', label: 'Pulley A', kind: 'pulley' },
+    { id: 'B', label: 'Pulley B', kind: 'pulley' },
+    { id: 'C', label: 'Pulley C', kind: 'pulley' },
+    { id: 'p', label: 'Rope p', kind: 'rope', connector: true },
+    { id: 'q', label: 'Rope q', kind: 'rope', connector: true },
+    { id: 'r', label: 'Rope r', kind: 'rope', connector: true },
+    { id: 's', label: 'Rope s', kind: 'rope', connector: true },
+    { id: 't', label: 'Rope t', kind: 'rope', connector: true },
+    { id: 'u', label: 'Rope u', kind: 'rope', connector: true },
+    { id: 'v', label: 'Rope v', kind: 'rope', connector: true },
+    { id: 'b1', label: 'Box B1', kind: 'box' },
+    { id: 'b2', label: 'Box B2', kind: 'box' },
+  ],
+  relations: [
+    { kind: 'grouping', id: 'sysA', members: ['p', 'A', 'r'], label: 'Pulley System A' },
+    { kind: 'grouping', id: 'sysB', members: ['r', 'B', 's'], label: 'Pulley System B' },
+    { kind: 'grouping', id: 'sysC', members: ['s', 'C', 'u'], label: 'Pulley System C' },
+    { kind: 'connection', id: 'h-b1-p', endpoints: ['b1', 'p'], directed: true, semantic: 'hangs-from', label: 'Box B1 hangs from Rope p' },
+    { kind: 'connection', id: 'h-A-q', endpoints: ['A', 'q'], directed: true, semantic: 'hangs-from', label: 'Pulley A hangs from Rope q' },
+    { kind: 'connection', id: 'h-C-t', endpoints: ['C', 't'], directed: true, semantic: 'hangs-from', label: 'Pulley C hangs from Rope t' },
+    { kind: 'connection', id: 'h-b2-u', endpoints: ['b2', 'u'], directed: true, semantic: 'hangs-from', label: 'Box B2 hangs from Rope u' },
+    { kind: 'connection', id: 'h-q-ceiling', endpoints: ['q', 'ceiling'], directed: true, semantic: 'hangs-from', label: 'Rope q hangs from Ceiling' },
+    { kind: 'connection', id: 'h-t-ceiling', endpoints: ['t', 'ceiling'], directed: true, semantic: 'hangs-from', label: 'Rope t hangs from Ceiling' },
+    { kind: 'connection', id: 'a-B-v', endpoints: ['B', 'v'], directed: true, semantic: 'anchored-to', label: 'Pulley B is anchored to Rope v' },
+    { kind: 'connection', id: 'a-v-floor', endpoints: ['v', 'floor'], directed: true, semantic: 'anchored-to', label: 'Rope v is anchored to Floor' },
+  ],
+};

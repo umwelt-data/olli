@@ -1,0 +1,132 @@
+.olli-vis {
+  --olli-focus-bg: #eee;
+  --olli-hover-bg: #ddd;
+  --olli-indent: 1.5em;
+  --olli-virtual-style: italic;
+}
+
+.olli-vis * {
+  all: revert;
+}
+
+.olli-vis.olli-tree,
+.olli-vis .olli-tree-group {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.olli-vis .olli-tree-group {
+  padding-left: var(--olli-indent);
+}
+
+.olli-vis .olli-tree-item {
+  outline: none;
+  padding: 2px 4px;
+}
+
+.olli-vis .olli-tree-item[aria-expanded='false'] > .olli-tree-group {
+  display: none;
+}
+
+.olli-vis .olli-node-label {
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+.olli-vis .olli-node-label:hover,
+.olli-vis .olli-tree-item.olli-focused > .olli-node-label:hover {
+  background: var(--olli-hover-bg);
+}
+
+.olli-vis .olli-tree-item.olli-focused > .olli-node-label {
+  background: var(--olli-focus-bg);
+}
+
+.olli-vis .olli-tree-item.olli-virtual > .olli-node-label {
+  font-style: var(--olli-virtual-style);
+}
+
+.olli-vis .olli-node-label code,
+.olli-vis .olli-description-preview code {
+  font-family: monospace;
+  background: var(--olli-code-bg, rgba(0, 0, 0, 0.06));
+  padding: 0 3px;
+  border-radius: 2px;
+}
+
+.olli-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.olli-dialog {
+  background: white;
+  padding: 1em;
+  border-radius: 4px;
+  min-width: 320px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+}
+
+.olli-dialog * {
+  all: revert;
+}
+
+.olli-dialog-content {
+  max-height: 60vh;
+  overflow: auto;
+}
+
+.olli-dialog-content > p:first-child,
+.olli-dialog-content > :first-child > p:first-child {
+  margin-top: 0;
+}
+
+#olli-dialog-title:has(+ #olli-dialog-description) {
+  margin-bottom: 0;
+}
+
+#olli-dialog-description {
+  margin-top: 0;
+}
+
+.olli-dialog table {
+  border-spacing: 2px;
+}
+
+.olli-dialog th,
+.olli-dialog td {
+  text-align: left;
+  padding-right: 5px;
+}
+
+.olli-dialog .olli-token-description {
+  color: #666;
+}
+
+.olli-dialog kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  font-family: monospace;
+  background: #f4f4f4;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.olli-help-dialog h3 {
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+.olli-help-dialog h4 {
+  margin-top: 0.5em;
+  margin-bottom: 0.25em;
+}

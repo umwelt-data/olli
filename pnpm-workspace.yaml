@@ -1,0 +1,10 @@
+packages:
+  - packages/*
+  - examples/*
+  - apps/*
+allowBuilds:
+  esbuild: true
+minimumReleaseAgeExclude:
+  - bluefish-js@0.0.39
+  - bluefish-solid@0.0.39
+  - '@umwelt-data/umwelt-utils@0.1.1'

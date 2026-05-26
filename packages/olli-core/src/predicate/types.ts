@@ -1,0 +1,25 @@
+export {
+  isLogicalAnd,
+  isLogicalOr,
+  isLogicalNot,
+  isFieldPredicate,
+  EMPTY_AND,
+} from '@umwelt-data/umwelt-utils/predicate';
+export type {
+  FieldValue,
+  FieldPredicateBase,
+  FieldEqualPredicate,
+  FieldLTPredicate,
+  FieldGTPredicate,
+  FieldLTEPredicate,
+  FieldGTEPredicate,
+  FieldRangePredicate,
+  FieldOneOfPredicate,
+  FieldValidPredicate,
+  FieldPredicate,
+  LogicalAnd,
+  LogicalOr,
+  LogicalNot,
+  LogicalComposition,
+  Selection,
+} from '@umwelt-data/umwelt-utils/predicate';

@@ -1,0 +1,24 @@
+{
+  "name": "olli-playground",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@umwelt-data/umwelt-utils": "link:../../../umwelt-utils",
+    "bluefish-js": "^0.0.39",
+    "olli": "workspace:*",
+    "olli-adapters": "workspace:*",
+    "olli-render-solid": "workspace:*",
+    "solid-js": "^1.9.3",
+    "vega": "^5.30.0",
+    "vega-lite": "^5.19.0"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0",
+    "vite-plugin-solid": "^2.11.0"
+  }
+}

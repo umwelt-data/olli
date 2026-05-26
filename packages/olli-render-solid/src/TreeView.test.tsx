@@ -1,0 +1,679 @@
+import { cleanup, fireEvent, render } from '@solidjs/testing-library';
+import { afterEach, describe, expect, it } from 'vitest';
+import type { Hyperedge, NavigationRuntime, TokenContext } from 'olli-core';
+import {
+  buildHypergraph,
+  createNavigationRuntime,
+  VIRTUAL_ROLE,
+} from 'olli-core';
+import { TreeView } from './TreeView.jsx';
+
+afterEach(() => cleanup());
+
+function edge(
+  id: string,
+  displayName: string,
+  children: string[] = [],
+  parents: string[] = [],
+): Hyperedge {
+  return { id, displayName, children, parents };
+}
+
+function smallGraph() {
+  return buildHypergraph([
+    edge('root', 'Diagram', ['a', 'b']),
+    edge('a', 'Group A', ['a1', 'a2'], ['root']),
+    edge('a1', 'Leaf A1', [], ['a']),
+    edge('a2', 'Leaf A2', [], ['a']),
+    edge('b', 'Group B', [], ['root']),
+  ]);
+}
+
+/**
+ * Create the runtime inside render's reactive root so Solid's memos are
+ * properly owned (avoids the "computations created outside a createRoot"
+ * warning).
+ */
+function renderWith<P>(
+  buildRt: () => NavigationRuntime<P>,
+): { runtime: NavigationRuntime<P>; container: HTMLElement } {
+  let rt!: NavigationRuntime<P>;
+  const { container } = render(() => {
+    rt = buildRt();
+    return <TreeView runtime={rt} />;
+  });
+  return { runtime: rt, container };
+}
+
+function labelOf(container: HTMLElement, navId: string): string {
+  const el = container.querySelector<HTMLElement>(
+    `[data-nav-id="${CSS.escape(navId)}"] > .olli-node-label`,
+  );
+  return el?.textContent ?? '';
+}
+
+describe('<TreeView /> — ARIA structure', () => {
+  it('renders a tree with correct roles and attributes', () => {
+    const { container } = renderWith(() => createNavigationRuntime(smallGraph()));
+
+    const tree = container.querySelector('[role="tree"]')!;
+    expect(tree).toBeTruthy();
+    expect(tree.tagName).toBe('UL');
+
+    const items = container.querySelectorAll('[role="treeitem"]');
+    expect(items.length).toBe(5);
+
+    const root = container.querySelector<HTMLElement>('[data-nav-id="root"]')!;
+    expect(root.getAttribute('aria-level')).toBe('1');
+    expect(root.getAttribute('aria-posinset')).toBe('1');
+    expect(root.getAttribute('aria-setsize')).toBe('1');
+    expect(root.getAttribute('aria-expanded')).toBe('false');
+
+    const a = container.querySelector<HTMLElement>('[data-nav-id="root/a"]')!;
+    expect(a.getAttribute('aria-level')).toBe('2');
+    expect(a.getAttribute('aria-posinset')).toBe('1');
+    expect(a.getAttribute('aria-setsize')).toBe('2');
+
+    const b = container.querySelector<HTMLElement>('[data-nav-id="root/b"]')!;
+    expect(b.getAttribute('aria-posinset')).toBe('2');
+    expect(b.getAttribute('aria-setsize')).toBe('2');
+    expect(b.getAttribute('aria-expanded')).toBeNull();
+
+    const a1 = container.querySelector<HTMLElement>('[data-nav-id="root/a/a1"]')!;
+    expect(a1.getAttribute('aria-level')).toBe('3');
+  });
+
+  it('does not steal focus on mount', async () => {
+    const outer = document.createElement('button');
+    document.body.appendChild(outer);
+    outer.focus();
+    renderWith(() => createNavigationRuntime(smallGraph()));
+    await new Promise<void>((r) => queueMicrotask(r));
+    expect(document.activeElement).toBe(outer);
+    document.body.removeChild(outer);
+  });
+
+  it('root is initially focused and selected', () => {
+    const { container } = renderWith(() => createNavigationRuntime(smallGraph()));
+    const root = container.querySelector<HTMLElement>('[data-nav-id="root"]')!;
+    expect(root.getAttribute('aria-selected')).toBe('true');
+    expect(root.getAttribute('tabindex')).toBe('0');
+  });
+});
+
+describe('<TreeView /> — keyboard navigation', () => {
+  it('ArrowDown moves focus to first child and updates aria-selected', () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(smallGraph()),
+    );
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'ArrowDown' });
+    expect(runtime.focusedNavId()).toBe('root/a');
+    const a = container.querySelector<HTMLElement>('[data-nav-id="root/a"]')!;
+    expect(a.getAttribute('aria-selected')).toBe('true');
+    const root = container.querySelector<HTMLElement>('[data-nav-id="root"]')!;
+    expect(root.getAttribute('aria-selected')).toBe('false');
+  });
+
+  it('ArrowRight/ArrowLeft cycle siblings', () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(smallGraph()),
+    );
+    runtime.focus('root/a');
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'ArrowRight' });
+    expect(runtime.focusedNavId()).toBe('root/b');
+    fireEvent.keyDown(tree, { key: 'ArrowLeft' });
+    expect(runtime.focusedNavId()).toBe('root/a');
+  });
+
+  it('ArrowUp returns to parent', () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(smallGraph()),
+    );
+    runtime.focus('root/a/a1');
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'ArrowUp' });
+    expect(runtime.focusedNavId()).toBe('root/a');
+  });
+
+  it('Enter and Space descend like ArrowDown', () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(smallGraph()),
+    );
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'Enter' });
+    expect(runtime.focusedNavId()).toBe('root/a');
+    fireEvent.keyDown(tree, { key: ' ' });
+    expect(runtime.focusedNavId()).toBe('root/a/a1');
+  });
+
+  it('Escape ascends like ArrowUp', () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(smallGraph()),
+    );
+    runtime.focus('root/a/a1');
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'Escape' });
+    expect(runtime.focusedNavId()).toBe('root/a');
+    fireEvent.keyDown(tree, { key: 'Escape' });
+    expect(runtime.focusedNavId()).toBe('root');
+  });
+
+  it("'o' jumps focus to the first root", () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(smallGraph()),
+    );
+    runtime.focus('root/a/a1');
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'o' });
+    expect(runtime.focusedNavId()).toBe('root');
+  });
+
+  it('click on a non-focused label focuses it', () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(smallGraph()),
+    );
+    runtime.focus('root/a');
+    const bLabel = container.querySelector<HTMLElement>(
+      '[data-nav-id="root/b"] > .olli-node-label',
+    )!;
+    fireEvent.click(bLabel);
+    expect(runtime.focusedNavId()).toBe('root/b');
+  });
+
+  it('click on the already-focused label descends into its first child', () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(smallGraph()),
+    );
+    runtime.focus('root/a');
+    const aLabel = container.querySelector<HTMLElement>(
+      '[data-nav-id="root/a"] > .olli-node-label',
+    )!;
+    fireEvent.click(aLabel);
+    expect(runtime.focusedNavId()).toBe('root/a/a1');
+  });
+
+  it('focus-path expansion: only the ancestors of the focused node are expanded', () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(smallGraph()),
+    );
+    const root = container.querySelector<HTMLElement>('[data-nav-id="root"]')!;
+    const a = container.querySelector<HTMLElement>('[data-nav-id="root/a"]')!;
+
+    // Initial focus on root: root has no ancestors, so nothing is expanded.
+    // The focused node itself is collapsed; its children are not shown until
+    // the user navigates down.
+    expect(root.getAttribute('aria-expanded')).toBe('false');
+
+    // Focusing a child expands the parent (but not the focused node itself).
+    runtime.focus('root/a');
+    expect(root.getAttribute('aria-expanded')).toBe('true');
+    expect(a.getAttribute('aria-expanded')).toBe('false');
+
+    // Focusing a leaf expands every ancestor on the path.
+    runtime.focus('root/a/a1');
+    expect(root.getAttribute('aria-expanded')).toBe('true');
+    expect(a.getAttribute('aria-expanded')).toBe('true');
+
+    // Moving focus back up collapses the sibling branch again.
+    runtime.focus('root');
+    expect(root.getAttribute('aria-expanded')).toBe('false');
+    expect(a.getAttribute('aria-expanded')).toBe('false');
+  });
+});
+
+describe('<TreeView /> — virtual parent-context siblings', () => {
+  function multiParentGraph() {
+    return buildHypergraph([
+      edge('root', 'Diagram', ['x', 'hangs']),
+      edge('hangs', 'Hangs relation', ['x'], ['root']),
+      edge('x', 'Box B1', [], ['root', 'hangs']),
+    ]);
+  }
+
+  it('renders virtuals in the parent group as leaf treeitems', () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(multiParentGraph()),
+    );
+    runtime.focus('root/hangs/x');
+    expect(container.querySelector('[data-virtual="true"]')).toBeNull();
+
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'ArrowUp' });
+
+    const virtuals = container.querySelectorAll<HTMLElement>('[data-virtual="true"]');
+    expect(virtuals.length).toBe(2);
+    expect(virtuals[0]!.getAttribute('data-nav-id')).toBe('root/hangs/x/^0');
+    expect(virtuals[0]!.getAttribute('aria-selected')).toBe('true');
+    expect(virtuals[0]!.getAttribute('aria-posinset')).toBe('1');
+    expect(virtuals[0]!.getAttribute('aria-setsize')).toBe('2');
+    expect(virtuals[1]!.getAttribute('data-nav-id')).toBe('root/hangs/x/^1');
+    expect(virtuals[1]!.getAttribute('aria-posinset')).toBe('2');
+
+    const label0 = virtuals[0]!.querySelector(':scope > .olli-node-label')!.textContent ?? '';
+    expect(label0).toContain('Grouping for Box B1');
+    expect(label0).toContain('Hangs relation');
+    expect(label0).toContain('(current)');
+    const label1 = virtuals[1]!.querySelector(':scope > .olli-node-label')!.textContent ?? '';
+    expect(label1).toContain('Grouping for Box B1');
+    expect(label1).toContain('Diagram');
+
+    // Virtuals live in the "hangs" node's group, not in "x"'s group.
+    const hangsGroup = container.querySelector<HTMLElement>(
+      '[data-nav-id="root/hangs"] > [role="group"]',
+    )!;
+    expect(hangsGroup.contains(virtuals[0]!)).toBe(true);
+    expect(hangsGroup.contains(virtuals[1]!)).toBe(true);
+
+    // The original "x" is hidden — replaced by virtuals (not a direct child of hangs' group).
+    const directChildren = Array.from(hangsGroup.children).filter(
+      (el) => el.getAttribute('data-nav-id') === 'root/hangs/x',
+    );
+    expect(directChildren.length).toBe(0);
+
+    // Virtuals are leaf nodes — no nested children.
+    expect(virtuals[0]!.querySelector('[role="group"]')).toBeNull();
+    expect(virtuals[1]!.querySelector('[role="group"]')).toBeNull();
+  });
+
+  it('ArrowRight and ArrowLeft move focus across virtual siblings', () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(multiParentGraph()),
+    );
+    runtime.focus('root/hangs/x');
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'ArrowUp' });
+    expect(runtime.focusedNavId()).toBe('root/hangs/x/^0');
+    fireEvent.keyDown(tree, { key: 'ArrowRight' });
+    expect(runtime.focusedNavId()).toBe('root/hangs/x/^1');
+    fireEvent.keyDown(tree, { key: 'ArrowLeft' });
+    expect(runtime.focusedNavId()).toBe('root/hangs/x/^0');
+  });
+
+  it('siblings of the active virtual source are hidden while virtual layer is open', () => {
+    function graphWithSibling() {
+      return buildHypergraph([
+        edge('root', 'Diagram', ['x', 'hangs']),
+        edge('hangs', 'Hangs relation', ['x', 'y'], ['root']),
+        edge('x', 'Box B1', [], ['root', 'hangs']),
+        edge('y', 'Box B2', [], ['hangs']),
+      ]);
+    }
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(graphWithSibling()),
+    );
+    runtime.focus('root/hangs/x');
+
+    // Before virtuals: y is visible as a sibling of x under hangs.
+    const hangsGroup = container.querySelector<HTMLElement>(
+      '[data-nav-id="root/hangs"] > [role="group"]',
+    )!;
+    expect(hangsGroup.querySelector('[data-nav-id="root/hangs/y"]')).toBeTruthy();
+
+    // Activate virtual layer on x.
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'ArrowUp' });
+    expect(runtime.focusedNavId()).toBe('root/hangs/x/^0');
+
+    // y is now hidden.
+    expect(hangsGroup.querySelector('[data-nav-id="root/hangs/y"]')).toBeNull();
+
+    // Commit back down — y reappears.
+    fireEvent.keyDown(tree, { key: 'ArrowDown' });
+    expect(runtime.focusedNavId()).toBe('root/hangs/x');
+    expect(hangsGroup.querySelector('[data-nav-id="root/hangs/y"]')).toBeTruthy();
+  });
+
+  it('DOM focus moves to virtual node on ArrowUp', async () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(multiParentGraph()),
+    );
+    runtime.focus('root/hangs/x');
+    await new Promise<void>((r) => queueMicrotask(r));
+
+    const xItem = container.querySelector<HTMLElement>('[data-nav-id="root/hangs/x"]')!;
+    xItem.focus();
+
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'ArrowUp' });
+    await new Promise<void>((r) => queueMicrotask(r));
+
+    const virtual = container.querySelector<HTMLElement>('[data-nav-id="root/hangs/x/^0"]')!;
+    expect(document.activeElement).toBe(virtual);
+  });
+
+  it('DOM focus moves between virtual siblings', async () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(multiParentGraph()),
+    );
+    runtime.focus('root/hangs/x');
+    await new Promise<void>((r) => queueMicrotask(r));
+
+    const xItem = container.querySelector<HTMLElement>('[data-nav-id="root/hangs/x"]')!;
+    xItem.focus();
+
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'ArrowUp' });
+    await new Promise<void>((r) => queueMicrotask(r));
+    expect(document.activeElement).toBe(
+      container.querySelector<HTMLElement>('[data-nav-id="root/hangs/x/^0"]'),
+    );
+
+    fireEvent.keyDown(tree, { key: 'ArrowRight' });
+    await new Promise<void>((r) => queueMicrotask(r));
+    expect(document.activeElement).toBe(
+      container.querySelector<HTMLElement>('[data-nav-id="root/hangs/x/^1"]'),
+    );
+
+    fireEvent.keyDown(tree, { key: 'ArrowLeft' });
+    await new Promise<void>((r) => queueMicrotask(r));
+    expect(document.activeElement).toBe(
+      container.querySelector<HTMLElement>('[data-nav-id="root/hangs/x/^0"]'),
+    );
+  });
+
+  it('DOM focus moves to committed target on ArrowDown from virtual', async () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(multiParentGraph()),
+    );
+    runtime.focus('root/hangs/x');
+    await new Promise<void>((r) => queueMicrotask(r));
+
+    const xItem = container.querySelector<HTMLElement>('[data-nav-id="root/hangs/x"]')!;
+    xItem.focus();
+
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'ArrowUp' });
+    fireEvent.keyDown(tree, { key: 'ArrowRight' });
+    expect(runtime.focusedNavId()).toBe('root/hangs/x/^1');
+
+    fireEvent.keyDown(tree, { key: 'ArrowDown' });
+    await new Promise<void>((r) => queueMicrotask(r));
+
+    const target = container.querySelector<HTMLElement>('[data-nav-id="root/x"]')!;
+    expect(document.activeElement).toBe(target);
+  });
+
+  it('ArrowDown on a non-default virtual focuses the regrouped source', () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(multiParentGraph()),
+    );
+    runtime.focus('root/hangs/x');
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'ArrowUp' });
+    fireEvent.keyDown(tree, { key: 'ArrowRight' });
+    expect(runtime.focusedNavId()).toBe('root/hangs/x/^1');
+    fireEvent.keyDown(tree, { key: 'ArrowDown' });
+    expect(runtime.focusedNavId()).toBe('root/x');
+    // Virtual layer collapses — no more virtual items.
+    expect(container.querySelector('[data-virtual="true"]')).toBeNull();
+  });
+});
+
+describe('<TreeView /> — dialogs', () => {
+  it('pressing a dialog trigger key opens the dialog', () => {
+    const { container } = renderWith(() => {
+      const rt = createNavigationRuntime(smallGraph());
+      rt.registerDialog({
+        id: 'test-dialog',
+        label: 'test',
+        triggerKey: 'd',
+        render: () => ({ title: 'Test', content: <div class="test-dialog-content">Hello</div> }),
+      });
+      return rt;
+    });
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'd' });
+    expect(container.querySelector('[role="dialog"]')).toBeTruthy();
+    expect(container.querySelector('.test-dialog-content')).toBeTruthy();
+  });
+
+  it('dialog has a close button as the first focusable element', () => {
+    const { container } = renderWith(() => {
+      const rt = createNavigationRuntime(smallGraph());
+      rt.registerDialog({
+        id: 'test-dialog',
+        label: 'test',
+        triggerKey: 'd',
+        render: () => ({ title: 'Test', content: <div>Hello</div> }),
+      });
+      return rt;
+    });
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'd' });
+    const closeBtn = container.querySelector<HTMLButtonElement>('.olli-dialog-close')!;
+    expect(closeBtn).toBeTruthy();
+    expect(closeBtn.textContent).toBe('Close test');
+  });
+
+  it('Escape closes an open dialog', () => {
+    const { container } = renderWith(() => {
+      const rt = createNavigationRuntime(smallGraph());
+      rt.registerDialog({
+        id: 'test-dialog',
+        label: 'test',
+        triggerKey: 'd',
+        render: () => ({ title: 'Test', content: <div>Hello</div> }),
+      });
+      return rt;
+    });
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'd' });
+    const dialog = container.querySelector('[role="dialog"]')!;
+    fireEvent.keyDown(dialog, { key: 'Escape' });
+    expect(container.querySelector('[role="dialog"]')).toBeNull();
+  });
+
+  it('close button closes the dialog', () => {
+    const { container } = renderWith(() => {
+      const rt = createNavigationRuntime(smallGraph());
+      rt.registerDialog({
+        id: 'test-dialog',
+        label: 'test',
+        triggerKey: 'd',
+        render: () => ({ title: 'Test', content: <div>Hello</div> }),
+      });
+      return rt;
+    });
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'd' });
+    const closeBtn = container.querySelector<HTMLButtonElement>('.olli-dialog-close')!;
+    fireEvent.click(closeBtn);
+    expect(container.querySelector('[role="dialog"]')).toBeNull();
+  });
+
+  it('focus returns to the tree item after dialog closes', async () => {
+    const { runtime, container } = renderWith(() => {
+      const rt = createNavigationRuntime(smallGraph());
+      rt.registerDialog({
+        id: 'test-dialog',
+        label: 'test',
+        triggerKey: 'd',
+        render: () => ({ title: 'Test', content: <div>Hello</div> }),
+      });
+      return rt;
+    });
+    runtime.focus('root/a');
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'd' });
+    expect(container.querySelector('[role="dialog"]')).toBeTruthy();
+    const dialog = container.querySelector('[role="dialog"]')!;
+    fireEvent.keyDown(dialog, { key: 'Escape' });
+    await new Promise<void>((r) => queueMicrotask(r));
+    const item = container.querySelector<HTMLElement>('[data-nav-id="root/a"]')!;
+    expect(document.activeElement).toBe(item);
+  });
+
+  it('navigation keys do not move focus while dialog is open', () => {
+    const { runtime, container } = renderWith(() => {
+      const rt = createNavigationRuntime(smallGraph());
+      rt.registerDialog({
+        id: 'test-dialog',
+        label: 'test',
+        triggerKey: 'd',
+        render: () => ({ title: 'Test', content: <div>Hello</div> }),
+      });
+      return rt;
+    });
+    const initialFocus = runtime.focusedNavId();
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'd' });
+    fireEvent.keyDown(tree, { key: 'ArrowDown' });
+    expect(runtime.focusedNavId()).toBe(initialFocus);
+  });
+
+  it('dialog render receives the focused nav node at time of trigger', () => {
+    let capturedNode: any = null;
+    const { runtime, container } = renderWith(() => {
+      const rt = createNavigationRuntime(smallGraph());
+      rt.registerDialog({
+        id: 'test-dialog',
+        label: 'test',
+        triggerKey: 'd',
+        render: (_rt, node) => {
+          capturedNode = node;
+          return { title: 'Test', content: <div>Dialog</div> };
+        },
+      });
+      return rt;
+    });
+    runtime.focus('root/a');
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'd' });
+    expect(capturedNode).toBeTruthy();
+    expect(capturedNode.navId).toBe('root/a');
+  });
+
+  it('trigger key is ignored while a dialog is already open', () => {
+    const { container } = renderWith(() => {
+      const rt = createNavigationRuntime(smallGraph());
+      rt.registerDialog({
+        id: 'test-dialog',
+        label: 'test',
+        triggerKey: 'd',
+        render: () => ({ title: 'Test', content: <div>Hello</div> }),
+      });
+      return rt;
+    });
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'd' });
+    expect(container.querySelectorAll('[role="dialog"]').length).toBe(1);
+    fireEvent.keyDown(tree, { key: 'd' });
+    expect(container.querySelectorAll('[role="dialog"]').length).toBe(1);
+  });
+});
+
+describe('<TreeView /> — reactivity', () => {
+  it('label updates when the recipe changes at runtime', () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(smallGraph()),
+    );
+    expect(labelOf(container, 'root/a')).toContain('Group A');
+
+    runtime.customization.setFor('', {
+      role: '',
+      recipe: [{ token: 'name', brevity: 'short' }],
+
+    });
+    expect(labelOf(container, 'root/a')).toBe('Group A.');
+  });
+
+  it('custom selection-dependent token updates after setSelection', () => {
+    const { runtime, container } = renderWith(() => {
+      const rt = createNavigationRuntime(smallGraph());
+      rt.registerToken({
+        name: 'selSize',
+        applicableRoles: '*',
+        compute: (ctx: TokenContext<unknown>) => {
+          const sel = ctx.selection;
+          const n = 'and' in sel ? sel.and.length : 0;
+          const s = `sel=${n}`;
+          return { short: s, long: s };
+        },
+      });
+      rt.customization.setFor('', {
+        role: '',
+        recipe: [
+          { token: 'name', brevity: 'short' },
+          { token: 'selSize', brevity: 'short' },
+        ],
+  
+      });
+      return rt;
+    });
+    expect(labelOf(container, 'root/a')).toContain('Sel=0');
+    runtime.setSelection({ and: [{ field: 'q', equal: 1 }] });
+    expect(labelOf(container, 'root/a')).toContain('Sel=1');
+  });
+
+  it('context root label updates when navigating between context roots via virtual commit', () => {
+    // Regression: without keyed <Show>, Solid reuses the context root TreeItem
+    // and the NodeLabel desc memo stays bound to the old navId.
+    function contextRootGraph() {
+      return buildHypergraph([
+        edge('root', 'Diagram', ['grp'], []),
+        edge('grp', 'Group', ['x'], ['root']),
+        // Two context-only roots that both parent x
+        { id: 'ctx-a', displayName: 'Context A', children: ['x'], parents: [], contextOnly: true },
+        { id: 'ctx-b', displayName: 'Context B', children: ['x'], parents: [], contextOnly: true },
+        // x has three parents: grp (structural), ctx-a, ctx-b
+        edge('x', 'Node X', [], ['grp', 'ctx-a', 'ctx-b']),
+      ]);
+    }
+
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(contextRootGraph()),
+    );
+    const tree = container.querySelector('[role="tree"]')!;
+
+    // Navigate to x under grp
+    runtime.focus('root/grp/x');
+
+    // UP → virtual (multi-parent), then RIGHT twice to ctx-b option
+    fireEvent.keyDown(tree, { key: 'ArrowUp' });
+    // ^0 = grp (descent parent), ^1 = ctx-a, ^2 = ctx-b
+    fireEvent.keyDown(tree, { key: 'ArrowRight' }); // → ^1 (ctx-a)
+    fireEvent.keyDown(tree, { key: 'ArrowDown' }); // commit into ctx-a context
+    expect(runtime.focusedNavId()).toBe('ctx-a/x');
+
+    // Context root ctx-a should now be visible with correct label
+    expect(labelOf(container, 'ctx-a')).toContain('Context A');
+
+    // Now UP from ctx-a/x → virtual, RIGHT past default (ctx-a) and grp to ctx-b
+    fireEvent.keyDown(tree, { key: 'ArrowUp' });  // ^0 (ctx-a)
+    fireEvent.keyDown(tree, { key: 'ArrowRight' }); // ^1 (grp)
+    fireEvent.keyDown(tree, { key: 'ArrowRight' }); // ^2 (ctx-b)
+    fireEvent.keyDown(tree, { key: 'ArrowDown' }); // commit into ctx-b context
+    expect(runtime.focusedNavId()).toBe('ctx-b/x');
+
+    // BUG FIX: context root label must update to Context B, not stay as Context A
+    expect(labelOf(container, 'ctx-b')).toContain('Context B');
+  });
+
+  it('virtual role uses default virtual recipe independent of role customization', () => {
+    const { runtime, container } = renderWith(() => {
+      const rt = createNavigationRuntime(
+        buildHypergraph([
+          edge('root', 'Diagram', ['x', 'hangs']),
+          edge('hangs', 'Hangs relation', ['x'], ['root']),
+          edge('x', 'Box B1', [], ['root', 'hangs']),
+        ]),
+      );
+      rt.customization.setFor('', {
+        role: '',
+        recipe: [{ token: 'name', brevity: 'short' }],
+  
+      });
+      return rt;
+    });
+    runtime.focus('root/hangs/x');
+    const tree = container.querySelector('[role="tree"]')!;
+    fireEvent.keyDown(tree, { key: 'ArrowUp' });
+
+    const virtual = container.querySelector<HTMLElement>('[data-virtual="true"]')!;
+    const virtualLabel = virtual.querySelector('.olli-node-label')!.textContent ?? '';
+    expect(virtualLabel).toContain('Grouping for Box B1');
+    expect(VIRTUAL_ROLE).toBe('__virtualParentContext__');
+  });
+});
