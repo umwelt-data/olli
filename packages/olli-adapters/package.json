@@ -18,7 +18,7 @@
     "olli-vis": "workspace:*",
     "olli-diagram": "workspace:*",
     "@umwelt-data/umwelt-utils": "^0.1.1",
-    "vega-expression": "^5.0.0",
+    "vega-expression": "^6.1.0",
     "topojson-client": "^3.1.0",
     "papaparse": "^5.4.0",
     "@types/topojson-client": "^3.1.0",
