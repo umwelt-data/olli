@@ -195,6 +195,118 @@ describe('evaluateVegaData', () => {
     expect(b.v_end).toBe(30);
   });
 
+  it('handles topojson format with feature extraction', () => {
+    const topology = {
+      type: 'Topology',
+      objects: {
+        counties: {
+          type: 'GeometryCollection',
+          geometries: [
+            { type: 'Point', coordinates: [0, 0], id: '01001', properties: { name: 'Autauga' } },
+            { type: 'Point', coordinates: [1, 1], id: '01003', properties: { name: 'Baldwin' } },
+          ],
+        },
+      },
+      arcs: [],
+    };
+    const entries = [
+      {
+        name: 'source_0',
+        values: topology as any,
+        format: { type: 'topojson', feature: 'counties' },
+      },
+    ];
+    const store = evaluateVegaData(entries);
+    const data = store['source_0']!;
+    expect(data).toHaveLength(2);
+    expect(data[0]!.id).toBe('01001');
+    expect(data[0]!.name).toBe('Autauga');
+    expect(data[1]!.id).toBe('01003');
+  });
+
+  it('applies lookup transform', () => {
+    const entries = [
+      {
+        name: 'lookup_data',
+        values: [
+          { id: '1', rate: 0.05 },
+          { id: '2', rate: 0.10 },
+        ],
+      },
+      {
+        name: 'source_0',
+        values: [
+          { id: '1', name: 'A' },
+          { id: '2', name: 'B' },
+          { id: '3', name: 'C' },
+        ],
+        transform: [
+          {
+            type: 'lookup',
+            from: 'lookup_data',
+            key: 'id',
+            fields: ['id'],
+            values: ['rate'],
+            as: ['rate'],
+            default: null,
+          },
+        ],
+      },
+    ];
+    const store = evaluateVegaData(entries);
+    const data = store['source_0']!;
+    expect(data).toHaveLength(3);
+    expect(data[0]!.rate).toBe(0.05);
+    expect(data[1]!.rate).toBe(0.10);
+    expect(data[2]!.rate).toBeNull();
+  });
+
+  it('handles topojson + lookup pipeline', () => {
+    const topology = {
+      type: 'Topology',
+      objects: {
+        regions: {
+          type: 'GeometryCollection',
+          geometries: [
+            { type: 'Point', coordinates: [0, 0], id: '1', properties: {} },
+            { type: 'Point', coordinates: [1, 1], id: '2', properties: {} },
+          ],
+        },
+      },
+      arcs: [],
+    };
+    const entries = [
+      {
+        name: 'lookup_0',
+        values: [
+          { id: '1', value: 42 },
+          { id: '2', value: 99 },
+        ],
+      },
+      {
+        name: 'source_0',
+        values: topology as any,
+        format: { type: 'topojson', feature: 'regions' },
+        transform: [
+          {
+            type: 'lookup',
+            from: 'lookup_0',
+            key: 'id',
+            fields: ['id'],
+            values: ['value'],
+            as: ['value'],
+          },
+        ],
+      },
+    ];
+    const store = evaluateVegaData(entries);
+    const data = store['source_0']!;
+    expect(data).toHaveLength(2);
+    expect(data[0]!.id).toBe('1');
+    expect(data[0]!.value).toBe(42);
+    expect(data[1]!.value).toBe(99);
+  });
+
   it('applies impute transform', () => {
     const entries = [
       {

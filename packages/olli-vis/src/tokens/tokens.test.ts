@@ -83,6 +83,89 @@ describe('vis tokens', () => {
     });
   });
 
+  it('geoshape with color legend produces choropleth map type', () => {
+    const geoSpec: UnitOlliVisSpec = {
+      data: [
+        { id: 1, rate: 0.05, region: 'South', state_name: 'Alabama' },
+        { id: 2, rate: 0.10, region: 'West', state_name: 'California' },
+      ],
+      mark: 'geoshape',
+      fields: [
+        { field: 'rate', type: 'quantitative' },
+        { field: 'region', type: 'nominal' },
+        { field: 'state_name', type: 'nominal' },
+      ],
+      legends: [{ field: 'rate', channel: 'color' }],
+    };
+    createRoot((dispose) => {
+      const graph = lowerVisSpec(geoSpec);
+      const runtime = createNavigationRuntime<VisPayload>(graph);
+      registerDomain(runtime, visDomain);
+      const rootId = runtime.navTree().roots[0]!;
+      const desc = runtime.getDescriptionFor(rootId)();
+      expect(desc).toContain('choropleth map');
+      dispose();
+    });
+  });
+
+  it('other group node description contains field label', () => {
+    const otherSpec: UnitOlliVisSpec = {
+      data: [
+        { category: 'A', value: 10 },
+        { category: 'B', value: 20 },
+      ],
+      mark: 'point',
+      fields: [
+        { field: 'category', type: 'nominal' },
+        { field: 'value', type: 'quantitative' },
+      ],
+      structure: [
+        { groupby: 'value' },
+        { groupby: 'category' },
+      ],
+    };
+    createRoot((dispose) => {
+      const graph = lowerVisSpec(otherSpec);
+      const runtime = createNavigationRuntime<VisPayload>(graph);
+      registerDomain(runtime, visDomain);
+      const rootId = runtime.navTree().roots[0]!;
+      const rootNode = runtime.getNavNode(rootId)!;
+      const otherNavId = rootNode.childNavIds.find((id) => {
+        const node = runtime.getNavNode(id)!;
+        const edge = runtime.getHyperedge(node.hyperedgeId!)!;
+        return edge.payload?.nodeType === 'other';
+      })!;
+      expect(otherNavId).toBeDefined();
+      const desc = runtime.getDescriptionFor(otherNavId)();
+      expect(desc.length).toBeGreaterThan(0);
+      expect(desc).toContain('value');
+      expect(desc).not.toContain('guide titled');
+      dispose();
+    });
+  });
+
+  it('geoshape without color legend produces map type', () => {
+    const geoSpec: UnitOlliVisSpec = {
+      data: [
+        { id: 1, region: 'South' },
+        { id: 2, region: 'West' },
+      ],
+      mark: 'geoshape',
+      fields: [
+        { field: 'region', type: 'nominal' },
+      ],
+    };
+    createRoot((dispose) => {
+      const graph = lowerVisSpec(geoSpec);
+      const runtime = createNavigationRuntime<VisPayload>(graph);
+      registerDomain(runtime, visDomain);
+      const rootId = runtime.navTree().roots[0]!;
+      const desc = runtime.getDescriptionFor(rootId)();
+      expect(desc).toContain('map');
+      dispose();
+    });
+  });
+
   it('aggregate token shows on value axis but not key axis', () => {
     createRoot((dispose) => {
       const runtime = setup();

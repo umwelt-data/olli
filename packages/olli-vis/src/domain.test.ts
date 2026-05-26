@@ -153,4 +153,42 @@ describe('visDomain', () => {
       dispose();
     });
   });
+
+  it('geo predicate provider passes through region predicates unchanged', () => {
+    const geoSpec: UnitOlliVisSpec = {
+      data: [
+        { id: 1, rate: 0.05, region: 'South', state_name: 'Alabama' },
+        { id: 2, rate: 0.10, region: 'West', state_name: 'California' },
+        { id: 3, rate: 0.07, region: 'South', state_name: 'Georgia' },
+      ],
+      mark: 'geoshape',
+      fields: [
+        { field: 'rate', type: 'quantitative' },
+        { field: 'region', type: 'nominal' },
+        { field: 'state_name', type: 'nominal' },
+      ],
+      legends: [{ field: 'rate', channel: 'color' }],
+      guides: [{ field: 'region', title: 'Geography' }],
+    };
+    createRoot((dispose) => {
+      const graph = lowerVisSpec(geoSpec);
+      const runtime = createNavigationRuntime<VisPayload>(graph);
+      registerDomain(runtime, visDomain);
+      const southEdge = [...graph.edges.values()].find(
+        (e) => e.role === 'filteredData' && e.payload?.predicate?.field === 'region' && e.displayName === 'South',
+      )!;
+      expect(southEdge).toBeDefined();
+      const southNavId = [...runtime.navTree().byNavId.entries()].find(
+        ([, node]) => node.hyperedgeId === southEdge.id,
+      )![0];
+      const pred = runtime.fullPredicate(southNavId);
+      expect('and' in pred).toBe(true);
+      if ('and' in pred) {
+        const regionPred = pred.and.find((p) => 'equal' in p && p.field === 'region');
+        expect(regionPred).toBeDefined();
+        expect((regionPred as any).equal).toBe('South');
+      }
+      dispose();
+    });
+  });
 });

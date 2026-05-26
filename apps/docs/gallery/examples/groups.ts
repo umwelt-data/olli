@@ -65,6 +65,10 @@ export const galleryGroups: { label: string; items: { id: string; title: string 
     ],
   },
   {
+    label: 'Maps',
+    items: [{ id: 'choropleth-map', title: 'Choropleth map' }],
+  },
+  {
     label: 'Diagrams',
     items: [{ id: 'pulley', title: 'Pulley diagram' }],
   },

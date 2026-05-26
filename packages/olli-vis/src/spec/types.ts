@@ -5,7 +5,7 @@ import type { FieldPredicate, LogicalComposition, Selection } from 'olli-core';
 export type OlliValue = string | number | Date;
 export type OlliDatum = Record<string, OlliValue>;
 export type OlliDataset = OlliDatum[];
-export type OlliMarkType = 'point' | 'bar' | 'line' | 'area' | 'rect' | 'tick' | 'arc';
+export type OlliMarkType = 'point' | 'bar' | 'line' | 'area' | 'rect' | 'tick' | 'arc' | 'geoshape';
 
 export interface OlliMarkDef {
   type: OlliMarkType;
@@ -54,7 +54,7 @@ export interface OlliLegend extends OlliGuide {
 // ---- Structure nodes ----
 
 export interface OlliGroupNode {
-  groupby: string;
+  groupby: string | string[];
   children?: OlliNode[];
 }
 

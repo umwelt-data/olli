@@ -50,6 +50,13 @@ describe('predicateToDescription', () => {
       expect(result).toBe('`category` is one of `A`, `B`, `C`');
     });
 
+    it('truncates long oneOf lists', () => {
+      const values = Array.from({ length: 20 }, (_, i) => `item${i}`);
+      const result = predicateToDescription({ field: 'category', oneOf: values }, fields);
+      expect(result).toContain('and 15 more');
+      expect(result).not.toContain('item5');
+    });
+
     it('falls back to field name when no label', () => {
       const result = predicateToDescription({ field: 'category', equal: 'X' }, fields);
       expect(result).toContain('`category`');

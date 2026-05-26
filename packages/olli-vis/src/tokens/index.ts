@@ -31,6 +31,14 @@ function getChartType(spec: UnitOlliVisSpec): string {
   if (mt === 'arc') {
     return typeof spec.mark === 'object' && spec.mark.innerRadius ? 'donut chart' : 'pie chart';
   }
+  if (mt === 'geoshape') {
+    const colorLegend = spec.legends?.find((l) => l.channel === 'color');
+    if (colorLegend) {
+      const fd = getFieldDef(colorLegend.field, spec.fields ?? []);
+      if (fd.type === 'quantitative') return 'choropleth map';
+    }
+    return 'map';
+  }
   if (mt === 'rect') {
     const colorLegend = spec.legends?.find((l) => l.channel === 'color');
     if (colorLegend) {
@@ -93,6 +101,12 @@ export function nameToken(): DescriptionToken<VisPayload> {
             guide?.channel ?? 'guide';
           const label = guide?.title ?? fd.label ?? fd.field;
           const s = `${guideType} titled ${wrapForMonospace(label)}`;
+          return { short: s, long: s };
+        }
+        case 'other': {
+          const fd = getFieldDef(p.groupby!, spec.fields ?? []);
+          const label = fd.label ?? fd.field;
+          const s = `grouped by ${wrapForMonospace(label)}`;
           return { short: s, long: s };
         }
         case 'annotations':

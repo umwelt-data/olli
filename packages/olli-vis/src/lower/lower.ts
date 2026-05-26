@@ -1,6 +1,6 @@
 import type { Hyperedge, Hypergraph } from 'olli-core';
 import { buildHypergraph, selectionTest } from 'olli-core';
-import type { FieldPredicate, LogicalAnd } from 'olli-core';
+import type { FieldPredicate } from 'olli-core';
 import type {
   OlliDataset,
   OlliFieldDef,
@@ -66,7 +66,7 @@ export function lowerVisSpec(rawSpec: OlliVisSpec): Hypergraph<VisPayload> {
     const rootId = nextId();
     const nodes = Array.isArray(spec.structure) ? spec.structure : spec.structure ? [spec.structure] : [];
 
-    if (nodes.length === 1 && 'groupby' in nodes[0]! && nodes[0]!.groupby === spec.facet) {
+    if (nodes.length === 1 && 'groupby' in nodes[0]! && !Array.isArray(nodes[0]!.groupby) && nodes[0]!.groupby === spec.facet) {
       // faceted: root = groupby node
       const childIds = lowerGroupby(spec, undefined, rootId, nodes[0]!, edges);
       const label = spec.description || spec.title || 'Chart';
@@ -138,20 +138,26 @@ function lowerNodes(
   for (const node of nodes) {
     if ('groupby' in node) {
       const id = nextId();
+      const primaryField = Array.isArray(node.groupby) ? node.groupby[0]! : node.groupby;
       const subIds = lowerGroupby(spec, specIndex, id, node, edges);
-      const nodeType = nodeTypeFromGroupField(node.groupby, spec);
+      const nodeType = nodeTypeFromGroupField(primaryField, spec);
       const guide =
-        spec.axes?.find((a) => a.field === node.groupby) ??
-        spec.legends?.find((l) => l.field === node.groupby) ??
-        spec.guides?.find((g) => g.field === node.groupby);
-      const fd = getFieldDef(node.groupby, spec.fields ?? []);
-      const guideLabel =
-        nodeType === 'xAxis' ? 'x-axis' :
-        nodeType === 'yAxis' ? 'y-axis' :
-        nodeType === 'legend' ? 'legend' :
-        guide?.channel ?? 'guide';
+        spec.axes?.find((a) => a.field === primaryField) ??
+        spec.legends?.find((l) => l.field === primaryField) ??
+        spec.guides?.find((g) => g.field === primaryField);
+      const fd = getFieldDef(primaryField, spec.fields ?? []);
       const label = guide?.title ?? fd.label ?? fd.field;
-      const displayName = `${guideLabel} titled ${label}`;
+      let displayName: string;
+      if (nodeType === 'other') {
+        displayName = label;
+      } else {
+        const guideLabel =
+          nodeType === 'xAxis' ? 'x-axis' :
+          nodeType === 'yAxis' ? 'y-axis' :
+          nodeType === 'legend' ? 'legend' :
+          guide?.channel ?? 'guide';
+        displayName = `${guideLabel} titled ${label}`;
+      }
       edges.push({
         id,
         displayName,
@@ -160,7 +166,7 @@ function lowerNodes(
         parents: [parentId],
         payload: {
           nodeType,
-          groupby: node.groupby,
+          groupby: primaryField,
           specIndex,
           spec,
         },
@@ -211,6 +217,11 @@ function lowerGroupby(
   edges: Hyperedge<VisPayload>[],
 ): string[] {
   const data = spec.selection ? selectionTest(spec.data, spec.selection) : spec.data;
+
+  if (Array.isArray(node.groupby)) {
+    return lowerMultiLevelGroupby(spec, specIndex, parentId, node.groupby, node.children ?? [], data, edges);
+  }
+
   const axis = spec.axes?.find((a) => a.field === node.groupby);
   const childPreds = fieldToPredicates(node.groupby, data, spec.fields ?? [], axis?.ticks);
   const nodeType = nodeTypeFromGroupField(node.groupby, spec);
@@ -236,6 +247,49 @@ function lowerGroupby(
         predicate: pred,
         specIndex,
         viewType,
+        spec,
+      },
+    });
+    childIds.push(id);
+  }
+  return childIds;
+}
+
+function lowerMultiLevelGroupby(
+  spec: UnitOlliVisSpec,
+  specIndex: number | undefined,
+  parentId: string,
+  fields: string[],
+  subChildren: OlliNode[],
+  data: OlliDataset,
+  edges: Hyperedge<VisPayload>[],
+): string[] {
+  const [field, ...rest] = fields;
+  if (!field) return lowerNodes(spec, specIndex, parentId, subChildren, data, edges);
+
+  const childPreds = fieldToPredicates(field, data, spec.fields ?? []);
+  const fd = getFieldDef(field, spec.fields ?? []);
+  const childIds: string[] = [];
+
+  for (const pred of childPreds) {
+    const id = nextId();
+    const displayName = predicateDisplayName(pred, fd);
+    const filteredData = selectionTest(data, pred);
+
+    const subIds = rest.length > 0
+      ? lowerMultiLevelGroupby(spec, specIndex, id, rest, subChildren, filteredData, edges)
+      : lowerNodes(spec, specIndex, id, subChildren, filteredData, edges);
+
+    edges.push({
+      id,
+      displayName,
+      role: 'filteredData',
+      children: subIds,
+      parents: [parentId],
+      payload: {
+        nodeType: 'filteredData',
+        predicate: pred,
+        specIndex,
         spec,
       },
     });

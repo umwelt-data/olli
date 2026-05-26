@@ -29,5 +29,6 @@ export const galleryPathsMetadata: { id: string; title: string }[] = [
   { id: 'concat-chart', title: 'Concatenated chart' },
   { id: 'pie-chart', title: 'Pie chart' },
   { id: 'donut-chart', title: 'Donut chart' },
+  { id: 'choropleth-map', title: 'Choropleth map' },
   { id: 'pulley', title: 'Pulley diagram' },
 ];

@@ -1,4 +1,5 @@
 import { parseExpression } from 'vega-expression';
+import { feature as topojsonFeature, mesh as topojsonMesh } from 'topojson-client';
 
 type Datum = Record<string, any>;
 type Dataset = Datum[];
@@ -20,11 +21,15 @@ export function evaluateVegaData(dataEntries: VegaDataEntry[]): Record<string, D
   for (const entry of dataEntries) {
     let data: Dataset;
     if (entry.values) {
-      data = entry.values.map((d) => ({ ...d }));
+      data = Array.isArray(entry.values) ? entry.values.map((d: any) => ({ ...d })) : [entry.values as Datum];
     } else if (entry.source && store[entry.source]) {
       data = store[entry.source]!.map((d) => ({ ...d }));
     } else {
       data = [];
+    }
+
+    if (entry.format?.type === 'topojson') {
+      data = applyTopojsonFormat(data, entry.format);
     }
 
     if (entry.format?.parse) {
@@ -33,7 +38,7 @@ export function evaluateVegaData(dataEntries: VegaDataEntry[]): Record<string, D
 
     if (entry.transform) {
       for (const t of entry.transform) {
-        data = applyTransform(data, t, signals);
+        data = applyTransform(data, t, signals, store);
       }
     }
 
@@ -80,6 +85,28 @@ export function extractOutputDatasets(
   return [[]];
 }
 
+function applyTopojsonFormat(data: Dataset, format: any): Dataset {
+  const topology: any = data.length === 1 ? data[0] : data;
+  if (!topology || !topology.objects) return data;
+
+  if (format.feature) {
+    const obj = topology.objects[format.feature];
+    if (!obj) return data;
+    const collection = topojsonFeature(topology, obj) as any;
+    const features: any[] = collection.features ?? [collection];
+    return features.map((f: any) => ({ ...f.properties, id: f.id, type: f.type, geometry: f.geometry }));
+  }
+
+  if (format.mesh) {
+    const obj = topology.objects[format.mesh];
+    if (!obj) return data;
+    const m = topojsonMesh(topology, obj);
+    return [m as any];
+  }
+
+  return data;
+}
+
 function applyFormatParse(data: Dataset, parse: Record<string, string>): Dataset {
   return data.map((d) => {
     const out = { ...d };
@@ -94,7 +121,7 @@ function applyFormatParse(data: Dataset, parse: Record<string, string>): Dataset
   });
 }
 
-function applyTransform(data: Dataset, t: any, signals: SignalStore): Dataset {
+function applyTransform(data: Dataset, t: any, signals: SignalStore, store: Record<string, Dataset>): Dataset {
   switch (t.type) {
     case 'extent':
       return applyExtent(data, t, signals);
@@ -118,6 +145,8 @@ function applyTransform(data: Dataset, t: any, signals: SignalStore): Dataset {
       return applyIdentifier(data, t);
     case 'sequence':
       return applySequence(t, signals);
+    case 'lookup':
+      return applyLookup(data, t, store);
     default:
       return data;
   }
@@ -560,6 +589,41 @@ function applySequence(t: any, signals: SignalStore): Dataset {
     result.push({ [as]: i });
   }
   return result;
+}
+
+function applyLookup(data: Dataset, t: any, store: Record<string, Dataset>): Dataset {
+  const fromData = store[t.from];
+  if (!fromData) return data;
+
+  const keyField = t.key as string;
+  const index = new Map<string, Datum>();
+  for (const d of fromData) {
+    if (d[keyField] != null) {
+      index.set(String(d[keyField]), d);
+    }
+  }
+
+  const fields: string[] = t.fields || [];
+  const values: string[] = t.values || [];
+  const asNames: string[] = t.as || values;
+  const defaultValue = t.default ?? null;
+
+  return data.map((d) => {
+    const out = { ...d };
+    for (let i = 0; i < fields.length; i++) {
+      const lookupKey = String(d[fields[i]!]);
+      const match = index.get(lookupKey);
+      if (values.length) {
+        for (let j = 0; j < values.length; j++) {
+          const outField = asNames[i * values.length + j]!;
+          out[outField] = match ? match[values[j]!] : defaultValue;
+        }
+      } else {
+        out[asNames[i]!] = match ?? defaultValue;
+      }
+    }
+    return out;
+  });
 }
 
 // --- Expression evaluator ---

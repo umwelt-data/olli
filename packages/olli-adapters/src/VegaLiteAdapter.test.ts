@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { VegaLiteAdapter } from './index.js';
+import { VegaLiteAdapter, VegaLiteAdapterSync } from './index.js';
 import { lowerVisSpec, getMarkType } from 'olli-vis';
 import type { OlliVisSpec, UnitOlliVisSpec } from 'olli-vis';
 import { examples } from '../../../apps/docs/gallery/examples/index.js';
@@ -239,6 +239,90 @@ describe('VegaLiteAdapter', () => {
     expect(getMarkType(olliSpec.mark)).toBe('arc');
     expect(typeof olliSpec.mark === 'object' && olliSpec.mark.innerRadius).toBe(50);
   }, 30000);
+
+  describe('choropleth support', () => {
+    const topology = {
+      type: 'Topology',
+      objects: {
+        counties: {
+          type: 'GeometryCollection',
+          geometries: [
+            { type: 'Point', coordinates: [0, 0], id: '01001', properties: {} },
+            { type: 'Point', coordinates: [1, 1], id: '06037', properties: {} },
+            { type: 'Point', coordinates: [2, 2], id: '17031', properties: {} },
+          ],
+        },
+      },
+      arcs: [],
+    };
+
+    const choroplethSpec = {
+      $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+      width: 500,
+      height: 300,
+      data: {
+        values: topology,
+        format: { type: 'topojson', feature: 'counties' },
+      },
+      transform: [{
+        lookup: 'id',
+        from: {
+          data: {
+            values: [
+              { id: '1001', rate: 0.05 },
+              { id: '6037', rate: 0.10 },
+              { id: '17031', rate: 0.07 },
+            ],
+          },
+          key: 'id',
+          fields: ['rate'],
+        },
+      }],
+      projection: { type: 'albersUsa' },
+      mark: 'geoshape',
+      encoding: {
+        color: { field: 'rate', type: 'quantitative' },
+      },
+    };
+
+    it('produces geoshape mark', () => {
+      const olliSpec = VegaLiteAdapterSync(choroplethSpec) as UnitOlliVisSpec;
+      expect(getMarkType(olliSpec.mark)).toBe('geoshape');
+    });
+
+    it('has color legend for rate', () => {
+      const olliSpec = VegaLiteAdapterSync(choroplethSpec) as UnitOlliVisSpec;
+      const colorLegend = olliSpec.legends?.find(l => l.channel === 'color');
+      expect(colorLegend).toBeDefined();
+      expect(colorLegend!.field).toBe('rate');
+    });
+
+    it('enriches data with geographic fields', () => {
+      const olliSpec = VegaLiteAdapterSync(choroplethSpec) as UnitOlliVisSpec;
+      expect(olliSpec.data.length).toBeGreaterThan(0);
+      const hasGeoFields = olliSpec.data.some(d => d['state_name'] != null);
+      expect(hasGeoFields).toBe(true);
+      const hasRegion = olliSpec.data.some(d => d['region'] != null);
+      expect(hasRegion).toBe(true);
+    });
+
+    it('has geographic fields in field defs', () => {
+      const olliSpec = VegaLiteAdapterSync(choroplethSpec) as UnitOlliVisSpec;
+      const fieldNames = olliSpec.fields?.map(f => f.field) ?? [];
+      expect(fieldNames).toContain('state_name');
+      expect(fieldNames).toContain('region');
+    });
+
+    it('infers structure with legend and geography guide', () => {
+      const olliSpec = VegaLiteAdapterSync(choroplethSpec) as UnitOlliVisSpec;
+      const graph = lowerVisSpec(olliSpec);
+      const root = graph.edges.get(graph.roots[0]!)!;
+      expect(root.children.length).toBeGreaterThanOrEqual(2);
+      const childRoles = root.children.map(id => graph.edges.get(id)!.role);
+      expect(childRoles).toContain('legend');
+      expect(childRoles).toContain('guide');
+    });
+  });
 
   describe('structure regression', () => {
     for (const example of vlExamples) {

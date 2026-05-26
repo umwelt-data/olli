@@ -6,7 +6,8 @@ import { evaluateVegaData, extractOutputDatasets } from './vegaDataEval.js';
 import { computeAxisTicks } from '@umwelt-data/umwelt-utils/vega';
 import type { AxisTicksConfig } from '@umwelt-data/umwelt-utils/vega';
 import type { VisAdapter } from './types.js';
-import { inferFormatFromUrl, parseCsv } from './utils.js';
+import { inferFormatFromUrl, parseDelimited } from './utils.js';
+import { enrichWithUSGeo, looksLikeFips } from './geo/enrichGeoData.js';
 import { compile } from 'vega-lite';
 
 function getDatasets(vegaSpec: any): OlliDataset[] {
@@ -63,23 +64,53 @@ export function VegaLiteAdapterSync(spec: any): OlliVisSpec {
   return adaptUnitSpec(spec, data[0]!);
 }
 
-async function resolveData(spec: any): Promise<any> {
-  const data = spec.data;
-  if (!data || data.values) return spec;
-  if (!data.url) return spec;
-
-  const response = await fetch(data.url);
+async function fetchAndParse(url: string, format?: any): Promise<any> {
+  const response = await fetch(url);
   const text = await response.text();
-  const format = data.format?.type || inferFormatFromUrl(data.url);
+  const fmt = format?.type || inferFormatFromUrl(url);
 
-  let values: any[];
-  if (format === 'json') {
-    values = JSON.parse(text);
-  } else {
-    values = parseCsv(text);
+  if (fmt === 'topojson' || fmt === 'json') {
+    return JSON.parse(text);
+  }
+  return parseDelimited(text, fmt);
+}
+
+async function resolveData(spec: any): Promise<any> {
+  let result = { ...spec };
+
+  const data = result.data;
+  if (data?.url && !data.values) {
+    const parsed = await fetchAndParse(data.url, data.format);
+    const isTopojson = data.format?.type === 'topojson';
+    result = {
+      ...result,
+      data: {
+        ...data,
+        values: isTopojson ? parsed : Array.isArray(parsed) ? parsed : [parsed],
+        url: undefined,
+      },
+    };
   }
 
-  return { ...spec, data: { ...data, values, url: undefined } };
+  if (result.transform) {
+    const transforms = [...result.transform];
+    for (let i = 0; i < transforms.length; i++) {
+      const t = transforms[i];
+      if (t?.lookup && t.from?.data?.url && !t.from.data.values) {
+        const parsed = await fetchAndParse(t.from.data.url, t.from.data.format);
+        transforms[i] = {
+          ...t,
+          from: {
+            ...t.from,
+            data: { ...t.from.data, values: Array.isArray(parsed) ? parsed : [parsed], url: undefined },
+          },
+        };
+      }
+    }
+    result = { ...result, transform: transforms };
+  }
+
+  return result;
 }
 
 export const VegaLiteAdapter: VisAdapter<any> = async (spec: any): Promise<OlliVisSpec> => {
@@ -344,6 +375,32 @@ function adaptUnitSpec(spec: any, data: OlliDataset): UnitOlliVisSpec {
   }
 
   coerceData(olliSpec);
+
+  if (getMarkType(olliSpec.mark) === 'geoshape' && olliSpec.data.length > 0) {
+    const idField = olliSpec.data[0]!['id'] != null ? 'id' : undefined;
+    if (idField && looksLikeFips(olliSpec.data, idField)) {
+      olliSpec.data = enrichWithUSGeo(olliSpec.data, idField);
+      const geoFields: Array<{ field: string; type: 'nominal' }> = [];
+      if (olliSpec.data.some((d) => d['county_name'] != null)) {
+        geoFields.push({ field: 'county_name', type: 'nominal' });
+      }
+      if (olliSpec.data.some((d) => d['state_name'] != null)) {
+        geoFields.push({ field: 'state_name', type: 'nominal' });
+      }
+      if (olliSpec.data.some((d) => d['region'] != null)) {
+        geoFields.push({ field: 'region', type: 'nominal' });
+      }
+      for (const gf of geoFields) {
+        if (!olliSpec.fields!.find((f) => f.field === gf.field)) {
+          olliSpec.fields!.push(gf);
+        }
+      }
+      if (geoFields.some((f) => f.field === 'region')) {
+        if (!olliSpec.guides) olliSpec.guides = [];
+        olliSpec.guides.push({ field: 'region', title: 'Geography' });
+      }
+    }
+  }
 
   return olliSpec;
 }

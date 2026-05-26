@@ -35,7 +35,13 @@ function fieldPredicateToDescription(pred: FieldPredicate, fields: OlliFieldDef[
   if ('gt' in pred) return `${label} is greater than ${fmtDataValue(pred.gt as OlliValue, fd)}`;
   if ('gte' in pred) return `${label} is greater than or equal to ${fmtDataValue(pred.gte as OlliValue, fd)}`;
   if ('oneOf' in pred) {
-    return `${label} is one of ${pred.oneOf.map((v) => fmtDataValue(v as OlliValue, fd)).join(', ')}`;
+    const MAX_SHOWN = 5;
+    const formatted = pred.oneOf.map((v) => fmtDataValue(v as OlliValue, fd));
+    if (formatted.length <= MAX_SHOWN) {
+      return `${label} is one of ${formatted.join(', ')}`;
+    }
+    const shown = formatted.slice(0, MAX_SHOWN).join(', ');
+    return `${label} is one of ${shown}, and ${formatted.length - MAX_SHOWN} more`;
   }
   return '';
 }

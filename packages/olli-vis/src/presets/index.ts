@@ -12,7 +12,7 @@ const roleTokenMap: RoleTokens = {
   guide: ['name', 'visType', 'visData', 'parent'],
   filteredData: ['visData', 'visSize', 'parent', 'aggregate', 'quartile', 'instructions'],
   annotations: ['name', 'visSize'],
-  other: ['visData', 'visSize', 'instructions'],
+  other: ['name', 'children', 'visData', 'visSize', 'instructions'],
 };
 
 function makeRecipe(tokens: string[], brevity: 'short' | 'long'): RecipeEntry[] {
@@ -45,7 +45,7 @@ const detailedRoles: RoleTokens = {
   guide: ['name', 'visType', 'visData', 'parent'],
   filteredData: ['visData', 'visSize', 'parent', 'aggregate', 'quartile', 'instructions'],
   annotations: ['name', 'visSize'],
-  other: ['visData', 'visSize', 'instructions'],
+  other: ['name', 'children', 'visData', 'visSize', 'instructions'],
 };
 
 const standardRoles: RoleTokens = {
@@ -57,7 +57,7 @@ const standardRoles: RoleTokens = {
   guide: ['name', 'visData'],
   filteredData: ['visData', 'visSize', 'aggregate', 'instructions'],
   annotations: ['name', 'visSize'],
-  other: ['visData', 'visSize', 'instructions'],
+  other: ['name', 'children', 'visData', 'visSize', 'instructions'],
 };
 
 const minimalRoles: RoleTokens = {
@@ -69,7 +69,7 @@ const minimalRoles: RoleTokens = {
   guide: ['name'],
   filteredData: ['visData', 'visSize'],
   annotations: ['name'],
-  other: ['visData'],
+  other: ['name', 'visData'],
 };
 
 export function visPresets(): { name: string; customizations: Customization[] }[] {

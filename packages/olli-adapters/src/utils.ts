@@ -1,3 +1,5 @@
+import Papa from 'papaparse';
+
 export function filterUniqueObjects<T>(arr: T[]): T[] {
   return arr.filter((value, index) => {
     const _value = JSON.stringify(value);
@@ -11,20 +13,25 @@ export function filterUniqueObjects<T>(arr: T[]): T[] {
 }
 
 export function inferFormatFromUrl(url: string): string {
-  if (url.endsWith('.csv') || url.endsWith('.tsv')) return 'csv';
+  if (url.endsWith('.tsv')) return 'tsv';
+  if (url.endsWith('.csv')) return 'csv';
   return 'json';
 }
 
-export function parseCsv(text: string): any[] {
-  const lines = text.split('\n').filter((l) => l.trim());
-  if (lines.length < 2) return [];
-  const headers = lines[0]!.split(',').map((h) => h.trim());
-  return lines.slice(1).map((line) => {
-    const values = line.split(',').map((v) => v.trim());
-    const obj: Record<string, any> = {};
-    for (let i = 0; i < headers.length; i++) {
-      obj[headers[i]!] = values[i] ?? '';
-    }
-    return obj;
+export function parseDelimited(text: string, format?: string): any[] {
+  const result = Papa.parse(text, {
+    delimiter: format === 'tsv' ? '\t' : undefined,
+    header: true,
+    dynamicTyping: true,
+    skipEmptyLines: 'greedy',
   });
+  return result.data;
+}
+
+export function parseCsv(text: string): any[] {
+  return parseDelimited(text, 'csv');
+}
+
+export function parseTsv(text: string): any[] {
+  return parseDelimited(text, 'tsv');
 }

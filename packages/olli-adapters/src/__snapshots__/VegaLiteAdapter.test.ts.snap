@@ -125,6 +125,38 @@ exports[`VegaLiteAdapter > structure regression > bubble-plot 1`] = `
 }
 `;
 
+exports[`VegaLiteAdapter > structure regression > choropleth-map 1`] = `
+{
+  "axes": [],
+  "facet": undefined,
+  "fields": [
+    {
+      "field": "rate",
+      "type": "quantitative",
+    },
+    {
+      "field": "county_name",
+      "type": "nominal",
+    },
+    {
+      "field": "state_name",
+      "type": "nominal",
+    },
+    {
+      "field": "region",
+      "type": "nominal",
+    },
+  ],
+  "legends": [
+    {
+      "channel": "color",
+      "field": "rate",
+    },
+  ],
+  "mark": "geoshape",
+}
+`;
+
 exports[`VegaLiteAdapter > structure regression > concat-chart 1`] = `
 {
   "operator": "concat",

@@ -21,6 +21,7 @@ import { layeredChart } from './vega-lite/layered-chart.js';
 import { concatChart } from './vega-lite/concat-chart.js';
 import { pieChart } from './vega-lite/pie-chart.js';
 import { donutChart } from './vega-lite/donut-chart.js';
+import { choroplethMap } from './vega-lite/choropleth-map.js';
 
 /**
  * All gallery examples, in display order.
@@ -48,6 +49,7 @@ export const examples: GalleryExample[] = [
   concatChart,
   pieChart,
   donutChart,
+  choroplethMap,
   pulley,
 ];
 

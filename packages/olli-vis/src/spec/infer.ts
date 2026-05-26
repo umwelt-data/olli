@@ -67,6 +67,21 @@ export function inferStructure(spec: UnitOlliVisSpec): OlliNode | OlliNode[] {
       .map((f) => ({ groupby: f.field, children: [] }));
   }
 
+  if (getMarkType(spec.mark) === 'geoshape') {
+    const nodes: OlliNode[] = [];
+    if (spec.legends?.length) {
+      nodes.push(...spec.legends.map((l) => ({ groupby: l.field, children: [] as OlliNode[] })));
+    }
+    const hasRegion = spec.fields?.some((f) => f.field === 'region');
+    const hasState = spec.fields?.some((f) => f.field === 'state_name');
+    if (hasRegion && hasState) {
+      nodes.push({ groupby: ['region', 'state_name'] });
+    } else if (hasState) {
+      nodes.push({ groupby: 'state_name' });
+    }
+    if (nodes.length) return nodes;
+  }
+
   if (spec.axes?.length || spec.legends?.length) {
     return nodesFromGuides(spec.axes, spec.legends);
   }
@@ -77,7 +92,12 @@ export function inferStructure(spec: UnitOlliVisSpec): OlliNode | OlliNode[] {
 function dedupeGroupby(nodes: OlliNode[]): OlliNode[] {
   return nodes.filter((node, idx, arr) => {
     if ('groupby' in node) {
-      return arr.findIndex((n) => 'groupby' in n && n.groupby === node.groupby) === idx;
+      const field = Array.isArray(node.groupby) ? node.groupby[0] : node.groupby;
+      return arr.findIndex((n) => {
+        if (!('groupby' in n)) return false;
+        const nField = Array.isArray(n.groupby) ? n.groupby[0] : n.groupby;
+        return nField === field;
+      }) === idx;
     }
     return true;
   });

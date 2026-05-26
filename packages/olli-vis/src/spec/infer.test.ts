@@ -142,6 +142,73 @@ describe('inferStructure', () => {
     });
   });
 
+  describe('geoshape', () => {
+    it('creates legend groupby and multi-level region/state groupby', () => {
+      const geoData = [
+        { id: 1, rate: 0.05, region: 'South', state_name: 'Alabama' },
+        { id: 2, rate: 0.10, region: 'West', state_name: 'California' },
+        { id: 3, rate: 0.07, region: 'South', state_name: 'Georgia' },
+      ];
+      const spec: UnitOlliVisSpec = {
+        data: geoData,
+        mark: 'geoshape',
+        fields: [
+          { field: 'rate', type: 'quantitative' },
+          { field: 'region', type: 'nominal' },
+          { field: 'state_name', type: 'nominal' },
+        ],
+        legends: [{ field: 'rate', channel: 'color' }],
+      };
+      const result = inferStructure(spec);
+      const nodes = Array.isArray(result) ? result : [result];
+      expect(hasGroupby(nodes[0]!, 'rate')).toBe(true);
+      const geoNode = nodes.find((n) => 'groupby' in n && Array.isArray(n.groupby));
+      expect(geoNode).toBeDefined();
+      expect('groupby' in geoNode! && geoNode!.groupby).toEqual(['region', 'state_name']);
+    });
+
+    it('creates only legend branch when no geographic fields', () => {
+      const spec: UnitOlliVisSpec = {
+        data: sampleData,
+        mark: 'geoshape',
+        fields: [{ field: 'rate', type: 'quantitative' }],
+        legends: [{ field: 'rate', channel: 'color' }],
+      };
+      const result = inferStructure(spec);
+      const nodes = Array.isArray(result) ? result : [result];
+      expect(nodes.length).toBe(1);
+      expect(hasGroupby(nodes[0]!, 'rate')).toBe(true);
+    });
+
+    it('creates state-only geographic branch when no region field', () => {
+      const spec: UnitOlliVisSpec = {
+        data: sampleData,
+        mark: 'geoshape',
+        fields: [
+          { field: 'rate', type: 'quantitative' },
+          { field: 'state_name', type: 'nominal' },
+        ],
+        legends: [{ field: 'rate', channel: 'color' }],
+      };
+      const result = inferStructure(spec);
+      const nodes = Array.isArray(result) ? result : [result];
+      expect(nodes.length).toBe(2);
+      expect(hasGroupby(nodes[1]!, 'state_name')).toBe(true);
+    });
+
+    it('falls through to generic when no legends or geo fields', () => {
+      const spec: UnitOlliVisSpec = {
+        data: sampleData,
+        mark: 'geoshape',
+        fields: [{ field: 'value', type: 'quantitative' }],
+      };
+      const result = inferStructure(spec);
+      const nodes = Array.isArray(result) ? result : [result];
+      expect(nodes.length).toBe(1);
+      expect(hasGroupby(nodes[0]!, 'value')).toBe(true);
+    });
+  });
+
   describe('deduplication', () => {
     it('removes duplicate groupby fields from guides', () => {
       const spec: UnitOlliVisSpec = {
