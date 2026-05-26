@@ -35,7 +35,7 @@
     "solid-js": "^1.9.3",
     "topojson-client": "^3.1.0",
     "ua-parser-js": "^2.0.9",
-    "vega-expression": "^5.0.0"
+    "vega-expression": "^6.1.0"
   },
   "peerDependencies": {
     "@observablehq/plot": ">=0.6.0",
