@@ -1,5 +1,5 @@
-import { BluefishAdapter } from 'olli-adapters';
-import type { BluefishKit, BluefishSpecFn } from 'olli-adapters';
+import { BluefishAdapter } from 'olli/adapters';
+import type { BluefishKit, BluefishSpecFn } from 'olli/adapters';
 // @gallery-hide-start
 import type { DiagramExample } from '../types.js';
 // @gallery-hide-end

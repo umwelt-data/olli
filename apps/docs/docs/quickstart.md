@@ -24,7 +24,8 @@ npm install olli vega-lite vega
     <script type="module">
       import { compile } from 'vega-lite';
       import { parse, View } from 'vega';
-      import { olliVis, VegaLiteAdapter } from 'olli';
+      import { olliVis } from 'olli';
+      import { VegaLiteAdapter } from 'olli/adapters';
       import 'olli/styles.css';
 
       const spec = {

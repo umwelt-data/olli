@@ -13,7 +13,8 @@ Use `olliVis` when the data is tabular and the rendered view is a chart. It acce
 Adapters convert from external formats into `OlliVisSpec`:
 
 ```ts
-import { olliVis, VegaLiteAdapter } from 'olli';
+import { olliVis } from 'olli';
+import { VegaLiteAdapter } from 'olli/adapters';
 
 const olliSpec = await VegaLiteAdapter(vlSpec);
 const handle = olliVis(olliSpec, document.getElementById('tree'));

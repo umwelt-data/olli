@@ -16,7 +16,11 @@ Olli converts external visualization specs through adapters. The primary adapter
 npm install olli vega-lite vega
 ```
 
-The `VegaLiteAdapter` is re-exported from the `olli` package, so no additional import path is needed.
+Adapters are available from the `olli/adapters` sub-path:
+
+```ts
+import { VegaLiteAdapter } from 'olli/adapters';
+```
 
 Adapters also exist for Vega (`npm install olli vega`) and Observable Plot (`npm install olli @observablehq/plot`).
 

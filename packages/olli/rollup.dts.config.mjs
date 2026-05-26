@@ -1,9 +1,6 @@
 import { dts } from 'rollup-plugin-dts';
-import path from 'path';
 
-export default {
-  input: 'dist/index.d.ts',
-  output: { file: 'dist/index.d.ts', format: 'es' },
+const shared = {
   plugins: [
     dts({
       tsconfig: 'tsconfig.build.json',
@@ -29,3 +26,16 @@ export default {
     /^ua-parser-js/,
   ],
 };
+
+export default [
+  {
+    input: 'dist/index.d.ts',
+    output: { file: 'dist/index.d.ts', format: 'es' },
+    ...shared,
+  },
+  {
+    input: 'dist/adapters.d.ts',
+    output: { file: 'dist/adapters.d.ts', format: 'es' },
+    ...shared,
+  },
+];

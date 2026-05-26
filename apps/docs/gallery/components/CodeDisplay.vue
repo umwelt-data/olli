@@ -42,14 +42,15 @@ const specCode = computed(() => {
 
 const usageCode = computed(() => {
   if (props.example.domain === 'visualization') {
-    return `import { VegaLiteAdapter, olliVis } from 'olli';
+    return `import { olliVis } from 'olli';
+import { VegaLiteAdapter } from 'olli/adapters';
 
 // vlSpec is your Vega-Lite specification (shown above)
 const olliSpec = await VegaLiteAdapter(vlSpec);
 olliVis(olliSpec, document.getElementById('olli-tree'));`;
   }
-  return `import { BluefishAdapter } from 'olli-adapters';
-import { olliDiagram } from 'olli';
+  return `import { olliDiagram } from 'olli';
+import { BluefishAdapter } from 'olli/adapters';
 
 // mySpecFn is your Bluefish specification (shown above)
 const spec = BluefishAdapter(mySpecFn);

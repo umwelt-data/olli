@@ -1,9 +1,9 @@
 # Adapters
 
-An adapter converts an external visualization specification into an `OlliVisSpec` that `olliVis` can render. The primary adapter is for Vega-Lite. All adapters are re-exported from the `olli` package.
+An adapter converts an external visualization specification into an `OlliVisSpec` that `olliVis` can render. The primary adapter is for Vega-Lite. All adapters are available from the `olli/adapters` sub-path export.
 
 ```ts
-import { VegaLiteAdapter } from 'olli';
+import { VegaLiteAdapter } from 'olli/adapters';
 ```
 
 ## `VegaLiteAdapter`
@@ -15,7 +15,8 @@ function VegaLiteAdapter(spec: object): Promise<OlliVisSpec>
 Converts a Vega-Lite specification into an `OlliVisSpec`. Compiles the spec to Vega internally, evaluates the data pipeline, and extracts axes, legends, marks, and data.
 
 ```ts
-import { olliVis, VegaLiteAdapter } from 'olli';
+import { olliVis } from 'olli';
+import { VegaLiteAdapter } from 'olli/adapters';
 
 const olliSpec = await VegaLiteAdapter(vlSpec);
 const handle = olliVis(olliSpec, container);
@@ -39,16 +40,16 @@ Adapters also exist for Vega and Observable Plot. They follow the same pattern a
 - **`ObservablePlotAdapter(spec: object): Promise<OlliVisSpec>`** — converts an Observable Plot specification. Requires `@observablehq/plot` as a peer dependency.
 
 ```ts
-import { VegaAdapter, ObservablePlotAdapter } from 'olli';
+import { VegaAdapter, ObservablePlotAdapter } from 'olli/adapters';
 ```
 
 ## `BluefishAdapter`
 
-The Bluefish adapter converts Bluefish diagram specifications into `DiagramSpec` for use with `olliDiagram`. It is exported from `olli-adapters`:
+The Bluefish adapter converts Bluefish diagram specifications into `DiagramSpec` for use with `olliDiagram`. It is available from `olli/adapters`:
 
 ```ts
-import { BluefishAdapter } from 'olli-adapters';
-import type { BluefishKit, OlliCustomData, BluefishSpecFn } from 'olli-adapters';
+import { BluefishAdapter } from 'olli/adapters';
+import type { BluefishKit, OlliCustomData, BluefishSpecFn } from 'olli/adapters';
 ```
 
 ## Adapter types

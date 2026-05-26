@@ -2,7 +2,7 @@ import { defineConfig } from 'tsup';
 import { solidPlugin } from 'esbuild-plugin-solid';
 
 export default defineConfig({
-  entry: ['src/index.ts'],
+  entry: ['src/index.ts', 'src/adapters.ts'],
   format: ['esm'],
   target: 'es2022',
   dts: false,

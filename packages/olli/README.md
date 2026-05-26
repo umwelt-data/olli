@@ -2,7 +2,7 @@
 
 Vanilla-JS consumer wrapper — the sole public npm package. Exposes an imperative API over the Solid-based internals so downstream users in any framework can use Olli without knowing about Solid.
 
-Re-exports all adapters (`VegaLiteAdapter`, `VegaAdapter`, `ObservablePlotAdapter`, `BluefishAdapter`, sync variants) and core types so consumers only need `npm install olli`.
+All adapters (`VegaLiteAdapter`, `VegaAdapter`, `ObservablePlotAdapter`, `BluefishAdapter`, sync variants) are available from the `olli/adapters` sub-path export. Core types are re-exported from the main `olli` entry. Consumers only need `npm install olli`.
 
 **Docs:** [Quickstart](https://umwelt-data.github.io/olli/docs/quickstart), [Entry points](https://umwelt-data.github.io/olli/docs/entry-points), [OlliHandle](https://umwelt-data.github.io/olli/docs/handle), [Options](https://umwelt-data.github.io/olli/docs/options)
 
@@ -40,10 +40,19 @@ pnpm run build          # runs all steps below in order
 After building, confirm no internal package references leak into the published output:
 
 ```bash
-grep 'from.*olli-core\|from.*olli-vis\|from.*olli-diagram\|from.*olli-adapters\|from.*olli-render' dist/index.js dist/index.d.ts
+grep 'from.*olli-core\|from.*olli-vis\|from.*olli-diagram\|from.*olli-adapters\|from.*olli-render' dist/index.js dist/index.d.ts dist/adapters.js dist/adapters.d.ts
 ```
 
 This should produce no output. If it does, the bundle is broken and consumers will get import errors.
+
+## Sub-path exports
+
+The package exposes two entry points:
+
+- **`olli`** — Core runtime, renderer, vis/diagram domain, types. No adapter dependencies.
+- **`olli/adapters`** — All adapters (`VegaLiteAdapter`, `VegaAdapter`, `ObservablePlotAdapter`, `BluefishAdapter`, etc.). This entry point pulls in `vega-lite`, `@observablehq/plot`, etc. only when imported.
+
+This split ensures that `import { olliVis } from 'olli'` works even if `vega-lite` is not installed. Consumers only pay for adapter dependencies they actually use.
 
 ## Dependencies
 

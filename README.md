@@ -73,7 +73,7 @@ See [apps/docs/README.md](apps/docs/README.md) for the step-by-step guide.
 
 ### Publishing to npm
 
-`olli` is the sole public npm package — it re-exports everything including adapters, so consumers only need `npm install olli`. All internal workspace packages (`olli-core`, `olli-render-solid`, `olli-vis`, `olli-diagram`, `olli-adapters`) are bundled into the published `olli` package at build time — they are never published separately.
+`olli` is the sole public npm package — consumers only need `npm install olli`. All internal workspace packages (`olli-core`, `olli-render-solid`, `olli-vis`, `olli-diagram`, `olli-adapters`) are bundled into the published `olli` package at build time — they are never published separately. The package exposes two entry points: `olli` (core + renderer + types) and `olli/adapters` (all adapters). This split keeps adapter dependencies like `vega-lite` lazy — they're only loaded when `olli/adapters` is imported.
 
 `olli` also depends on `@umwelt-data/umwelt-utils`, which is a separate published package shared with the Umwelt project. If you've made changes to umwelt-utils, publish it first.
 
@@ -98,7 +98,7 @@ See [apps/docs/README.md](apps/docs/README.md) for the step-by-step guide.
 
 4. **Verify the bundle has no internal references:**
    ```bash
-   grep 'from.*olli-core\|from.*olli-vis\|from.*olli-diagram\|from.*olli-adapters\|from.*olli-render' packages/olli/dist/index.js packages/olli/dist/index.d.ts
+   grep 'from.*olli-core\|from.*olli-vis\|from.*olli-diagram\|from.*olli-adapters\|from.*olli-render' packages/olli/dist/index.js packages/olli/dist/index.d.ts packages/olli/dist/adapters.js packages/olli/dist/adapters.d.ts
    ```
    This should produce no output.
 

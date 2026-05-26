@@ -1,5 +1,5 @@
-import { BluefishAdapter } from 'olli-adapters';
-import type { BluefishKit, BluefishSpecFn } from 'olli-adapters';
+import { BluefishAdapter } from 'olli/adapters';
+import type { BluefishKit, BluefishSpecFn } from 'olli/adapters';
 
 const BOX_H = 30;
 const H_GAP = 40;
