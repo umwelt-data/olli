@@ -31,11 +31,12 @@ export function VisualizationRenderer(props: { example: VisualizationExample }) 
         });
 
         (async () => {
-          const [vega, vegaLite, utils, olliJs] = await Promise.all([
+          const [vega, vegaLite, utils, olliJs, olliAdapters] = await Promise.all([
             import('vega'),
             import('vega-lite'),
             import('@umwelt-data/umwelt-utils/vl-bridge'),
             import('olli'),
+            import('olli/adapters'),
           ]);
           if (cancelled) return;
 
@@ -70,7 +71,7 @@ export function VisualizationRenderer(props: { example: VisualizationExample }) 
             } catch { /* dataset may not be queryable */ }
           }
 
-          const olliSpec = await olliJs.VegaLiteAdapter(props.example.spec);
+          const olliSpec = await olliAdapters.VegaLiteAdapter(props.example.spec);
           if (cancelled) return;
 
           handle = olliJs.olliVis(olliSpec, treeRef, { initialPreset: 'standard' });
