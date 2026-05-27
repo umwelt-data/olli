@@ -26,8 +26,9 @@
     "build:bundle": "tsup",
     "build:dts": "rollup -c rollup.dts.config.mjs",
     "build:css": "cat ../olli-render-solid/src/styles.css > dist/styles.css",
+    "build:smoke": "node --conditions=browser smoke.mjs",
     "build": "pnpm run build:deps && pnpm run build:bundle && pnpm run build:dts && pnpm run build:css",
-    "prepublishOnly": "pnpm run build"
+    "prepublishOnly": "pnpm run build && pnpm run build:smoke"
   },
   "dependencies": {
     "@umwelt-data/umwelt-utils": "^0.1.2",
