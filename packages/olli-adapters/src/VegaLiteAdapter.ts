@@ -1,5 +1,6 @@
 import type { UnitOlliVisSpec, OlliVisSpec, OlliDataset, OlliAxis, OlliMark } from 'olli-vis';
-import { typeInference, getMarkType } from 'olli-vis';
+import { getMarkType } from 'olli-vis/spec/types';
+import { typeInference } from 'olli-vis/util/types';
 import { typeCoerceData } from '@umwelt-data/umwelt-utils/data';
 import { describeField } from '@umwelt-data/umwelt-utils/description';
 import { evaluateVegaData, extractOutputDatasets } from './vegaDataEval.js';

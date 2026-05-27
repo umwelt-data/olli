@@ -12,17 +12,16 @@
   "dependencies": {
     "@umwelt-data/umwelt-utils": "^0.1.1",
     "bluefish-js": "^0.0.39",
+    "olli": "workspace:*",
     "olli-adapters": "workspace:*",
     "olli-core": "workspace:*",
     "olli-diagram": "workspace:*",
-    "olli": "workspace:*",
     "olli-render-solid": "workspace:*",
     "olli-vis": "workspace:*",
     "vega": "^5.30.0",
     "vega-lite": "^5.19.0"
   },
   "devDependencies": {
-    "vite-plugin-solid": "^2.11.0",
     "vitepress": "^1.5.0",
     "vue": "^3.4.0"
   }

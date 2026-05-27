@@ -1,14 +1,7 @@
 import { defineConfig } from 'vitepress';
-import solidPlugin from 'vite-plugin-solid';
 import { galleryGroups } from '../gallery/examples/groups.js';
 
 export default defineConfig({
-  vite: {
-    plugins: [solidPlugin({ ssr: true })],
-    resolve: {
-      conditions: ['development', 'browser'],
-    },
-  },
   title: 'Olli',
   description: 'Accessible tree-navigation views of data visualizations and diagrams.',
   base: '/olli/',

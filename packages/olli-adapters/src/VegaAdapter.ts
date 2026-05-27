@@ -1,5 +1,5 @@
 import type { UnitOlliVisSpec, OlliDataset, OlliAxis, OlliLegend, OlliMark } from 'olli-vis';
-import { getMarkType as olliGetMarkType } from 'olli-vis';
+import { getMarkType as olliGetMarkType } from 'olli-vis/spec/types';
 import { filterUniqueObjects, inferFormatFromUrl, parseCsv } from './utils.js';
 import { evaluateVegaData } from './vegaDataEval.js';
 import { computeAxisTicks } from '@umwelt-data/umwelt-utils/vega';

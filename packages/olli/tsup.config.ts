@@ -8,6 +8,7 @@ export default defineConfig({
   dts: false,
   sourcemap: true,
   clean: false,
+  splitting: false,
   treeshake: true,
 
   // Inline all workspace packages so consumers don't need them installed
