@@ -322,6 +322,51 @@ describe('VegaLiteAdapter', () => {
       expect(childRoles).toContain('legend');
       expect(childRoles).toContain('guide');
     });
+
+    it('computes ticks for quantitative color legend', () => {
+      const olliSpec = VegaLiteAdapterSync(choroplethSpec) as UnitOlliVisSpec;
+      const colorLegend = olliSpec.legends?.find(l => l.channel === 'color');
+      expect(colorLegend!.ticks).toBeDefined();
+      expect(colorLegend!.ticks!.length).toBeGreaterThan(0);
+    });
+
+    it('legend bins align with legend ticks', () => {
+      const olliSpec = VegaLiteAdapterSync(choroplethSpec) as UnitOlliVisSpec;
+      const colorLegend = olliSpec.legends?.find(l => l.channel === 'color');
+      const ticks = colorLegend!.ticks as number[];
+
+      const graph = lowerVisSpec(olliSpec);
+      const root = graph.edges.get(graph.roots[0]!)!;
+      const legendNodeId = root.children.find(id => graph.edges.get(id)!.role === 'legend')!;
+      const legendNode = graph.edges.get(legendNodeId)!;
+      const bins = legendNode.children.map(id => {
+        const edge = graph.edges.get(id)!;
+        const pred = edge.payload.predicate;
+        return pred && 'range' in pred ? pred.range : undefined;
+      }).filter(Boolean) as [number, number][];
+
+      expect(bins.length).toBeGreaterThan(0);
+      for (const [lo, hi] of bins) {
+        expect(ticks).toContain(lo);
+        expect(ticks).toContain(hi);
+      }
+    });
+
+    it('does not compute ticks for nominal color legend', () => {
+      const nominalSpec = {
+        $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+        data: { values: [{ x: 1, cat: 'a' }, { x: 2, cat: 'b' }] },
+        mark: 'point',
+        encoding: {
+          x: { field: 'x', type: 'quantitative' },
+          color: { field: 'cat', type: 'nominal' },
+        },
+      };
+      const olliSpec = VegaLiteAdapterSync(nominalSpec) as UnitOlliVisSpec;
+      const colorLegend = olliSpec.legends?.find(l => l.channel === 'color');
+      expect(colorLegend).toBeDefined();
+      expect(colorLegend!.ticks).toBeUndefined();
+    });
   });
 
   describe('structure regression', () => {

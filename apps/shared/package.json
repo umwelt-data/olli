@@ -6,7 +6,7 @@
     "@umwelt-data/umwelt-utils": "^0.1.1",
     "olli": "workspace:*",
     "olli-adapters": "workspace:*",
-    "vega": "^5.30.0",
-    "vega-lite": "^5.19.0"
+    "vega": ">=6.2.0",
+    "vega-lite": "^6.4.3"
   }
 }

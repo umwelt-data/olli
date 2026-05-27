@@ -1,11 +1,11 @@
-import type { UnitOlliVisSpec, OlliVisSpec, OlliDataset, OlliAxis, OlliMark } from 'olli-vis';
+import type { UnitOlliVisSpec, OlliVisSpec, OlliDataset, OlliAxis, OlliLegend, OlliMark } from 'olli-vis';
 import { getMarkType } from 'olli-vis/spec/types';
 import { typeInference } from 'olli-vis/util/types';
 import { typeCoerceData } from '@umwelt-data/umwelt-utils/data';
 import { describeField } from '@umwelt-data/umwelt-utils/description';
 import { evaluateVegaData, extractOutputDatasets } from './vegaDataEval.js';
-import { computeAxisTicks } from '@umwelt-data/umwelt-utils/vega';
-import type { AxisTicksConfig } from '@umwelt-data/umwelt-utils/vega';
+import { computeGuideTicks } from '@umwelt-data/umwelt-utils/vega';
+import type { GuideTicksConfig } from '@umwelt-data/umwelt-utils/vega';
 import type { VisAdapter } from './types.js';
 import { inferFormatFromUrl, parseDelimited } from './utils.js';
 import { enrichWithUSGeo, looksLikeFips } from './geo/enrichGeoData.js';
@@ -308,7 +308,7 @@ function adaptUnitSpec(spec: any, data: OlliDataset): UnitOlliVisSpec {
           && encoding.stack !== null && encoding.stack !== false
           && ['area', 'bar'].includes(getMarkType(mark) ?? '')
           && spec.encoding && ('color' in spec.encoding || 'detail' in spec.encoding);
-        const tickConfig: AxisTicksConfig = {
+        const tickConfig: GuideTicksConfig = {
           field: fieldDef.field,
           type: fieldDef.type,
           bin: !!encoding.bin,
@@ -321,8 +321,7 @@ function adaptUnitSpec(spec: any, data: OlliDataset): UnitOlliVisSpec {
           tickCount: encoding.axis?.tickCount,
           tickValues: encoding.axis?.values,
         };
-        const computed = computeAxisTicks(data, { [channel]: tickConfig });
-        const axisTicks = (isStackedCumulativeAxis && encoding.axis !== null) ? [] : computed[channel as 'x' | 'y'];
+        const axisTicks = (isStackedCumulativeAxis && encoding.axis !== null) ? [] : computeGuideTicks(data, tickConfig);
         const axis: OlliAxis = {
           axisType: channel as 'x' | 'y',
           field: fieldDef.field,
@@ -331,11 +330,25 @@ function adaptUnitSpec(spec: any, data: OlliDataset): UnitOlliVisSpec {
         if (axisTicks) axis.ticks = axisTicks;
         olliSpec.axes!.push(axis);
       } else if (['color', 'opacity', 'size'].includes(channel)) {
-        olliSpec.legends!.push({
+        const legend: OlliLegend = {
           channel: channel as 'color' | 'opacity' | 'size',
           field: fieldDef.field,
           title: encoding.title,
-        });
+        };
+        if (fieldDef.type === 'quantitative' || fieldDef.type === 'temporal') {
+          const ticks = computeGuideTicks(data, {
+            field: fieldDef.field,
+            type: fieldDef.type,
+            bin: !!encoding.bin,
+            timeUnit: encoding.timeUnit,
+            scaleZero: encoding.scale?.zero ?? false,
+            scaleDomain: encoding.scale?.domain,
+            tickCount: encoding.legend?.tickCount,
+            tickValues: encoding.legend?.values,
+          });
+          if (ticks) legend.ticks = ticks;
+        }
+        olliSpec.legends!.push(legend);
       } else if (['order', 'theta'].includes(channel)) {
         olliSpec.guides!.push({
           field: fieldDef.field,

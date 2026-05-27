@@ -49,6 +49,7 @@ export interface OlliAxis extends OlliGuide {
 
 export interface OlliLegend extends OlliGuide {
   channel: 'color' | 'opacity' | 'size';
+  ticks?: OlliValue[];
 }
 
 // ---- Structure nodes ----

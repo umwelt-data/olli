@@ -223,7 +223,9 @@ function lowerGroupby(
   }
 
   const axis = spec.axes?.find((a) => a.field === node.groupby);
-  const childPreds = fieldToPredicates(node.groupby, data, spec.fields ?? [], axis?.ticks);
+  const legend = spec.legends?.find((l) => l.field === node.groupby);
+  const ticks = axis?.ticks ?? legend?.ticks;
+  const childPreds = fieldToPredicates(node.groupby, data, spec.fields ?? [], ticks);
   const nodeType = nodeTypeFromGroupField(node.groupby, spec);
   const fd = getFieldDef(node.groupby, spec.fields ?? []);
   const childIds: string[] = [];

@@ -2,8 +2,8 @@ import type { UnitOlliVisSpec, OlliDataset, OlliAxis, OlliLegend, OlliMark } fro
 import { getMarkType as olliGetMarkType } from 'olli-vis/spec/types';
 import { filterUniqueObjects, inferFormatFromUrl, parseCsv } from './utils.js';
 import { evaluateVegaData } from './vegaDataEval.js';
-import { computeAxisTicks } from '@umwelt-data/umwelt-utils/vega';
-import type { AxisTicksConfig } from '@umwelt-data/umwelt-utils/vega';
+import { computeGuideTicks } from '@umwelt-data/umwelt-utils/vega';
+import type { GuideTicksConfig } from '@umwelt-data/umwelt-utils/vega';
 import type { VisAdapter } from './types.js';
 
 export function VegaAdapterSync(spec: any): UnitOlliVisSpec {
@@ -137,7 +137,7 @@ function parseAxisFromSpec(axisSpec: any, spec: any, data: OlliDataset, groupMar
     }
   }
 
-  const tickConfig: AxisTicksConfig = {
+  const tickConfig: GuideTicksConfig = {
     field,
     type: scaleTypeToFieldType(scaleType),
     scaleZero: scaleSpec.zero,
@@ -149,8 +149,7 @@ function parseAxisFromSpec(axisSpec: any, spec: any, data: OlliDataset, groupMar
     tickValues: axisSpec.values,
   };
 
-  const computed = computeAxisTicks(data, { [axisType]: tickConfig });
-  const ticks = computed[axisType];
+  const ticks = computeGuideTicks(data, tickConfig);
 
   const axis: OlliAxis = { axisType, field, scaleType };
   if (title !== undefined) axis.title = title;
@@ -253,11 +252,28 @@ function parseLegendFromSpec(legendSpec: any, spec: any, data: OlliDataset): Oll
     }
   }
 
-  return {
+  const legend: OlliLegend = {
     channel: channel as 'color' | 'opacity' | 'size',
     title: title ?? '',
     field: field as string,
   };
+
+  if (field) {
+    const fieldType = scaleTypeToFieldType(scaleSpec?.type);
+    if (fieldType === 'quantitative' || fieldType === 'temporal') {
+      const ticks = computeGuideTicks(data, {
+        field,
+        type: fieldType,
+        scaleZero: scaleSpec?.zero,
+        scaleDomain: scaleSpec?.domain && Array.isArray(scaleSpec.domain) ? scaleSpec.domain : undefined,
+        tickCount: legendSpec.tickCount,
+        tickValues: legendSpec.values,
+      });
+      if (ticks) legend.ticks = ticks;
+    }
+  }
+
+  return legend;
 }
 
 function mapVegaLegendChannel(vegaChannel: string): string {

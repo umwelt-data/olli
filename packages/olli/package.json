@@ -39,7 +39,7 @@
   },
   "peerDependencies": {
     "@observablehq/plot": ">=0.6.0",
-    "vega-lite": "^5.0.0"
+    "vega-lite": "^6.4.3"
   },
   "peerDependenciesMeta": {
     "vega-lite": {
