@@ -9,6 +9,7 @@ export const choroplethMap: VisualizationExample = {
   description: 'US county-level unemployment rates on a choropleth map.',
   spec: {
     $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+    description: 'US county-level unemployment rates',
     width: 500,
     height: 300,
     data: {

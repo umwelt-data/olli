@@ -18,11 +18,12 @@ let disposeBridge: (() => void) | undefined;
 async function mountVegaLite() {
   if (!chartContainer.value || !treeContainer.value) return;
 
-  const [vega, vegaLite, utils, olliJs] = await Promise.all([
+  const [vega, vegaLite, utils, olliJs, olliAdapters] = await Promise.all([
     import('vega'),
     import('vega-lite'),
     import('@umwelt-data/umwelt-utils/vl-bridge'),
     import('olli'),
+    import('olli/adapters'),
   ]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -45,8 +46,8 @@ async function mountVegaLite() {
     if (!ds.name) continue;
     try {
       const rows = view.data(ds.name);
-      if (rows?.length && olliJs.looksLikeFips(rows, 'id')) {
-        const enriched = olliJs.enrichWithUSGeo(rows, 'id')
+      if (rows?.length && olliAdapters.looksLikeFips(rows, 'id')) {
+        const enriched = olliAdapters.enrichWithUSGeo(rows, 'id')
           .map((d: Record<string, unknown>) => Object.fromEntries(Object.entries(d)));
         view.data(ds.name, enriched);
         await view.runAsync();
@@ -57,7 +58,7 @@ async function mountVegaLite() {
   // olli's VegaLiteAdapter compiles and spins up its own view internally
   // to scrape the rendered scenegraph for data. We pass the same injected
   // spec so extracted predicates align with the one the user sees.
-  const olliSpec = await olliJs.VegaLiteAdapter(injected);
+  const olliSpec = await olliAdapters.VegaLiteAdapter(injected);
   handle = olliJs.olliVis(olliSpec, treeContainer.value, { initialPreset: 'standard' });
 
   disposeBridge = utils.connectOlliToVegaLite(handle, view);
