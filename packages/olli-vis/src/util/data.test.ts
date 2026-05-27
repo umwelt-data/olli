@@ -124,6 +124,28 @@ describe('getBins', () => {
     ]);
   });
 
+  it('absorbs domain overshoot into last bin instead of creating a degenerate bin', () => {
+    const data: OlliDataset = [{ v: 0 }, { v: 50 }, { v: 100.1 }];
+    const bins = getBins('v', data, fields, [0, 25, 50, 75, 100]);
+    expect(bins).toEqual([
+      [0, 25],
+      [25, 50],
+      [50, 75],
+      [75, 100.1],
+    ]);
+  });
+
+  it('absorbs domain undershoot into first bin instead of creating a degenerate bin', () => {
+    const data: OlliDataset = [{ v: -0.1 }, { v: 50 }, { v: 100 }];
+    const bins = getBins('v', data, fields, [0, 25, 50, 75, 100]);
+    expect(bins).toEqual([
+      [-0.1, 25],
+      [25, 50],
+      [50, 75],
+      [75, 100],
+    ]);
+  });
+
   it('creates 6 equal-width bins for temporal data', () => {
     const temporalFields: OlliFieldDef[] = [{ field: 't', type: 'temporal' }];
     const data: OlliDataset = [

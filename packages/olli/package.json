@@ -1,6 +1,6 @@
 {
   "name": "olli",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Olli is a library for converting web visualizations into accessible text structures for blind and low-vision screen reader users.",
   "type": "module",
   "main": "./dist/index.js",
@@ -30,7 +30,7 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@umwelt-data/umwelt-utils": "^0.1.1",
+    "@umwelt-data/umwelt-utils": "^0.1.2",
     "papaparse": "^5.4.0",
     "solid-js": "^1.9.3",
     "topojson-client": "^3.1.0",

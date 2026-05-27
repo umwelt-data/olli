@@ -101,12 +101,12 @@ export function getBins(
   if (tickValues.length === 0) return [];
 
   const bins: [number, number][] = [];
-  if (domMin < tickValues[0]!) bins.push([domMin, tickValues[0]!]);
   for (let i = 0; i < tickValues.length - 1; i++) {
     bins.push([tickValues[i]!, tickValues[i + 1]!]);
   }
-  if (domMax > tickValues[tickValues.length - 1]!) {
-    bins.push([tickValues[tickValues.length - 1]!, domMax]);
+  if (bins.length > 0) {
+    if (domMin < bins[0]![0]) bins[0]![0] = domMin;
+    if (domMax > bins[bins.length - 1]![1]) bins[bins.length - 1]![1] = domMax;
   }
   return bins;
 }
