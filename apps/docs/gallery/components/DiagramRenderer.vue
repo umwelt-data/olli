@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import type { OlliHandle } from 'olli';
 import type { DiagramExample } from '../examples/types.js';
+import type { DiagramMountResult } from '../../../shared/mountDiagram.js';
 
 const props = defineProps<{
   example: DiagramExample;
@@ -10,46 +10,28 @@ const props = defineProps<{
 const chartContainer = ref<HTMLDivElement>();
 const treeContainer = ref<HTMLDivElement>();
 
-let destroyMount: (() => void) | undefined;
-let handle: OlliHandle | undefined;
-let disposeBridge: (() => void) | undefined;
+let result: DiagramMountResult | undefined;
 
 async function mountDiagram() {
   if (!chartContainer.value || !treeContainer.value) return;
 
-  const [{ render, elements }, { createBluefishBridge }, olliJs] = await Promise.all([
-    props.example.children(),
-    import('@umwelt-data/umwelt-utils/bluefish-bridge'),
-    import('olli'),
-  ]);
+  const { mountDiagramExample } = await import('../../../shared/mountDiagram.js');
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  destroyMount = render(() => elements as any, chartContainer.value);
-  const svgElement = chartContainer.value.querySelector('svg') as SVGSVGElement;
-
-  handle = olliJs.olliDiagram(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    props.example.spec as any,
-    treeContainer.value,
-  );
-
-  disposeBridge = createBluefishBridge({ handle, svgElement }).destroy;
+  result = await mountDiagramExample({
+    chartEl: chartContainer.value,
+    treeEl: treeContainer.value,
+    example: props.example,
+  });
 
   if (import.meta.env.DEV) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).__olliGallery = { handle, svgElement, spec: props.example.spec };
+    (window as any).__olliGallery = { handle: result.handle, spec: props.example.spec };
   }
 }
 
 function teardown() {
-  disposeBridge?.();
-  disposeBridge = undefined;
-  handle?.destroy();
-  handle = undefined;
-  destroyMount?.();
-  destroyMount = undefined;
-  if (chartContainer.value) chartContainer.value.innerHTML = '';
-  if (treeContainer.value) treeContainer.value.innerHTML = '';
+  result?.destroy();
+  result = undefined;
 }
 
 onMounted(() => void mountDiagram());

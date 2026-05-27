@@ -1,0 +1,12 @@
+{
+  "name": "@olli/shared",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@umwelt-data/umwelt-utils": "^0.1.1",
+    "olli": "workspace:*",
+    "olli-adapters": "workspace:*",
+    "vega": "^5.30.0",
+    "vega-lite": "^5.19.0"
+  }
+}

@@ -1,6 +1,6 @@
 import { createEffect, on, onCleanup } from 'solid-js';
-import type { OlliHandle } from 'olli';
 import type { DiagramExample } from '../../docs/gallery/examples/types.js';
+import type { DiagramMountResult } from '../../shared/mountDiagram.js';
 
 export function DiagramRenderer(props: { example: DiagramExample }) {
   let chartRef!: HTMLDivElement;
@@ -10,36 +10,27 @@ export function DiagramRenderer(props: { example: DiagramExample }) {
     on(
       () => props.example.id,
       () => {
-        let destroyMount: (() => void) | undefined;
-        let handle: OlliHandle | undefined;
-        let disposeBridge: (() => void) | undefined;
+        let result: DiagramMountResult | undefined;
         let cancelled = false;
 
         onCleanup(() => {
           cancelled = true;
-          disposeBridge?.();
-          handle?.destroy();
-          destroyMount?.();
-          chartRef.innerHTML = '';
-          treeRef.innerHTML = '';
+          result?.destroy();
         });
 
         (async () => {
-          const [{ render, elements }, { createBluefishBridge }, olliJs] = await Promise.all([
-            props.example.children(),
-            import('@umwelt-data/umwelt-utils/bluefish-bridge'),
-            import('olli'),
-          ]);
+          const { mountDiagramExample } = await import('../../shared/mountDiagram.js');
           if (cancelled) return;
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          destroyMount = render(() => elements as any, chartRef);
-          const svgElement = chartRef.querySelector('svg') as SVGSVGElement;
-          if (cancelled) { destroyMount(); return; }
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          handle = olliJs.olliDiagram(props.example.spec as any, treeRef);
-          disposeBridge = createBluefishBridge({ handle, svgElement }).destroy;
+          result = await mountDiagramExample({
+            chartEl: chartRef,
+            treeEl: treeRef,
+            example: props.example,
+          });
+          if (cancelled) {
+            result.destroy();
+            result = undefined;
+          }
         })();
       },
     ),

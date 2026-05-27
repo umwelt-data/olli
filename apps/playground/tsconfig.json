@@ -4,7 +4,7 @@
     "outDir": "dist",
     "rootDir": "."
   },
-  "include": ["src/**/*", "../docs/gallery/examples/**/*"],
+  "include": ["src/**/*", "../docs/gallery/examples/**/*", "../shared/**/*"],
   "references": [
     { "path": "../../packages/olli-core" },
     { "path": "../../packages/olli-render-solid" },

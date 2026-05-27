@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import type { OlliHandle } from 'olli';
 import type { VisualizationExample } from '../examples/types.js';
+import type { MountResult } from '../../../shared/mountVegaLite.js';
 
 const props = defineProps<{
   example: VisualizationExample;
@@ -10,78 +10,29 @@ const props = defineProps<{
 const chartContainer = ref<HTMLDivElement>();
 const treeContainer = ref<HTMLDivElement>();
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let view: any;
-let handle: OlliHandle | undefined;
-let disposeBridge: (() => void) | undefined;
+let result: MountResult | undefined;
 
 async function mountVegaLite() {
   if (!chartContainer.value || !treeContainer.value) return;
 
-  const [vega, vegaLite, utils, olliJs, olliAdapters] = await Promise.all([
-    import('vega'),
-    import('vega-lite'),
-    import('@umwelt-data/umwelt-utils/vl-bridge'),
-    import('olli'),
-    import('olli/adapters'),
-  ]);
+  const { mountVegaLiteExample } = await import('../../../shared/mountVegaLite.js');
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const injected = utils.withExternalStateParam(props.example.spec as any);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const compiled = vegaLite.compile(injected as any).spec;
-  const runtime = vega.parse(compiled);
-
-  view = await new vega.View(runtime, { renderer: 'canvas' })
-    .initialize(chartContainer.value)
-    .runAsync();
-
-  // Enrich geoshape view data with geo fields so VL selection can test against them.
-  // Vega tuples carry a Symbol-keyed ID; spreading copies it, causing the
-  // changeset to treat enriched objects as duplicates (cancel remove + skip add).
-  // Stripping symbols via Object.fromEntries(Object.entries(...)) ensures they
-  // are ingested as fresh tuples.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for (const ds of (compiled as any).data ?? []) {
-    if (!ds.name) continue;
-    try {
-      const rows = view.data(ds.name);
-      if (rows?.length && olliAdapters.looksLikeFips(rows, 'id')) {
-        const enriched = olliAdapters.enrichWithUSGeo(rows, 'id')
-          .map((d: Record<string, unknown>) => Object.fromEntries(Object.entries(d)));
-        view.data(ds.name, enriched);
-        await view.runAsync();
-      }
-    } catch { /* dataset may not be queryable */ }
-  }
-
-  // olli's VegaLiteAdapter compiles and spins up its own view internally
-  // to scrape the rendered scenegraph for data. We pass the same injected
-  // spec so extracted predicates align with the one the user sees.
-  const olliSpec = await olliAdapters.VegaLiteAdapter(injected);
-  handle = olliJs.olliVis(olliSpec, treeContainer.value, { initialPreset: 'standard' });
-
-  disposeBridge = utils.connectOlliToVegaLite(handle, view);
+  result = await mountVegaLiteExample({
+    chartEl: chartContainer.value,
+    treeEl: treeContainer.value,
+    spec: props.example.spec,
+    renderer: 'canvas',
+  });
 
   if (import.meta.env.DEV) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).__olliGallery = { view, handle, spec: injected };
+    (window as any).__olliGallery = { view: result.view, handle: result.handle, spec: props.example.spec };
   }
 }
 
 function teardown() {
-  disposeBridge?.();
-  disposeBridge = undefined;
-  handle?.destroy();
-  handle = undefined;
-  try {
-    view?.finalize();
-  } catch {
-    /* ignore */
-  }
-  view = undefined;
-  if (chartContainer.value) chartContainer.value.innerHTML = '';
-  if (treeContainer.value) treeContainer.value.innerHTML = '';
+  result?.destroy();
+  result = undefined;
 }
 
 onMounted(() => void mountVegaLite());

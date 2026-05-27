@@ -108,6 +108,24 @@ importers:
         specifier: ^2.11.0
         version: 2.11.12(@testing-library/jest-dom@6.9.1)(solid-js@1.9.12)(vite@7.3.3(@types/node@25.9.1)(jiti@1.21.7)(lightningcss@1.32.0))
 
+  apps/shared:
+    dependencies:
+      '@umwelt-data/umwelt-utils':
+        specifier: ^0.1.1
+        version: 0.1.1
+      olli:
+        specifier: workspace:*
+        version: link:../../packages/olli
+      olli-adapters:
+        specifier: workspace:*
+        version: link:../../packages/olli-adapters
+      vega:
+        specifier: ^5.30.0
+        version: 5.33.1
+      vega-lite:
+        specifier: ^5.19.0
+        version: 5.23.0(vega@5.33.1)
+
   packages/olli:
     dependencies:
       '@observablehq/plot':
