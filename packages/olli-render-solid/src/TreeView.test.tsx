@@ -99,6 +99,31 @@ describe('<TreeView /> — ARIA structure', () => {
     expect(root.getAttribute('aria-selected')).toBe('true');
     expect(root.getAttribute('tabindex')).toBe('0');
   });
+
+  it('focused item has data-lm-suppress-shortcuts, others do not', () => {
+    const { container } = renderWith(() => createNavigationRuntime(smallGraph()));
+    const root = container.querySelector<HTMLElement>('[data-nav-id="root"]')!;
+    expect(root.getAttribute('data-lm-suppress-shortcuts')).toBe('true');
+    const others = container.querySelectorAll<HTMLElement>(
+      '[role="treeitem"]:not([data-nav-id="root"])',
+    );
+    for (const el of others) {
+      expect(el.hasAttribute('data-lm-suppress-shortcuts')).toBe(false);
+    }
+  });
+
+  it('data-lm-suppress-shortcuts moves with focus', () => {
+    const { runtime, container } = renderWith(() =>
+      createNavigationRuntime(smallGraph()),
+    );
+    const root = container.querySelector<HTMLElement>('[data-nav-id="root"]')!;
+    expect(root.getAttribute('data-lm-suppress-shortcuts')).toBe('true');
+
+    runtime.focus('root/a');
+    const a = container.querySelector<HTMLElement>('[data-nav-id="root/a"]')!;
+    expect(a.getAttribute('data-lm-suppress-shortcuts')).toBe('true');
+    expect(root.hasAttribute('data-lm-suppress-shortcuts')).toBe(false);
+  });
 });
 
 describe('<TreeView /> — keyboard navigation', () => {

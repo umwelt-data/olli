@@ -46,6 +46,9 @@ export function TreeItem<P>(props: {
       aria-selected={focused() ? 'true' : 'false'}
       aria-expanded={ariaExpanded()}
       tabindex={focused() ? 0 : -1}
+      // Prevents JupyterLab/Lumino from intercepting keyboard events (arrows,
+      // Enter, Escape) on the focused tree item.
+      data-lm-suppress-shortcuts={focused() ? "true" : undefined}
       class="olli-tree-item"
       classList={{ 'olli-focused': focused(), 'olli-virtual': isVirtual() }}
     >
