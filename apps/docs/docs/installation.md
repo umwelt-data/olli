@@ -10,10 +10,10 @@ This gives you the `olli`, `olliVis`, and `olliDiagram` entry points, along with
 
 ## With an adapter
 
-Olli converts external visualization specs through adapters. The primary adapter is for Vega-Lite — install it alongside `olli`:
+Olli converts external visualization specs through adapters. The primary adapter is for Vega-Lite, which needs `vega-lite` as a peer dependency — install it alongside `olli`:
 
 ```bash
-npm install olli vega-lite vega
+npm install olli vega-lite
 ```
 
 Adapters are available from the `olli/adapters` sub-path:
@@ -22,7 +22,9 @@ Adapters are available from the `olli/adapters` sub-path:
 import { VegaLiteAdapter } from 'olli/adapters';
 ```
 
-Adapters also exist for Vega (`npm install olli vega`) and Observable Plot (`npm install olli @observablehq/plot`).
+The Vega-Lite adapter only uses `vega-lite` to compile and evaluate the spec — it does not need the `vega` runtime. Install `vega` (or `vega-embed`) separately only if you also want to render the chart visually, as in the [quickstart](/docs/quickstart).
+
+An adapter also exists for Observable Plot, which needs `@observablehq/plot` (`npm install olli @observablehq/plot`). The `VegaAdapter` for raw Vega specs needs no extra peer dependency.
 
 ## Importing the stylesheet
 

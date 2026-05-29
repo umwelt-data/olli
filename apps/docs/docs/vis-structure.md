@@ -16,14 +16,14 @@ Groups the data by a field. Each distinct value (or bin range) of the field beco
 
 ```ts
 interface OlliGroupNode {
-  groupby: string;
+  groupby: string | string[];
   children?: OlliNode[];
 }
 ```
 
 | Property | Type | Required | Description |
 | --- | --- | --- | --- |
-| `groupby` | `string` | yes | The field name to group by. |
+| `groupby` | `string \| string[]` | yes | The field name (or names) to group by. |
 | `children` | `OlliNode[]` | no | Nested structure within each group. |
 
 For example, grouping a bar chart by the x-axis field and then by a color field:

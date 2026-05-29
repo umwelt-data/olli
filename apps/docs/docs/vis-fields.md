@@ -92,10 +92,11 @@ A legend guide, extending `OlliGuide`.
 ```ts
 interface OlliLegend extends OlliGuide {
   channel: 'color' | 'opacity' | 'size';
+  ticks?: OlliValue[];
 }
 ```
 
-The `channel` property is required and must be one of `'color'`, `'opacity'`, or `'size'`.
+The `channel` property is required and must be one of `'color'`, `'opacity'`, or `'size'`. Like `OlliAxis`, a legend may carry explicit `ticks` to define bin boundaries for quantitative or temporal fields.
 
 ## How guides map to tree nodes
 

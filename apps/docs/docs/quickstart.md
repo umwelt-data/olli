@@ -66,7 +66,7 @@ Open it, focus on the Olli tree. The root node describes the whole chart. Press 
 
 ## Two-way highlighting
 
-To have Olli's focus drive selection in the rendered Vega-Lite chart (dimming non-matching marks), add [`@umwelt-data/umwelt-utils`](https://github.com/umwelt-data/umwelt-utils) and wrap the spec with `withExternalStateParam` before compiling. See the [gallery source](https://github.com/umwelt-data/olli/blob/main/apps/docs/gallery/components/VisualizationRenderer.vue) for the pattern.
+To have Olli's focus drive selection in the rendered Vega-Lite chart (dimming non-matching marks), add [`@umwelt-data/umwelt-utils`](https://github.com/umwelt-data/umwelt-utils), wrap the spec with `withExternalStateParam` before compiling, then connect the handle to the view with `connectOlliToVegaLite`. See the [gallery source](https://github.com/umwelt-data/olli/blob/main/apps/shared/mountVegaLite.ts) for the pattern.
 
 ## Next
 

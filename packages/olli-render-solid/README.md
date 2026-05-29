@@ -14,7 +14,7 @@ Layer 3: Solid components that render a `NavigationRuntime` as an accessible ARI
 ## API
 
 - `mount(runtime, container, options?)` — Renders the tree view, returns a dispose function
-- `registerDefaultKeybindings(runtime)` — Registers arrow key navigation, Enter expand/collapse
+- `registerDefaultKeybindings(runtime)` — Registers arrow key navigation (up/down a level, prev/next sibling), Home/End, Escape (up a level), Enter/Space (down a level), and `o` (jump to root)
 
 ## Dependencies
 

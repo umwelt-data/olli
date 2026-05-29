@@ -6,8 +6,8 @@ Layer 5: Adapters that convert visualization and diagram library specs into Olli
 
 ## Adapters
 
-- **`VegaLiteAdapter`** / **`VegaLiteAdapterSync`** — Compiles a Vega-Lite spec, extracts scenegraph data, produces `OlliVisSpec`. This is the primary adapter.
-- **`VegaAdapter`** / **`VegaAdapterSync`** — Parses a Vega spec, extracts axes/legends/data from the scenegraph.
+- **`VegaLiteAdapter`** / **`VegaLiteAdapterSync`** — Compiles a Vega-Lite spec to Vega, evaluates its data pipeline, and extracts axes/legends/marks/data to produce `OlliVisSpec`. This is the primary adapter.
+- **`VegaAdapter`** / **`VegaAdapterSync`** — Reads a Vega spec structurally and evaluates its data pipeline to extract axes/legends/data.
 - **`ObservablePlotAdapter`** — Renders an Observable Plot spec, extracts structure from the SVG.
 - **`BluefishAdapter`** — Converts a Bluefish spec function into a `DiagramSpec`. Types: `BluefishKit`, `BluefishSpecFn`.
 

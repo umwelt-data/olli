@@ -22,7 +22,7 @@ const olliSpec = await VegaLiteAdapter(vlSpec);
 const handle = olliVis(olliSpec, container);
 ```
 
-**Requires:** `vega-lite` and `vega` as peer dependencies.
+**Requires:** `vega-lite` as a peer dependency. The adapter compiles the spec and evaluates the data pipeline itself, so the `vega` runtime is not needed for the conversion — you only need it (or another renderer) if you also want to draw the chart.
 
 ### `VegaLiteAdapterSync`
 
@@ -36,7 +36,7 @@ Synchronous variant. Use when the spec contains inline data (no URL-based data s
 
 Adapters also exist for Vega and Observable Plot. They follow the same pattern as the Vega-Lite adapter.
 
-- **`VegaAdapter(spec: object): Promise<OlliVisSpec>`** — converts a Vega specification. Requires `vega` as a peer dependency. A synchronous variant `VegaAdapterSync` is also available.
+- **`VegaAdapter(spec: object): Promise<OlliVisSpec>`** — converts a Vega specification. Reads the spec structurally and evaluates its data pipeline, so it has no extra peer dependency. A synchronous variant `VegaAdapterSync` is also available.
 - **`ObservablePlotAdapter(spec: object): Promise<OlliVisSpec>`** — converts an Observable Plot specification. Requires `@observablehq/plot` as a peer dependency.
 
 ```ts

@@ -13,7 +13,7 @@ npm install olli
 If you're using an adapter that wraps an external library, install its peer dependency too:
 
 ```bash
-npm install olli vega-lite vega          # for VegaLiteAdapter
+npm install olli vega-lite               # for VegaLiteAdapter
 ```
 
 ## Quick example
@@ -67,7 +67,9 @@ import { VegaLiteAdapter } from 'olli/adapters';
 
 | Adapter | Peer dependency |
 |---------|-----------------|
-| `VegaLiteAdapter` / `VegaLiteAdapterSync` | `vega-lite`, `vega` |
+| `VegaLiteAdapter` / `VegaLiteAdapterSync` | `vega-lite` |
+| `VegaAdapter` / `VegaAdapterSync` | — |
+| `ObservablePlotAdapter` | `@observablehq/plot` |
 | `BluefishAdapter` | — |
 
 The `olli/adapters` entry point is separate so that adapter dependencies are only loaded when imported. See [Adapters](https://umwelt-data.github.io/olli/docs/adapters) for usage and writing custom adapters.

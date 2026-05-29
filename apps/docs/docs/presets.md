@@ -24,13 +24,13 @@ The table below shows which tokens are included in each preset for each role. **
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `root` | D S M | D S M | | D | | D S | | | D S M |
 | `view` | D S M | D S | | | | D | | | |
-| `xAxis` | D S M | D | D S M | | D S | | D S | | |
-| `yAxis` | D S M | D | D S M | | D S | | D S | | |
-| `legend` | D S M | D | D S M | | D S | | D S | | |
+| `xAxis` | D S M | D | D S M | | D | | D S | | |
+| `yAxis` | D S M | D | D S M | | D | | D S | | |
+| `legend` | D S M | D | D S M | | D | | D S | | |
 | `guide` | D S M | D | D S | | D | | | | |
-| `filteredData` | | | D S M | D S | D | | D S | D | D S |
+| `filteredData` | | | D S M | D S M | D | | D S | D | D S |
 | `annotations` | D S M | | | D S | | | | | |
-| `other` | | | D M | D S | | | | | D S |
+| `other` | D S M | | D S M | D S | | D S | | | D S |
 
 ## Brevity
 

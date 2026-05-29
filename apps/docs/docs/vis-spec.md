@@ -63,7 +63,7 @@ function isMultiSpec(spec: OlliVisSpec): spec is MultiOlliVisSpec
 ## OlliMark
 
 ```ts
-type OlliMarkType = 'point' | 'bar' | 'line' | 'area' | 'rect' | 'tick' | 'arc';
+type OlliMarkType = 'point' | 'bar' | 'line' | 'area' | 'rect' | 'tick' | 'arc' | 'geoshape';
 
 interface OlliMarkDef {
   type: OlliMarkType;
@@ -86,7 +86,7 @@ getMarkType({ type: 'arc', innerRadius: 50 }); // 'arc'
 getMarkType(undefined);                      // undefined
 ```
 
-The mark type drives chart-type inference in description tokens. A `point` mark with two quantitative axes becomes "scatterplot"; a `rect` with a color legend becomes "heatmap"; an `arc` mark becomes "pie chart" or "donut chart" depending on `innerRadius`.
+The mark type drives chart-type inference in description tokens. A `point` mark with two quantitative axes becomes "scatterplot"; a `rect` with a quantitative color legend becomes "heatmap"; an `arc` mark becomes "pie chart" or "donut chart" depending on `innerRadius`; a `geoshape` mark becomes a "map" (or "choropleth map" when it has a quantitative color legend).
 
 ## Value types
 
