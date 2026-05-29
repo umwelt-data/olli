@@ -68,24 +68,6 @@ Use `olli` when you've already lowered your data into the hypergraph shape yours
 | `olliDiagram` | `DiagramSpec` | Diagram (elements, relations) | Relational data with containment/connection |
 | `olli` | `Hypergraph<P>` | None (generic navigation only) | Custom domain or pre-built hypergraph |
 
-## Direct Solid integration
-
-If your app already uses Solid.js, you can skip the vanilla wrapper and use the runtime and renderer directly:
-
-```ts
-import { createNavigationRuntime, registerDomain } from 'olli-core';
-import { visDomain, lowerVisSpec, elaborateSpec } from 'olli-vis';
-import { mount, registerDefaultKeybindings } from 'olli-render-solid';
-
-const spec = elaborateSpec(myVisSpec);
-const graph = lowerVisSpec(spec);
-const runtime = createNavigationRuntime(graph);
-
-registerDomain(runtime, visDomain);
-registerDefaultKeybindings(runtime);
-mount(runtime, container);
-```
-
 ## Next
 
 - [OlliHandle](/docs/handle) — the handle API returned by all entry points.
