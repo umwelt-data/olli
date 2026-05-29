@@ -2,10 +2,6 @@ packages:
   - packages/*
   - examples/*
   - apps/*
-overrides:
-  # Local-link to the sibling umwelt-utils checkout during development.
-  # Remove and bump the published dependency version before release.
-  '@umwelt-data/umwelt-utils': link:../umwelt-utils
 allowBuilds:
   esbuild: true
 minimumReleaseAgeExclude:
@@ -13,3 +9,4 @@ minimumReleaseAgeExclude:
   - bluefish-solid@0.0.39
   - '@umwelt-data/umwelt-utils@0.1.1'
   - '@umwelt-data/umwelt-utils@0.1.2'
+  - '@umwelt-data/umwelt-utils@0.1.3'
