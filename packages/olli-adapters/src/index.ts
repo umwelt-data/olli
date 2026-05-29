@@ -4,4 +4,3 @@ export { ObservablePlotAdapter } from './ObservablePlotAdapter.js';
 export { BluefishAdapter } from './BluefishAdapter.js';
 export type { BluefishKit, OlliCustomData, BluefishSpecFn } from './BluefishAdapter.js';
 export type { VisAdapter, DiagramAdapter } from './types.js';
-export { enrichWithUSGeo, looksLikeFips } from './geo/enrichGeoData.js';

@@ -5,8 +5,6 @@ export {
   VegaLiteAdapterSync,
   ObservablePlotAdapter,
   BluefishAdapter,
-  enrichWithUSGeo,
-  looksLikeFips,
   type BluefishKit,
   type OlliCustomData,
   type BluefishSpecFn,

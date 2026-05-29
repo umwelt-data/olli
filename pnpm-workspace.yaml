@@ -2,6 +2,10 @@ packages:
   - packages/*
   - examples/*
   - apps/*
+overrides:
+  # Local-link to the sibling umwelt-utils checkout during development.
+  # Remove and bump the published dependency version before release.
+  '@umwelt-data/umwelt-utils': link:../umwelt-utils
 allowBuilds:
   esbuild: true
 minimumReleaseAgeExclude:

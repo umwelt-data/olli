@@ -8,7 +8,7 @@ import { computeGuideTicks } from '@umwelt-data/umwelt-utils/vega';
 import type { GuideTicksConfig } from '@umwelt-data/umwelt-utils/vega';
 import type { VisAdapter } from './types.js';
 import { inferFormatFromUrl, parseDelimited } from './utils.js';
-import { enrichWithUSGeo, looksLikeFips } from './geo/enrichGeoData.js';
+import { enrichWithUSGeo, looksLikeFips } from '@umwelt-data/umwelt-utils/geo';
 import { compile } from 'vega-lite';
 
 function getDatasets(vegaSpec: any): OlliDataset[] {
@@ -393,7 +393,7 @@ function adaptUnitSpec(spec: any, data: OlliDataset): UnitOlliVisSpec {
   if (getMarkType(olliSpec.mark) === 'geoshape' && olliSpec.data.length > 0) {
     const idField = olliSpec.data[0]!['id'] != null ? 'id' : undefined;
     if (idField && looksLikeFips(olliSpec.data, idField)) {
-      olliSpec.data = enrichWithUSGeo(olliSpec.data, idField);
+      olliSpec.data = enrichWithUSGeo(olliSpec.data, idField) as OlliDataset;
       const geoFields: Array<{ field: string; type: 'nominal' }> = [];
       if (olliSpec.data.some((d) => d['county_name'] != null)) {
         geoFields.push({ field: 'county_name', type: 'nominal' });

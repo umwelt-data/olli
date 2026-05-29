@@ -32,19 +32,8 @@ export async function mountVegaLiteExample(options: MountOptions): Promise<Mount
     .initialize(chartEl)
     .runAsync();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for (const ds of (compiled as any).data ?? []) {
-    if (!ds.name) continue;
-    try {
-      const rows = view.data(ds.name);
-      if (rows?.length && olliAdapters.looksLikeFips(rows, 'id')) {
-        const enriched = olliAdapters.enrichWithUSGeo(rows, 'id')
-          .map((d: Record<string, unknown>) => Object.fromEntries(Object.entries(d)));
-        view.data(ds.name, enriched);
-        await view.runAsync();
-      }
-    } catch { /* dataset may not be queryable */ }
-  }
+  // Run vl-bridge data postprocessing (e.g. US-geo enrichment) on the view.
+  await utils.postprocessViewData(view);
 
   const olliSpec = await olliAdapters.VegaLiteAdapter(spec);
   const handle = olliJs.olliVis(olliSpec, treeEl, { initialPreset: 'standard' });
