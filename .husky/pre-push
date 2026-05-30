@@ -1,0 +1,7 @@
+echo "pre-push: running 'pnpm check' (boundaries + build + tests)..."
+
+if ! pnpm check; then
+  echo
+  echo "pre-push: checks failed — push aborted. Use 'git push --no-verify' to bypass."
+  exit 1
+fi

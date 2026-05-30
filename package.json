@@ -8,12 +8,14 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check:boundaries": "node scripts/check-import-boundaries.mjs",
-    "check": "pnpm run check:boundaries && pnpm run build && pnpm run test"
+    "check": "pnpm run check:boundaries && pnpm run build && pnpm run test",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@solidjs/testing-library": "^0.8.10",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/user-event": "^14.5.2",
+    "husky": "^9.1.7",
     "jsdom": "^25.0.1",
     "typescript": "^5.6.3",
     "vite-plugin-solid": "^2.11.0",
