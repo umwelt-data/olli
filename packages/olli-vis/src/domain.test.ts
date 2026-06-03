@@ -157,15 +157,15 @@ describe('visDomain', () => {
   it('geo predicate provider passes through region predicates unchanged', () => {
     const geoSpec: UnitOlliVisSpec = {
       data: [
-        { id: 1, rate: 0.05, region: 'South', state_name: 'Alabama' },
-        { id: 2, rate: 0.10, region: 'West', state_name: 'California' },
-        { id: 3, rate: 0.07, region: 'South', state_name: 'Georgia' },
+        { id: 1, rate: 0.05, region: 'South', state: 'Alabama' },
+        { id: 2, rate: 0.10, region: 'West', state: 'California' },
+        { id: 3, rate: 0.07, region: 'South', state: 'Georgia' },
       ],
       mark: 'geoshape',
       fields: [
         { field: 'rate', type: 'quantitative' },
         { field: 'region', type: 'nominal' },
-        { field: 'state_name', type: 'nominal' },
+        { field: 'state', type: 'nominal' },
       ],
       legends: [{ field: 'rate', channel: 'color' }],
       guides: [{ field: 'region', title: 'Geography' }],

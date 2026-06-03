@@ -86,14 +86,14 @@ describe('vis tokens', () => {
   it('geoshape with color legend produces choropleth map type', () => {
     const geoSpec: UnitOlliVisSpec = {
       data: [
-        { id: 1, rate: 0.05, region: 'South', state_name: 'Alabama' },
-        { id: 2, rate: 0.10, region: 'West', state_name: 'California' },
+        { id: 1, rate: 0.05, region: 'South', state: 'Alabama' },
+        { id: 2, rate: 0.10, region: 'West', state: 'California' },
       ],
       mark: 'geoshape',
       fields: [
         { field: 'rate', type: 'quantitative' },
         { field: 'region', type: 'nominal' },
-        { field: 'state_name', type: 'nominal' },
+        { field: 'state', type: 'nominal' },
       ],
       legends: [{ field: 'rate', channel: 'color' }],
     };

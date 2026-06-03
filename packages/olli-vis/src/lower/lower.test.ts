@@ -286,23 +286,23 @@ describe('lowerVisSpec', () => {
 
   it('multi-level groupby scopes children to parent (hierarchical containment)', () => {
     const data: OlliDataset = [
-      { region: 'South', state_name: 'Alabama', rate: 0.05 },
-      { region: 'South', state_name: 'Georgia', rate: 0.07 },
-      { region: 'West', state_name: 'California', rate: 0.10 },
+      { region: 'South', state: 'Alabama', rate: 0.05 },
+      { region: 'South', state: 'Georgia', rate: 0.07 },
+      { region: 'West', state: 'California', rate: 0.10 },
     ];
     const spec: UnitOlliVisSpec = {
       data,
       mark: 'geoshape',
       fields: [
         { field: 'region', type: 'nominal' },
-        { field: 'state_name', type: 'nominal' },
+        { field: 'state', type: 'nominal' },
         { field: 'rate', type: 'quantitative' },
       ],
       legends: [{ field: 'rate', channel: 'color' }],
       guides: [{ field: 'region', title: 'Geography' }],
       structure: [
         { groupby: 'rate', children: [] },
-        { groupby: ['region', 'state_name'] },
+        { groupby: ['region', 'state'] },
       ],
     };
     const graph = lowerVisSpec(spec);

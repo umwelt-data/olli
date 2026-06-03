@@ -73,11 +73,11 @@ export function inferStructure(spec: UnitOlliVisSpec): OlliNode | OlliNode[] {
       nodes.push(...spec.legends.map((l) => ({ groupby: l.field, children: [] as OlliNode[] })));
     }
     const hasRegion = spec.fields?.some((f) => f.field === 'region');
-    const hasState = spec.fields?.some((f) => f.field === 'state_name');
+    const hasState = spec.fields?.some((f) => f.field === 'state');
     if (hasRegion && hasState) {
-      nodes.push({ groupby: ['region', 'state_name'] });
+      nodes.push({ groupby: ['region', 'state'] });
     } else if (hasState) {
-      nodes.push({ groupby: 'state_name' });
+      nodes.push({ groupby: 'state' });
     }
     if (nodes.length) return nodes;
   }

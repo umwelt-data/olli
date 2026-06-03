@@ -300,7 +300,7 @@ describe('VegaLiteAdapter', () => {
     it('enriches data with geographic fields', () => {
       const olliSpec = VegaLiteAdapterSync(choroplethSpec) as UnitOlliVisSpec;
       expect(olliSpec.data.length).toBeGreaterThan(0);
-      const hasGeoFields = olliSpec.data.some(d => d['state_name'] != null);
+      const hasGeoFields = olliSpec.data.some(d => d['state'] != null);
       expect(hasGeoFields).toBe(true);
       const hasRegion = olliSpec.data.some(d => d['region'] != null);
       expect(hasRegion).toBe(true);
@@ -309,7 +309,7 @@ describe('VegaLiteAdapter', () => {
     it('has geographic fields in field defs', () => {
       const olliSpec = VegaLiteAdapterSync(choroplethSpec) as UnitOlliVisSpec;
       const fieldNames = olliSpec.fields?.map(f => f.field) ?? [];
-      expect(fieldNames).toContain('state_name');
+      expect(fieldNames).toContain('state');
       expect(fieldNames).toContain('region');
     });
 

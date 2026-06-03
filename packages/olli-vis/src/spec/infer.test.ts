@@ -145,9 +145,9 @@ describe('inferStructure', () => {
   describe('geoshape', () => {
     it('creates legend groupby and multi-level region/state groupby', () => {
       const geoData = [
-        { id: 1, rate: 0.05, region: 'South', state_name: 'Alabama' },
-        { id: 2, rate: 0.10, region: 'West', state_name: 'California' },
-        { id: 3, rate: 0.07, region: 'South', state_name: 'Georgia' },
+        { id: 1, rate: 0.05, region: 'South', state: 'Alabama' },
+        { id: 2, rate: 0.10, region: 'West', state: 'California' },
+        { id: 3, rate: 0.07, region: 'South', state: 'Georgia' },
       ];
       const spec: UnitOlliVisSpec = {
         data: geoData,
@@ -155,7 +155,7 @@ describe('inferStructure', () => {
         fields: [
           { field: 'rate', type: 'quantitative' },
           { field: 'region', type: 'nominal' },
-          { field: 'state_name', type: 'nominal' },
+          { field: 'state', type: 'nominal' },
         ],
         legends: [{ field: 'rate', channel: 'color' }],
       };
@@ -164,7 +164,7 @@ describe('inferStructure', () => {
       expect(hasGroupby(nodes[0]!, 'rate')).toBe(true);
       const geoNode = nodes.find((n) => 'groupby' in n && Array.isArray(n.groupby));
       expect(geoNode).toBeDefined();
-      expect('groupby' in geoNode! && geoNode!.groupby).toEqual(['region', 'state_name']);
+      expect('groupby' in geoNode! && geoNode!.groupby).toEqual(['region', 'state']);
     });
 
     it('creates only legend branch when no geographic fields', () => {
@@ -186,14 +186,14 @@ describe('inferStructure', () => {
         mark: 'geoshape',
         fields: [
           { field: 'rate', type: 'quantitative' },
-          { field: 'state_name', type: 'nominal' },
+          { field: 'state', type: 'nominal' },
         ],
         legends: [{ field: 'rate', channel: 'color' }],
       };
       const result = inferStructure(spec);
       const nodes = Array.isArray(result) ? result : [result];
       expect(nodes.length).toBe(2);
-      expect(hasGroupby(nodes[1]!, 'state_name')).toBe(true);
+      expect(hasGroupby(nodes[1]!, 'state')).toBe(true);
     });
 
     it('falls through to generic when no legends or geo fields', () => {

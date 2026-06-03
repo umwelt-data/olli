@@ -395,11 +395,11 @@ function adaptUnitSpec(spec: any, data: OlliDataset): UnitOlliVisSpec {
     if (idField && looksLikeFips(olliSpec.data, idField)) {
       olliSpec.data = enrichWithUSGeo(olliSpec.data, idField) as OlliDataset;
       const geoFields: Array<{ field: string; type: 'nominal' }> = [];
-      if (olliSpec.data.some((d) => d['county_name'] != null)) {
-        geoFields.push({ field: 'county_name', type: 'nominal' });
+      if (olliSpec.data.some((d) => d['county'] != null)) {
+        geoFields.push({ field: 'county', type: 'nominal' });
       }
-      if (olliSpec.data.some((d) => d['state_name'] != null)) {
-        geoFields.push({ field: 'state_name', type: 'nominal' });
+      if (olliSpec.data.some((d) => d['state'] != null)) {
+        geoFields.push({ field: 'state', type: 'nominal' });
       }
       if (olliSpec.data.some((d) => d['region'] != null)) {
         geoFields.push({ field: 'region', type: 'nominal' });

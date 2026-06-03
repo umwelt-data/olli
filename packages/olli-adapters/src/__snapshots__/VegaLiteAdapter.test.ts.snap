@@ -135,11 +135,11 @@ exports[`VegaLiteAdapter > structure regression > choropleth-map 1`] = `
       "type": "quantitative",
     },
     {
-      "field": "county_name",
+      "field": "county",
       "type": "nominal",
     },
     {
-      "field": "state_name",
+      "field": "state",
       "type": "nominal",
     },
     {
