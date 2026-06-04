@@ -1,6 +1,6 @@
 {
   "name": "olli",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "description": "Olli is a library for converting web visualizations into accessible text structures for blind and low-vision screen reader users.",
   "type": "module",
   "main": "./dist/index.js",
@@ -22,12 +22,14 @@
     "LICENSE"
   ],
   "scripts": {
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "build:deps": "tsc -b",
     "build:bundle": "tsup",
     "build:dts": "rollup -c rollup.dts.config.mjs",
     "build:css": "cat ../olli-render-solid/src/styles.css > dist/styles.css",
     "build:smoke": "node --conditions=browser smoke.mjs",
-    "build": "pnpm run build:deps && pnpm run build:bundle && pnpm run build:dts && pnpm run build:css",
+    "typecheck:tests": "tsc -p tsconfig.test.json",
+    "build": "pnpm run clean && pnpm run build:deps && pnpm run build:bundle && pnpm run build:dts && pnpm run build:css",
     "prepublishOnly": "pnpm run build && pnpm run build:smoke"
   },
   "dependencies": {

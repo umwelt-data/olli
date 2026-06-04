@@ -5,6 +5,7 @@
     "rootDir": "src"
   },
   "include": ["src/**/*"],
+  "exclude": ["src/**/*.test.ts"],
   "references": [
     { "path": "../olli-core" },
     { "path": "../olli-render-solid" },

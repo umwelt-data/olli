@@ -8,7 +8,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check:boundaries": "node scripts/check-import-boundaries.mjs",
-    "check": "pnpm run check:boundaries && pnpm run build && pnpm run test",
+    "check": "pnpm run check:boundaries && pnpm run build && pnpm -r run --if-present typecheck:tests && pnpm run test",
     "prepare": "husky"
   },
   "devDependencies": {

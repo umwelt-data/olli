@@ -20,15 +20,13 @@ export default defineConfig({
     'olli-adapters',
   ],
 
-  // Keep real npm dependencies external
+  // Keep real npm dependencies external.
+  // A bare package name externalizes all of its subpaths too
+  // (e.g. '@umwelt-data/umwelt-utils' covers .../geo, .../data, etc.).
   external: [
     'solid-js',
     'solid-js/web',
     '@umwelt-data/umwelt-utils',
-    '@umwelt-data/umwelt-utils/predicate',
-    '@umwelt-data/umwelt-utils/data',
-    '@umwelt-data/umwelt-utils/description',
-    '@umwelt-data/umwelt-utils/vega',
     'vega-lite',
     '@observablehq/plot',
     'vega-expression',

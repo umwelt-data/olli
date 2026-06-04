@@ -1,0 +1,15 @@
+{
+  // Type-checks the test files that tsconfig.json excludes from the emitted
+  // build (so they stay out of the published dist). No emit — checking only.
+  // Resolves workspace deps (olli-core, olli-vis, …) from their built dist
+  // .d.ts, so run this after `build:deps`.
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "composite": false,
+    "incremental": false,
+    "declaration": false,
+    "declarationMap": false
+  },
+  "include": ["src/**/*"]
+}
