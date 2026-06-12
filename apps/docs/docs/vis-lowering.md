@@ -32,7 +32,7 @@ For a `UnitOlliVisSpec`, the lowerer:
 For a `MultiOlliVisSpec`:
 
 1. Creates a root edge.
-2. Creates one `view` edge per unit, with `specIndex` and `viewType` in the payload.
+2. Creates one `view` edge per unit, with `specIndex` and `viewType` in the payload. The view's display name is the unit's `title`, falling back to `"View N: <chart type>"` (e.g. "View 1: bar chart").
 3. Each unit is lowered independently under its view edge.
 
 ### Faceting
@@ -50,6 +50,7 @@ Pre-processes the spec before lowering:
 1. **Field inference**: If `fields` is empty, creates one `OlliFieldDef` per key in `data[0]`.
 2. **Type inference**: For fields without a `type`, examines the data column to determine `quantitative`, `temporal`, or `nominal`.
 3. **Structure inference**: If `structure` is missing, builds a tree from axes, legends, and guides — each becomes a `groupby` node.
+4. **Annotations**: If the spec has `annotations`, appends an annotations node containing them to the structure.
 
 ## How groupby expansion works
 

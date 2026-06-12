@@ -39,11 +39,12 @@ pnpm install
 ### Key commands
 
 ```bash
-pnpm run check          # Full verification: boundaries + build + test (run before pushing)
+pnpm run check          # Full verification: boundaries + build + test typecheck + test (run before pushing)
 pnpm run build          # Build all packages (tsc -b for internals, bundled build for olli)
 pnpm test               # vitest (single run)
 pnpm test:watch         # vitest in watch mode
 pnpm run check:boundaries  # Verify import layer rules
+pnpm run coverage:vl    # Run VegaLiteAdapter against a vega-lite checkout's example specs and diff against scripts/vl-coverage-baseline.json (see --help)
 ```
 
 ### Updating snapshots

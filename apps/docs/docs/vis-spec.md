@@ -21,6 +21,7 @@ interface UnitOlliVisSpec {
   selection?: Selection;
   title?: string;
   description?: string;
+  annotations?: OlliPredicateNode[];
 }
 ```
 
@@ -37,6 +38,7 @@ interface UnitOlliVisSpec {
 | `selection` | `Selection` | no | Pre-filter applied to the data before lowering. |
 | `title` | `string` | no | Chart title. |
 | `description` | `string` | no | Longer description, announced at the root node. |
+| `annotations` | `OlliPredicateNode[]` | no | Data highlights (e.g. an annotated threshold). Elaboration appends them to `structure` as an annotations node. See [Structure Nodes](/docs/vis-structure). |
 
 ## MultiOlliVisSpec
 
@@ -108,6 +110,7 @@ Elaboration fills in defaults:
 1. If `fields` is missing, it creates one `OlliFieldDef` per key in `data[0]`.
 2. If any field lacks a `type`, it runs type inference on the data column.
 3. If `structure` is missing, it infers a tree structure from the axes, legends, and guides.
+4. If `annotations` is set, it appends an annotations node containing them to `structure`.
 
 This means a minimal spec only needs `data`, `mark`, and `axes` — everything else is derived.
 

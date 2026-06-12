@@ -88,6 +88,19 @@ const structure: OlliNode[] = [
 ];
 ```
 
+As a shorthand, you can set `annotations` directly on the `UnitOlliVisSpec` instead of writing the wrapper node yourself — elaboration appends an annotations node containing them to the structure (whether the structure was provided or inferred):
+
+```ts
+const spec: UnitOlliVisSpec = {
+  data,
+  mark: 'line',
+  axes,
+  annotations: [
+    { predicate: { field: 'price', gte: 200 }, name: 'High prices' },
+  ],
+};
+```
+
 ## VisPayload
 
 When the lowerer converts structure nodes into hyperedges, each edge carries a `VisPayload`:

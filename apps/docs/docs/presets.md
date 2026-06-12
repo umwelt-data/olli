@@ -23,7 +23,7 @@ The table below shows which tokens are included in each preset for each role. **
 | Role | `name` | `visType` | `visData` | `visSize` | `parent` | `children` | `aggregate` | `quartile` | `instructions` |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `root` | D S M | D S M | | D | | D S | | | D S M |
-| `view` | D S M | D S | | | | D | | | |
+| `view` | D S M | D S | | | | D S | | | |
 | `xAxis` | D S M | D | D S M | | D | | D S | | |
 | `yAxis` | D S M | D | D S M | | D | | D S | | |
 | `legend` | D S M | D | D S M | | D | | D S | | |

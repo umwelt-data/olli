@@ -86,7 +86,7 @@ Registered by the visualization domain:
 | `children` | `*` | Overrides built-in. For root/view nodes, lists axis names instead of child count. |
 | `visData` | axes, legend, guide, filteredData, other | Data range ("with values from 0 to 100") or predicate description. |
 | `visSize` | root, filteredData, annotations, other | Data count ("5 values") or facet count ("with 3 views for Year"). |
-| `aggregate` | axes, legend, filteredData | Statistical summary ("avg Temperature: 72"). |
+| `aggregate` | axes, legend, filteredData | Statistical summary ("avg Temperature: 72"). For boxplots, reports the five-number summary (median, quartiles, min/max) instead of the mean. |
 | `quartile` | filteredData | Relative position ("this section's average Temperature is in the 2nd quartile"). |
 | `parent` | `*` | Overrides built-in. Walks up to find facet view name if applicable. |
 | `instructions` | root, filteredData, other | Contextual help ("press ? for help", "press t to open table"). |
