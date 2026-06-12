@@ -15,6 +15,7 @@ import type {
 import { isMultiSpec, getMarkType } from '../spec/types.js';
 import { elaborateSpec } from '../spec/elaborate.js';
 import { fieldToPredicates, getFieldDef } from '../util/data.js';
+import { getChartType } from '../util/chartType.js';
 import { fmtValue, pluralize } from '../util/values.js';
 import { predicateToDescription } from './describe.js';
 
@@ -37,7 +38,7 @@ export function lowerVisSpec(rawSpec: OlliVisSpec): Hypergraph<VisPayload> {
       const viewId = nextId();
       viewIds.push(viewId);
       const childIds = lowerUnit(unit, i, viewId, edges);
-      const viewDisplayName = unit.title ?? `View ${i + 1}`;
+      const viewDisplayName = unit.title ?? `View ${i + 1}: ${getChartType(unit)}`;
       edges.push({
         id: viewId,
         displayName: viewDisplayName,
@@ -146,7 +147,7 @@ function lowerNodes(
         spec.legends?.find((l) => l.field === primaryField) ??
         spec.guides?.find((g) => g.field === primaryField);
       const fd = getFieldDef(primaryField, spec.fields ?? []);
-      const label = guide?.title ?? fd.label ?? fd.field;
+      const label = guide?.title || fd.label || fd.field;
       let displayName: string;
       if (nodeType === 'other') {
         displayName = label;

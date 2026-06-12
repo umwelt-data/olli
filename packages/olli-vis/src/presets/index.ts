@@ -50,7 +50,7 @@ const detailedRoles: RoleTokens = {
 
 const standardRoles: RoleTokens = {
   root: ['name', 'visType', 'children', 'instructions'],
-  view: ['visType', 'name'],
+  view: ['visType', 'name', 'children'],
   xAxis: ['name', 'visData', 'aggregate'],
   yAxis: ['name', 'visData', 'aggregate'],
   legend: ['name', 'visData', 'aggregate'],

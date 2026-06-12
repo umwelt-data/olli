@@ -13,11 +13,16 @@ export const galleryGroups: { label: string; items: { id: string; title: string 
       { id: 'grouped-bar-chart', title: 'Grouped bar chart' },
       { id: 'stacked-bar-chart', title: 'Stacked bar chart' },
       { id: 'population-pyramid', title: 'Population pyramid' },
+      { id: 'waterfall-chart', title: 'Waterfall chart' },
+      { id: 'annotated-bar-chart', title: 'Bar chart with annotation' },
     ],
   },
   {
-    label: 'Histograms',
-    items: [{ id: 'histogram', title: 'Histogram' }],
+    label: 'Histograms & Distributions',
+    items: [
+      { id: 'histogram', title: 'Histogram' },
+      { id: 'boxplot', title: 'Box plot' },
+    ],
   },
   {
     label: 'Scatter & Strip Plots',
@@ -55,6 +60,7 @@ export const galleryGroups: { label: string; items: { id: string; title: string 
       { id: 'faceted-chart', title: 'Faceted chart' },
       { id: 'layered-chart', title: 'Layered chart' },
       { id: 'concat-chart', title: 'Concatenated chart' },
+      { id: 'marginal-histograms', title: 'Marginal histograms' },
     ],
   },
   {
@@ -66,7 +72,10 @@ export const galleryGroups: { label: string; items: { id: string; title: string 
   },
   {
     label: 'Maps',
-    items: [{ id: 'choropleth-map', title: 'Choropleth map' }],
+    items: [
+      { id: 'choropleth-map', title: 'Choropleth map' },
+      { id: 'dot-map', title: 'Dot map' },
+    ],
   },
   {
     label: 'Diagrams',

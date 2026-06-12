@@ -222,4 +222,28 @@ describe('inferStructure', () => {
       expect(nodes.length).toBe(1);
     });
   });
+
+  describe('geographic point charts', () => {
+    it('groups region -> state for lat/lon charts with geo fields', () => {
+      const spec: UnitOlliVisSpec = {
+        data: [
+          { longitude: -72.6, latitude: 40.9, state: 'NY', region: 'Northeast', digit: '0' },
+          { longitude: -118.2, latitude: 34.0, state: 'CA', region: 'West', digit: '9' },
+        ],
+        mark: 'point',
+        fields: [
+          { field: 'longitude', type: 'quantitative' },
+          { field: 'latitude', type: 'quantitative' },
+          { field: 'state', type: 'nominal' },
+          { field: 'region', type: 'nominal' },
+          { field: 'digit', type: 'nominal' },
+        ],
+        legends: [{ channel: 'color', field: 'digit' }],
+      };
+      const structure = inferStructure(spec);
+      const nodes = Array.isArray(structure) ? structure : [structure];
+      expect(nodes).toContainEqual({ groupby: 'digit', children: [] });
+      expect(nodes).toContainEqual({ groupby: ['region', 'state'] });
+    });
+  });
 });

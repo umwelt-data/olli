@@ -4,13 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build:examples": "tsc -p gallery/examples/tsconfig.json",
     "dev": "vitepress dev",
-    "build": "npm run build:examples && vitepress build",
+    "build": "vitepress build",
     "preview": "vitepress preview"
   },
   "dependencies": {
-    "@umwelt-data/umwelt-utils": "^0.1.4",
+    "@umwelt-data/umwelt-utils": "^0.1.5",
     "bluefish-js": "^0.0.39",
     "olli": "workspace:*",
     "olli-adapters": "workspace:*",

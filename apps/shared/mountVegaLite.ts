@@ -24,7 +24,9 @@ export async function mountVegaLiteExample(options: MountOptions): Promise<Mount
     import('olli/adapters'),
   ]);
 
-  const injected = utils.withExternalStateParam(spec as any);
+  // normalize lets the bridge inject highlighting into composite marks
+  // (boxplot, errorbar, errorband) by expanding them into plain layers first
+  const injected = utils.withExternalStateParam(spec as any, { normalize: vegaLite.normalize });
   const compiled = vegaLite.compile(injected as any).spec;
   const runtime = vega.parse(compiled);
 

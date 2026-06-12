@@ -72,3 +72,13 @@ export function fmtDataValue(value: OlliValue, fieldDef: OlliFieldDef, precision
 export function averageValue(data: OlliDataset, field: string): number {
   return data.reduce((a, b) => a + Number(b[field]), 0) / data.length;
 }
+
+/** Linear-interpolated quantile (R-7, matching d3/vega) over a field. */
+export function quantileValue(data: OlliDataset, field: string, q: number): number {
+  const nums = data.map((d) => Number(d[field])).filter((n) => !isNaN(n)).sort((a, b) => a - b);
+  if (nums.length === 0) return NaN;
+  const pos = (nums.length - 1) * q;
+  const lo = Math.floor(pos);
+  const hi = Math.ceil(pos);
+  return nums[lo]! + (nums[hi]! - nums[lo]!) * (pos - lo);
+}

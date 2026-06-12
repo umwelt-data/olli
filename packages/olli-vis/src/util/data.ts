@@ -149,6 +149,11 @@ export function fieldToPredicates(
   const fieldDef = getFieldDef(field, fields);
   if (fieldDef.type === 'nominal' || fieldDef.type === 'ordinal') {
     const domain = getDomain(fieldDef, data);
+    if (ticks?.length) {
+      // follow the chart's tick order (e.g. sort: null keeps data order)
+      const order = new Map(ticks.map((t, i) => [String(t), i]));
+      domain.sort((a, b) => (order.get(String(a)) ?? Infinity) - (order.get(String(b)) ?? Infinity));
+    }
     return domain.map((value) => ({
       field,
       equal: serializeValue(value, fieldDef) as number | string | boolean,

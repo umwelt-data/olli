@@ -3,54 +3,14 @@ import { selectionTest } from 'olli-core';
 import type { VisPayload, OlliNodeType, UnitOlliVisSpec, OlliValue, OlliFieldDef } from '../spec/types.js';
 import { getMarkType } from '../spec/types.js';
 import { getFieldDef, getDomain, getBins } from '../util/data.js';
-import { fmtDataValue, wrapForMonospace, pluralize, averageValue, ordinalSuffix, dataPrecision } from '../util/values.js';
+import { getChartType } from '../util/chartType.js';
+import { fmtDataValue, wrapForMonospace, pluralize, averageValue, quantileValue, ordinalSuffix, dataPrecision } from '../util/values.js';
 import { predicateToDescription } from '../lower/describe.js';
 
 type Ctx = TokenContext<VisPayload>;
 
 function roles(...types: OlliNodeType[]): string[] {
   return types;
-}
-
-function getChartType(spec: UnitOlliVisSpec): string {
-  const mt = getMarkType(spec.mark);
-  if (!mt) return 'dataset';
-  if (mt === 'point' && spec.axes?.length === 2) {
-    const allQuant = spec.axes.every(
-      (a) => getFieldDef(a.field, spec.fields ?? []).type === 'quantitative',
-    );
-    if (allQuant) return 'scatterplot';
-    const hasQuant = spec.axes.some(
-      (a) => getFieldDef(a.field, spec.fields ?? []).type === 'quantitative',
-    );
-    const noTemporal = !spec.axes.some(
-      (a) => getFieldDef(a.field, spec.fields ?? []).type === 'temporal',
-    );
-    if (hasQuant && noTemporal) return 'dotplot';
-  }
-  if (mt === 'arc') {
-    return typeof spec.mark === 'object' && spec.mark.innerRadius ? 'donut chart' : 'pie chart';
-  }
-  if (mt === 'geoshape') {
-    const colorLegend = spec.legends?.find((l) => l.channel === 'color');
-    if (colorLegend) {
-      const fd = getFieldDef(colorLegend.field, spec.fields ?? []);
-      if (fd.type === 'quantitative') return 'choropleth map';
-    }
-    return 'map';
-  }
-  if (mt === 'rect') {
-    const colorLegend = spec.legends?.find((l) => l.channel === 'color');
-    if (colorLegend) {
-      const fd = getFieldDef(colorLegend.field, spec.fields ?? []);
-      if (fd.type === 'quantitative') return 'heatmap';
-    }
-  }
-  const stack = typeof spec.mark === 'object' ? spec.mark.stack : undefined;
-  if (stack) {
-    return `${stack} ${mt} chart`;
-  }
-  return `${mt} chart`;
 }
 
 export function nameToken(): DescriptionToken<VisPayload> {
@@ -99,7 +59,7 @@ export function nameToken(): DescriptionToken<VisPayload> {
             p.nodeType === 'yAxis' ? 'y-axis' :
             p.nodeType === 'legend' ? 'legend' :
             guide?.channel ?? 'guide';
-          const label = guide?.title ?? fd.label ?? fd.field;
+          const label = guide?.title || fd.label || fd.field;
           const s = `${guideType} titled ${wrapForMonospace(label)}`;
           return { short: s, long: s };
         }
@@ -178,11 +138,20 @@ export function childrenToken(): DescriptionToken<VisPayload> {
     applicableRoles: '*' as const,
     compute: (ctx: Ctx) => {
       const p = ctx.edge?.payload;
-      if (p && (p.nodeType === 'root' || p.nodeType === 'view')) {
+      // a multi-view root's spec is its first unit; listing that unit's axes
+      // would misdescribe the whole chart, so fall through to the child count
+      const isMultiViewRoot =
+        p?.nodeType === 'root' &&
+        ctx.navNode.childNavIds.some((id) => {
+          const child = ctx.runtime.getNavNode(id);
+          if (!child?.hyperedgeId) return false;
+          return ctx.hypergraph.edges.get(child.hyperedgeId)?.payload?.nodeType === 'view';
+        });
+      if (p && !isMultiViewRoot && (p.nodeType === 'root' || p.nodeType === 'view')) {
         const spec = p.spec;
         const axes = spec.axes?.map((a) => {
           const fd = getFieldDef(a.field, spec.fields ?? []);
-          return wrapForMonospace(a.title ?? fd.label ?? a.field);
+          return wrapForMonospace(a.title || fd.label || a.field);
         }).join(' and ');
         if (axes && spec.axes && spec.axes.length > 0) {
           const s = `with ${spec.axes.length > 1 ? 'axes' : 'axis'} ${axes}`;
@@ -313,6 +282,9 @@ export function visAggregateToken(): DescriptionToken<VisPayload> {
 
       const shortParts: string[] = [];
       const longParts: string[] = [];
+      // a boxplot's visual encodes the five-number summary, so describe that
+      // instead of the mean
+      const isBoxplot = (getMarkType(spec.mark) as string | undefined) === 'boxplot';
 
       for (const fd of targetFields) {
         const label = fd.label ?? fd.field;
@@ -320,6 +292,15 @@ export function visAggregateToken(): DescriptionToken<VisPayload> {
           const s = `the ${wrapForMonospace(label)} value is ${fmtDataValue(selection[0]![fd.field]!, fd)}`;
           shortParts.push(s);
           longParts.push(s);
+        } else if (isBoxplot) {
+          const precision = dataPrecision(selection, fd.field);
+          const median = quantileValue(selection, fd.field, 0.5);
+          const q1 = quantileValue(selection, fd.field, 0.25);
+          const q3 = quantileValue(selection, fd.field, 0.75);
+          const max = selection.reduce((a, b) => Math.max(a, Number(b[fd.field])), Number(selection[0]![fd.field]));
+          const min = selection.reduce((a, b) => Math.min(a, Number(b[fd.field])), Number(selection[0]![fd.field]));
+          shortParts.push(`median ${wrapForMonospace(label)}: ${fmtDataValue(median, fd, precision)}, quartiles ${fmtDataValue(q1, fd, precision)} to ${fmtDataValue(q3, fd, precision)}`);
+          longParts.push(`the median ${wrapForMonospace(label)} is ${fmtDataValue(median, fd, precision)}; the lower and upper quartiles are ${fmtDataValue(q1, fd, precision)} and ${fmtDataValue(q3, fd, precision)}; the minimum is ${fmtDataValue(min, fd, precision)} and the maximum is ${fmtDataValue(max, fd, precision)}`);
         } else {
           const precision = dataPrecision(selection, fd.field);
           const avg = averageValue(selection, fd.field);

@@ -337,6 +337,244 @@ describe('evaluateVegaData', () => {
     const aK2 = data.find((d) => d.g === 'a' && d.k === 2)!;
     expect(aK2.v).toBe(0);
   });
+
+  // transform shapes below are copied from vega-lite compile() output of the
+  // named example specs
+  describe('window transform', () => {
+    it('applies rank with descending sort + filter (window_top_k)', () => {
+      const entries = [
+        {
+          name: 'data_0',
+          values: [
+            { student: 'A', score: 50 },
+            { student: 'B', score: 90 },
+            { student: 'C', score: 70 },
+            { student: 'D', score: 70 },
+          ],
+          transform: [
+            {
+              type: 'window',
+              params: [null],
+              as: ['rank'],
+              ops: ['rank'],
+              fields: [null],
+              sort: { field: ['score'], order: ['descending'] },
+            },
+            { type: 'filter', expr: 'datum.rank <= 2' },
+          ],
+        },
+      ];
+      const store = evaluateVegaData(entries);
+      const data = store['data_0']!;
+      expect(data.map((d) => d.student)).toEqual(['B', 'C', 'D']);
+      expect(data.map((d) => d.rank)).toEqual([1, 2, 2]);
+    });
+
+    it('applies running mean with frame [null, 0] (window_cumulative_running_average)', () => {
+      const entries = [
+        {
+          name: 'source_0',
+          values: [
+            { year: 1, mpg: 10 },
+            { year: 2, mpg: 20 },
+            { year: 3, mpg: 30 },
+          ],
+          transform: [
+            {
+              type: 'window',
+              params: [null],
+              as: ['avg_mpg'],
+              ops: ['mean'],
+              fields: ['mpg'],
+              sort: { field: ['year'], order: ['ascending'] },
+              ignorePeers: false,
+              frame: [null, 0],
+            },
+          ],
+        },
+      ];
+      const store = evaluateVegaData(entries);
+      expect(store['source_0']!.map((d) => d.avg_mpg)).toEqual([10, 15, 20]);
+    });
+
+    it('applies groupby partitions independently', () => {
+      const entries = [
+        {
+          name: 'data_0',
+          values: [
+            { g: 'x', v: 1 },
+            { g: 'y', v: 2 },
+            { g: 'x', v: 3 },
+          ],
+          transform: [
+            {
+              type: 'window',
+              params: [null],
+              as: ['rn'],
+              ops: ['row_number'],
+              fields: [null],
+              sort: { field: ['v'], order: ['ascending'] },
+              groupby: ['g'],
+            },
+          ],
+        },
+      ];
+      const store = evaluateVegaData(entries);
+      const x = store['data_0']!.filter((d) => d.g === 'x');
+      const y = store['data_0']!.filter((d) => d.g === 'y');
+      expect(x.map((d) => d.rn)).toEqual([1, 2]);
+      expect(y.map((d) => d.rn)).toEqual([1]);
+    });
+  });
+
+  describe('joinaggregate transform', () => {
+    it('joins sum and supports formula percent (bar_percent_of_total)', () => {
+      const entries = [
+        {
+          name: 'data_0',
+          values: [
+            { task: 'a', Time: 1 },
+            { task: 'b', Time: 3 },
+          ],
+          transform: [
+            { type: 'joinaggregate', as: ['TotalTime'], ops: ['sum'], fields: ['Time'] },
+            { type: 'formula', expr: 'datum.Time/datum.TotalTime * 100', as: 'PercentOfTotal' },
+          ],
+        },
+      ];
+      const store = evaluateVegaData(entries);
+      const data = store['data_0']!;
+      expect(data).toHaveLength(2);
+      expect(data.map((d) => d.TotalTime)).toEqual([4, 4]);
+      expect(data.map((d) => d.PercentOfTotal)).toEqual([25, 75]);
+    });
+
+    it('respects groupby', () => {
+      const entries = [
+        {
+          name: 'data_0',
+          values: [
+            { g: 'x', v: 1 },
+            { g: 'x', v: 3 },
+            { g: 'y', v: 5 },
+          ],
+          transform: [
+            { type: 'joinaggregate', as: ['mean_v'], ops: ['mean'], fields: ['v'], groupby: ['g'] },
+          ],
+        },
+      ];
+      const store = evaluateVegaData(entries);
+      expect(store['data_0']!.map((d) => d.mean_v)).toEqual([2, 2, 5]);
+    });
+  });
+
+  describe('fold transform', () => {
+    it('unpivots fields into key/value rows (bar_column_fold)', () => {
+      const entries = [
+        {
+          name: 'data_0',
+          values: [{ country: 'US', gold: 10, silver: 20 }],
+          transform: [{ type: 'fold', fields: ['gold', 'silver'], as: ['key', 'value'] }],
+        },
+      ];
+      const store = evaluateVegaData(entries);
+      const data = store['data_0']!;
+      expect(data).toHaveLength(2);
+      expect(data[0]).toMatchObject({ country: 'US', key: 'gold', value: 10 });
+      expect(data[1]).toMatchObject({ country: 'US', key: 'silver', value: 20 });
+    });
+  });
+
+  describe('pivot transform', () => {
+    it('pivots values into columns (bar_column_pivot)', () => {
+      const entries = [
+        {
+          name: 'data_0',
+          values: [
+            { country: 'US', type: 'gold', count: 10 },
+            { country: 'US', type: 'silver', count: 20 },
+            { country: 'CA', type: 'gold', count: 5 },
+          ],
+          transform: [{ type: 'pivot', field: 'type', value: 'count', groupby: ['country'] }],
+        },
+      ];
+      const store = evaluateVegaData(entries);
+      const data = store['data_0']!;
+      expect(data).toHaveLength(2);
+      const us = data.find((d) => d.country === 'US')!;
+      const ca = data.find((d) => d.country === 'CA')!;
+      expect(us.gold).toBe(10);
+      expect(us.silver).toBe(20);
+      expect(ca.gold).toBe(5);
+    });
+  });
+
+  describe('flatten transform', () => {
+    it('expands array fields row-wise (circle_flatten)', () => {
+      const entries = [
+        {
+          name: 'data_0',
+          values: [
+            { id: 1, foo: [1, 2], bar: ['A', 'B', 'C'] },
+            { id: 2, foo: [], bar: [] },
+          ],
+          transform: [{ type: 'flatten', fields: ['foo', 'bar'], as: ['foo', 'bar'] }],
+        },
+      ];
+      const store = evaluateVegaData(entries);
+      const data = store['data_0']!;
+      expect(data).toHaveLength(3);
+      expect(data.map((d) => d.foo)).toEqual([1, 2, null]);
+      expect(data.map((d) => d.bar)).toEqual(['A', 'B', 'C']);
+    });
+  });
+
+  describe('argmax/argmin aggregate ops', () => {
+    it('returns the winning row and supports computed member filters (bar_argmax)', () => {
+      const entries = [
+        {
+          name: 'source_0',
+          values: [
+            { genre: 'drama', gross: 100, budget: 50 },
+            { genre: 'drama', gross: 300, budget: 70 },
+            { genre: 'comedy', gross: 200, budget: 60 },
+          ],
+          transform: [
+            {
+              type: 'aggregate',
+              groupby: ['genre'],
+              ops: ['argmax'],
+              fields: ['gross'],
+              as: ['argmax_gross'],
+            },
+            {
+              type: 'filter',
+              expr: 'isValid(datum["argmax_gross"]["budget"]) && isFinite(+datum["argmax_gross"]["budget"])',
+            },
+          ],
+        },
+      ];
+      const store = evaluateVegaData(entries);
+      const data = store['source_0']!;
+      expect(data).toHaveLength(2);
+      const drama = data.find((d) => d.genre === 'drama')!;
+      expect(drama.argmax_gross.budget).toBe(70);
+    });
+
+    it('argmin returns the minimum row', () => {
+      const entries = [
+        {
+          name: 'data_0',
+          values: [{ v: 5, tag: 'hi' }, { v: 1, tag: 'lo' }],
+          transform: [
+            { type: 'aggregate', groupby: [], ops: ['argmin'], fields: ['v'], as: ['argmin_v'] },
+          ],
+        },
+      ];
+      const store = evaluateVegaData(entries);
+      expect(store['data_0']![0]!.argmin_v.tag).toBe('lo');
+    });
+  });
 });
 
 describe('extractOutputDatasets', () => {

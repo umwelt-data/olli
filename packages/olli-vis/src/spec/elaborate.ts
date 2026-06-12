@@ -27,5 +27,13 @@ function elaborateUnit(spec: UnitOlliVisSpec): UnitOlliVisSpec {
     out.structure = inferStructure(out);
   }
 
+  if (out.annotations?.length) {
+    const nodes = Array.isArray(out.structure) ? out.structure : out.structure ? [out.structure] : [];
+    // idempotent: elaborate may run more than once on the same spec
+    if (!nodes.some((n) => 'annotations' in n)) {
+      out.structure = [...nodes, { annotations: out.annotations }];
+    }
+  }
+
   return out;
 }

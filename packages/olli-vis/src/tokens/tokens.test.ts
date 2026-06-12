@@ -189,4 +189,43 @@ describe('vis tokens', () => {
       dispose();
     });
   });
+
+  it('boxplot category nodes describe the five-number summary', () => {
+    const boxplotSpec: UnitOlliVisSpec = {
+      data: [
+        { species: 'A', mass: 10 },
+        { species: 'A', mass: 20 },
+        { species: 'A', mass: 30 },
+        { species: 'A', mass: 40 },
+        { species: 'A', mass: 50 },
+        { species: 'B', mass: 100 },
+        { species: 'B', mass: 200 },
+      ],
+      mark: 'boxplot' as any,
+      fields: [
+        { field: 'species', type: 'nominal' },
+        { field: 'mass', type: 'quantitative' },
+      ],
+      axes: [
+        { field: 'species', axisType: 'x' },
+        { field: 'mass', axisType: 'y' },
+      ],
+      structure: [{ groupby: 'species' }],
+    };
+    createRoot((dispose) => {
+      const graph = lowerVisSpec(boxplotSpec);
+      const runtime = createNavigationRuntime<VisPayload>(graph);
+      registerDomain(runtime, visDomain);
+      runtime.customization.applyPreset('detailed');
+      const rootId = runtime.navTree().roots[0]!;
+      const rootNode = runtime.getNavNode(rootId)!;
+      const firstCategory = rootNode.childNavIds[0]!;
+      const desc = runtime.getDescriptionFor(firstCategory)();
+      expect(desc).toContain('median');
+      expect(desc).toContain('30');
+      expect(desc).toContain('quartiles');
+      expect(desc).not.toContain('average');
+      dispose();
+    });
+  });
 });

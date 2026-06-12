@@ -67,7 +67,11 @@ export function inferStructure(spec: UnitOlliVisSpec): OlliNode | OlliNode[] {
       .map((f) => ({ groupby: f.field, children: [] }));
   }
 
-  if (getMarkType(spec.mark) === 'geoshape') {
+  // geoshape maps, and geographic point charts positioned by lat/lon
+  const isGeoChart =
+    getMarkType(spec.mark) === 'geoshape' ||
+    (!spec.axes?.length && ['longitude', 'latitude'].every((n) => spec.fields?.some((f) => f.field === n)));
+  if (isGeoChart) {
     const nodes: OlliNode[] = [];
     if (spec.legends?.length) {
       nodes.push(...spec.legends.map((l) => ({ groupby: l.field, children: [] as OlliNode[] })));

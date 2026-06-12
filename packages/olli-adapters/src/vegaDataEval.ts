@@ -133,6 +133,16 @@ function applyTransform(data: Dataset, t: any, signals: SignalStore, store: Reco
       return applyFilter(data, t);
     case 'formula':
       return applyFormula(data, t);
+    case 'window':
+      return applyWindow(data, t);
+    case 'joinaggregate':
+      return applyJoinaggregate(data, t);
+    case 'fold':
+      return applyFold(data, t);
+    case 'pivot':
+      return applyPivot(data, t);
+    case 'flatten':
+      return applyFlatten(data, t);
     case 'timeunit':
       return applyTimeUnit(data, t);
     case 'stack':
@@ -342,9 +352,189 @@ function computeAggOp(op: string, rows: Dataset, field?: string): any {
       return rows.length - values.length;
     case 'values':
       return values;
+    case 'argmax':
+    case 'argmin': {
+      // returns the full winning row; downstream expressions access its fields
+      // via computed member access (datum["argmax_x"]["y"])
+      let best: Datum | null = null;
+      let bestV = op === 'argmax' ? -Infinity : Infinity;
+      for (const d of rows) {
+        const v = Number(field ? d[field] : NaN);
+        if (isNaN(v)) continue;
+        if (op === 'argmax' ? v > bestV : v < bestV) {
+          bestV = v;
+          best = d;
+        }
+      }
+      return best;
+    }
     default:
       return null;
   }
+}
+
+function groupRows(data: Dataset, groupby: string[]): Map<string, Dataset> {
+  const groups = new Map<string, Dataset>();
+  for (const d of data) {
+    const key = groupby.map((g) => JSON.stringify(d[g])).join('|');
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(d);
+  }
+  return groups;
+}
+
+function sortComparator(fields: string[], orders: string[]): (a: Datum, b: Datum) => number {
+  return (a, b) => {
+    for (let i = 0; i < fields.length; i++) {
+      const f = fields[i]!;
+      const order = orders[i] === 'descending' ? -1 : 1;
+      const va = a[f];
+      const vb = b[f];
+      if (va < vb) return -order;
+      if (va > vb) return order;
+    }
+    return 0;
+  };
+}
+
+function applyWindow(data: Dataset, t: any): Dataset {
+  const ops: string[] = t.ops || [];
+  const fields: (string | null)[] = t.fields || [];
+  const asNames: string[] = t.as || [];
+  const params: any[] = t.params || [];
+  const frame: [number | null, number | null] = t.frame ?? [null, 0];
+  const sortFields: string[] = t.sort?.field || [];
+  const sortOrders: string[] = t.sort?.order || [];
+
+  const result: Dataset = [];
+  for (const [, rows] of groupRows(data, t.groupby || [])) {
+    const sorted = sortFields.length ? [...rows].sort(sortComparator(sortFields, sortOrders)) : rows;
+    const cmp = sortComparator(sortFields, sortOrders);
+    const n = sorted.length;
+
+    let rank = 0;
+    let denseRank = 0;
+    for (let i = 0; i < n; i++) {
+      const out = { ...sorted[i]! };
+      const isNewPeerGroup = i === 0 || cmp(sorted[i - 1]!, sorted[i]!) !== 0;
+      if (isNewPeerGroup) {
+        rank = i + 1;
+        denseRank++;
+      }
+      const lo = frame[0] == null ? 0 : Math.max(0, i + frame[0]);
+      const hi = frame[1] == null ? n - 1 : Math.min(n - 1, i + frame[1]);
+      const frameRows = sorted.slice(lo, hi + 1);
+
+      for (let j = 0; j < ops.length; j++) {
+        const op = ops[j]!;
+        const field = fields[j] ?? undefined;
+        const param = params[j];
+        let value: any;
+        switch (op) {
+          case 'row_number':
+            value = i + 1;
+            break;
+          case 'rank':
+            value = rank;
+            break;
+          case 'dense_rank':
+            value = denseRank;
+            break;
+          case 'lag':
+            value = sorted[i - (param ?? 1)]?.[field!] ?? null;
+            break;
+          case 'lead':
+            value = sorted[i + (param ?? 1)]?.[field!] ?? null;
+            break;
+          case 'first_value':
+            value = frameRows[0]?.[field!] ?? null;
+            break;
+          case 'last_value':
+            value = frameRows[frameRows.length - 1]?.[field!] ?? null;
+            break;
+          default:
+            value = computeAggOp(op, frameRows, field);
+        }
+        out[asNames[j]!] = value;
+      }
+      result.push(out);
+    }
+  }
+  return result;
+}
+
+function applyJoinaggregate(data: Dataset, t: any): Dataset {
+  const groupby: string[] = t.groupby || [];
+  const ops: string[] = t.ops || [];
+  const fields: (string | null)[] = t.fields || [];
+  const asNames: string[] = t.as || [];
+
+  const aggsByKey = new Map<string, Datum>();
+  for (const [key, rows] of groupRows(data, groupby)) {
+    const aggs: Datum = {};
+    for (let i = 0; i < ops.length; i++) {
+      aggs[asNames[i]!] = computeAggOp(ops[i]!, rows, fields[i] ?? undefined);
+    }
+    aggsByKey.set(key, aggs);
+  }
+
+  return data.map((d) => {
+    const key = groupby.map((g) => JSON.stringify(d[g])).join('|');
+    return { ...d, ...aggsByKey.get(key) };
+  });
+}
+
+function applyFold(data: Dataset, t: any): Dataset {
+  const fields: string[] = t.fields || [];
+  const [keyAs, valueAs] = (t.as || ['key', 'value']) as [string, string];
+  const result: Dataset = [];
+  for (const d of data) {
+    for (const f of fields) {
+      result.push({ ...d, [keyAs]: f, [valueAs]: d[f] });
+    }
+  }
+  return result;
+}
+
+function applyPivot(data: Dataset, t: any): Dataset {
+  const groupby: string[] = t.groupby || [];
+  const field = t.field as string;
+  const valueField = t.value as string;
+  const op = t.op || 'sum';
+
+  let pivotValues = [...new Set(data.map((d) => d[field]))].sort();
+  if (t.limit > 0) pivotValues = pivotValues.slice(0, t.limit);
+
+  const result: Dataset = [];
+  for (const [, rows] of groupRows(data, groupby)) {
+    const out: Datum = {};
+    for (const g of groupby) {
+      out[g] = rows[0]![g];
+    }
+    for (const v of pivotValues) {
+      out[String(v)] = computeAggOp(op, rows.filter((d) => d[field] === v), valueField);
+    }
+    result.push(out);
+  }
+  return result;
+}
+
+function applyFlatten(data: Dataset, t: any): Dataset {
+  const fields: string[] = t.fields || [];
+  const asNames: string[] = t.as || fields;
+  const result: Dataset = [];
+  for (const d of data) {
+    const n = Math.max(0, ...fields.map((f) => (Array.isArray(d[f]) ? d[f].length : 0)));
+    for (let j = 0; j < n; j++) {
+      const out = { ...d };
+      for (let i = 0; i < fields.length; i++) {
+        const v = d[fields[i]!];
+        out[asNames[i]!] = Array.isArray(v) ? (v[j] ?? null) : null;
+      }
+      result.push(out);
+    }
+  }
+  return result;
 }
 
 function applyFilter(data: Dataset, t: any): Dataset {
@@ -734,6 +924,8 @@ function evalCallExpression(fnName: string, args: any[]): any {
   switch (fnName) {
     case 'isValid':
       return args[0] != null && args[0] === args[0];
+    case 'isDate':
+      return args[0] instanceof Date;
     case 'isFinite':
       return Number.isFinite(args[0]);
     case 'isNaN':
@@ -814,18 +1006,19 @@ function evalCallExpression(fnName: string, args: any[]): any {
       return args[0]?.indexOf?.(args[1]) ?? -1;
     case 'lastindexof':
       return args[0]?.lastIndexOf?.(args[1]) ?? -1;
+    // string functions coerce non-string inputs like vega does
     case 'slice':
-      return args[0]?.slice?.(args[1], args[2]);
+      return Array.isArray(args[0]) ? args[0].slice(args[1], args[2]) : String(args[0] ?? '').slice(args[1], args[2]);
     case 'replace':
-      return typeof args[0] === 'string' ? args[0].replace(args[1], args[2]) : args[0];
+      return String(args[0] ?? '').replace(args[1], args[2]);
     case 'trim':
-      return typeof args[0] === 'string' ? args[0].trim() : args[0];
+      return String(args[0] ?? '').trim();
     case 'lower':
-      return typeof args[0] === 'string' ? args[0].toLowerCase() : args[0];
+      return String(args[0] ?? '').toLowerCase();
     case 'upper':
-      return typeof args[0] === 'string' ? args[0].toUpperCase() : args[0];
+      return String(args[0] ?? '').toUpperCase();
     case 'substring':
-      return typeof args[0] === 'string' ? args[0].substring(args[1], args[2]) : args[0];
+      return String(args[0] ?? '').substring(args[1], args[2]);
     case 'test': {
       try {
         const re = new RegExp(args[0]);

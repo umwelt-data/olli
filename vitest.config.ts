@@ -29,6 +29,7 @@ export default defineConfig({
             'packages/olli-diagram/src/**/*.test.{ts,tsx}',
             'packages/olli-adapters/src/**/*.test.{ts,tsx}',
             'examples/*/src/**/*.test.{ts,tsx}',
+            'apps/docs/gallery/examples/*.test.{ts,tsx}',
           ],
           server: { deps: { inline: [/solid-js/, /@solidjs\/testing-library/] } },
         },

@@ -1,12 +1,14 @@
-import { galleryPathsMetadata } from './examples/paths-metadata.js';
+import { galleryGroups } from './examples/groups.js';
 
 export default {
   paths() {
-    return galleryPathsMetadata.map((example) => ({
-      params: {
-        id: example.id,
-        title: example.title,
-      },
-    }));
+    return galleryGroups
+      .flatMap((group) => group.items)
+      .map((example) => ({
+        params: {
+          id: example.id,
+          title: example.title,
+        },
+      }));
   },
 };

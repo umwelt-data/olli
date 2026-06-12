@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { VegaLiteAdapter, VegaLiteAdapterSync } from './index.js';
 import { lowerVisSpec, getMarkType } from 'olli-vis';
 import type { OlliVisSpec, UnitOlliVisSpec } from 'olli-vis';
@@ -366,6 +366,243 @@ describe('VegaLiteAdapter', () => {
       const colorLegend = olliSpec.legends?.find(l => l.channel === 'color');
       expect(colorLegend).toBeDefined();
       expect(colorLegend!.ticks).toBeUndefined();
+    });
+  });
+
+  describe('scale.domain handling', () => {
+    it('does not crash on param-valued scale.domain', () => {
+      // overview+detail pattern: detail view's x domain is driven by a brush param
+      const spec = {
+        $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+        data: { values: [
+          { date: '2020-01-01', price: 10 },
+          { date: '2020-02-01', price: 20 },
+          { date: '2020-03-01', price: 15 },
+        ] },
+        vconcat: [
+          {
+            mark: 'area',
+            encoding: {
+              x: { field: 'date', type: 'temporal', scale: { domain: { param: 'brush' } } },
+              y: { field: 'price', type: 'quantitative' },
+            },
+          },
+          {
+            mark: 'area',
+            params: [{ name: 'brush', select: { type: 'interval', encodings: ['x'] } }],
+            encoding: {
+              x: { field: 'date', type: 'temporal' },
+              y: { field: 'price', type: 'quantitative' },
+            },
+          },
+        ],
+      };
+      expect(() => VegaLiteAdapterSync(spec)).not.toThrow();
+    });
+
+    it('still respects array scale.domain', () => {
+      const spec = {
+        $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+        data: { values: [{ x: 3, y: 4 }, { x: 7, y: 8 }] },
+        mark: 'point',
+        encoding: {
+          x: { field: 'x', type: 'quantitative', scale: { domain: [0, 10] } },
+          y: { field: 'y', type: 'quantitative' },
+        },
+      };
+      const olliSpec = VegaLiteAdapterSync(spec) as UnitOlliVisSpec;
+      const xAxis = olliSpec.axes?.find(a => a.axisType === 'x');
+      expect(xAxis?.ticks?.[0]).toBe(0);
+      expect(xAxis?.ticks?.[xAxis.ticks.length - 1]).toBe(10);
+    });
+  });
+
+  describe('nested composite views', () => {
+    it('flattens vconcat of hconcats into a concat of units', () => {
+      const values = [
+        { a: 1, b: 10, c: 100, t: '2020-01-01' },
+        { a: 2, b: 20, c: 200, t: '2020-02-01' },
+      ];
+      const spec = {
+        $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+        data: { values },
+        vconcat: [
+          {
+            hconcat: [
+              { mark: 'point', encoding: { x: { field: 'a', type: 'quantitative' }, y: { field: 'b', type: 'quantitative' } } },
+              { mark: 'bar', encoding: { x: { field: 'a', type: 'quantitative' }, y: { field: 'c', type: 'quantitative' } } },
+            ],
+          },
+          {
+            hconcat: [
+              { mark: 'line', encoding: { x: { field: 't', type: 'temporal' }, y: { field: 'b', type: 'quantitative' } } },
+            ],
+          },
+        ],
+      };
+      const olliSpec = VegaLiteAdapterSync(spec);
+      const units = 'operator' in olliSpec ? olliSpec.units : [olliSpec as UnitOlliVisSpec];
+      if ('operator' in olliSpec) expect(olliSpec.operator).toBe('concat');
+      expect(units.some(u => (u.fields?.length ?? 0) > 0)).toBe(true);
+      const fieldNames = units.flatMap(u => u.fields?.map(f => f.field) ?? []);
+      expect(fieldNames).toContain('a');
+      expect(fieldNames).toContain('b');
+    });
+
+    it('flattens layer-of-layer and keeps the layer operator', () => {
+      const values = [
+        { day: 1, value: 50 },
+        { day: 2, value: 300 },
+      ];
+      const spec = {
+        $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+        layer: [
+          {
+            data: { values },
+            layer: [
+              { mark: 'bar', encoding: { x: { field: 'day', type: 'ordinal' }, y: { field: 'value', type: 'quantitative' } } },
+              { mark: { type: 'bar', color: 'red' }, encoding: { x: { field: 'day', type: 'ordinal' }, y: { field: 'value', type: 'quantitative' } } },
+            ],
+          },
+        ],
+      };
+      const olliSpec = VegaLiteAdapterSync(spec);
+      const units = 'operator' in olliSpec ? olliSpec.units : [olliSpec as UnitOlliVisSpec];
+      const fieldNames = units.flatMap(u => u.fields?.map(f => f.field) ?? []);
+      expect(fieldNames).toContain('day');
+      expect(fieldNames).toContain('value');
+    });
+  });
+
+  describe('repeat with layered children', () => {
+    it('produces one merged unit per repeat value', () => {
+      const values = [
+        { date: '2020-01-01', a: 1, b: 10, city: 'X' },
+        { date: '2020-02-01', a: 2, b: 20, city: 'X' },
+        { date: '2020-01-01', a: 3, b: 30, city: 'Y' },
+        { date: '2020-02-01', a: 4, b: 40, city: 'Y' },
+      ];
+      const spec = {
+        $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+        data: { values },
+        repeat: { column: ['a', 'b'] },
+        spec: {
+          layer: [
+            {
+              mark: 'line',
+              encoding: {
+                x: { field: 'date', type: 'temporal' },
+                y: { aggregate: 'mean', field: { repeat: 'column' } },
+              },
+            },
+            {
+              mark: 'line',
+              encoding: {
+                x: { field: 'date', type: 'temporal' },
+                y: { field: { repeat: 'column' }, type: 'quantitative' },
+                detail: { field: 'city', type: 'nominal' },
+              },
+            },
+          ],
+        },
+      };
+      const olliSpec = VegaLiteAdapterSync(spec);
+      expect('operator' in olliSpec).toBe(true);
+      if ('operator' in olliSpec) {
+        expect(olliSpec.operator).toBe('concat');
+        expect(olliSpec.units).toHaveLength(2);
+        const fieldsPerUnit = olliSpec.units.map(u => u.fields?.map(f => f.field) ?? []);
+        expect(fieldsPerUnit[0]).toContain('mean_a');
+        expect(fieldsPerUnit[1]).toContain('mean_b');
+        for (const u of olliSpec.units) {
+          expect(u.data.length).toBeGreaterThan(0);
+        }
+      }
+    });
+  });
+
+  describe('recursive data resolution', () => {
+    it('resolves data.url inside child layer views', async () => {
+      const fetchStub = vi.fn(async () => new Response('day,value\n1,50\n2,300\n'));
+      vi.stubGlobal('fetch', fetchStub);
+      try {
+        const spec = {
+          $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+          layer: [
+            {
+              data: { url: 'https://example.com/values.csv' },
+              mark: 'line',
+              encoding: {
+                x: { field: 'day', type: 'quantitative' },
+                y: { field: 'value', type: 'quantitative' },
+              },
+            },
+          ],
+        };
+        const olliSpec = await VegaLiteAdapter(spec);
+        const units = 'operator' in olliSpec ? olliSpec.units : [olliSpec as UnitOlliVisSpec];
+        expect(fetchStub).toHaveBeenCalledOnce();
+        expect(units.some(u => (u.data?.length ?? 0) > 0)).toBe(true);
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    });
+  });
+
+  describe('ranged-mark axis field', () => {
+    it('a view positioning on the ranged bar\'s end field takes over the axis', () => {
+      // waterfall pattern: bar spans previous_sum -> sum, rule sits at sum
+      const values = [
+        { label: 'a', previous_sum: 0, sum: 10 },
+        { label: 'b', previous_sum: 10, sum: 30 },
+      ];
+      const spec = {
+        $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+        data: { values },
+        encoding: { x: { field: 'label', type: 'ordinal', sort: null } },
+        layer: [
+          {
+            mark: 'bar',
+            encoding: {
+              y: { field: 'previous_sum', type: 'quantitative', title: 'Amount' },
+              y2: { field: 'sum' },
+            },
+          },
+          {
+            mark: 'rule',
+            encoding: { y: { field: 'sum', type: 'quantitative' } },
+          },
+        ],
+      };
+      const olliSpec = VegaLiteAdapterSync(spec) as UnitOlliVisSpec;
+      const yAxes = olliSpec.axes?.filter(a => a.axisType === 'y');
+      expect(yAxes).toHaveLength(1);
+      expect(yAxes![0]!.field).toBe('sum');
+      expect(yAxes![0]!.title).toBe('Amount');
+    });
+  });
+
+  describe('geographic point charts', () => {
+    it('surfaces unencoded place columns as fields', () => {
+      const spec = {
+        $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+        data: { values: [
+          { longitude: -72.6, latitude: 40.9, city: 'Holtsville', state: 'NY', county: 'Suffolk', digit: '0' },
+          { longitude: -118.2, latitude: 34.0, city: 'Los Angeles', state: 'CA', county: 'Los Angeles', digit: '9' },
+        ] },
+        projection: { type: 'albersUsa' },
+        mark: 'circle',
+        encoding: {
+          longitude: { field: 'longitude', type: 'quantitative' },
+          latitude: { field: 'latitude', type: 'quantitative' },
+          color: { field: 'digit', type: 'nominal' },
+        },
+      };
+      const olliSpec = VegaLiteAdapterSync(spec) as UnitOlliVisSpec;
+      const fieldNames = olliSpec.fields?.map(f => f.field);
+      expect(fieldNames).toContain('city');
+      expect(fieldNames).toContain('state');
+      expect(fieldNames).toContain('county');
     });
   });
 

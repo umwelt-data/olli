@@ -99,6 +99,8 @@ export interface UnitOlliVisSpec {
   selection?: Selection;
   title?: string;
   description?: string;
+  /** Data highlights (e.g. an annotated threshold); appended to the structure as an annotations node. */
+  annotations?: OlliPredicateNode[];
 }
 
 export type MultiSpecOperator = 'layer' | 'concat';

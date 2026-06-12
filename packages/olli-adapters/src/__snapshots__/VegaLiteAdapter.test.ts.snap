@@ -28,6 +28,34 @@ exports[`VegaLiteAdapter > structure regression > aggregate-bar-chart 1`] = `
 }
 `;
 
+exports[`VegaLiteAdapter > structure regression > annotated-bar-chart 1`] = `
+{
+  "axes": [
+    {
+      "axisType": "x",
+      "field": "Day",
+    },
+    {
+      "axisType": "y",
+      "field": "Value",
+    },
+  ],
+  "facet": undefined,
+  "fields": [
+    {
+      "field": "Day",
+      "type": "ordinal",
+    },
+    {
+      "field": "Value",
+      "type": "quantitative",
+    },
+  ],
+  "legends": [],
+  "mark": "bar",
+}
+`;
+
 exports[`VegaLiteAdapter > structure regression > area-chart 1`] = `
 {
   "axes": [
@@ -81,6 +109,39 @@ exports[`VegaLiteAdapter > structure regression > bar-chart 1`] = `
   ],
   "legends": [],
   "mark": "bar",
+}
+`;
+
+exports[`VegaLiteAdapter > structure regression > boxplot 1`] = `
+{
+  "axes": [
+    {
+      "axisType": "x",
+      "field": "Species",
+    },
+    {
+      "axisType": "y",
+      "field": "Body Mass (g)",
+    },
+  ],
+  "facet": undefined,
+  "fields": [
+    {
+      "field": "Species",
+      "type": "nominal",
+    },
+    {
+      "field": "Body Mass (g)",
+      "type": "quantitative",
+    },
+  ],
+  "legends": [
+    {
+      "channel": "color",
+      "field": "Species",
+    },
+  ],
+  "mark": "boxplot",
 }
 `;
 
@@ -248,6 +309,50 @@ exports[`VegaLiteAdapter > structure regression > donut-chart 1`] = `
     "innerRadius": 50,
     "type": "arc",
   },
+}
+`;
+
+exports[`VegaLiteAdapter > structure regression > dot-map 1`] = `
+{
+  "axes": [],
+  "facet": undefined,
+  "fields": [
+    {
+      "field": "longitude",
+      "type": "quantitative",
+    },
+    {
+      "field": "latitude",
+      "type": "quantitative",
+    },
+    {
+      "field": "digit",
+      "type": "nominal",
+    },
+    {
+      "field": "city",
+      "type": "nominal",
+    },
+    {
+      "field": "state",
+      "type": "nominal",
+    },
+    {
+      "field": "county",
+      "type": "nominal",
+    },
+    {
+      "field": "region",
+      "type": "nominal",
+    },
+  ],
+  "legends": [
+    {
+      "channel": "color",
+      "field": "digit",
+    },
+  ],
+  "mark": "point",
 }
 `;
 
@@ -446,31 +551,6 @@ exports[`VegaLiteAdapter > structure regression > layered-chart 1`] = `
         },
         {
           "axisType": "y",
-          "field": "mean_price",
-        },
-      ],
-      "facet": undefined,
-      "fields": [
-        {
-          "field": "year_date",
-          "type": "temporal",
-        },
-        {
-          "field": "mean_price",
-          "type": "quantitative",
-        },
-      ],
-      "legends": [],
-      "mark": "line",
-    },
-    {
-      "axes": [
-        {
-          "axisType": "x",
-          "field": "year_date",
-        },
-        {
-          "axisType": "y",
           "field": "price",
         },
       ],
@@ -487,6 +567,31 @@ exports[`VegaLiteAdapter > structure regression > layered-chart 1`] = `
       ],
       "legends": [],
       "mark": "point",
+    },
+    {
+      "axes": [
+        {
+          "axisType": "x",
+          "field": "year_date",
+        },
+        {
+          "axisType": "y",
+          "field": "mean_price",
+        },
+      ],
+      "facet": undefined,
+      "fields": [
+        {
+          "field": "year_date",
+          "type": "temporal",
+        },
+        {
+          "field": "mean_price",
+          "type": "quantitative",
+        },
+      ],
+      "legends": [],
+      "mark": "line",
     },
   ],
 }
@@ -517,6 +622,98 @@ exports[`VegaLiteAdapter > structure regression > line-chart 1`] = `
   ],
   "legends": [],
   "mark": "line",
+}
+`;
+
+exports[`VegaLiteAdapter > structure regression > marginal-histograms 1`] = `
+{
+  "operator": "concat",
+  "units": [
+    {
+      "axes": [
+        {
+          "axisType": "x",
+          "field": "bin_maxbins_10_IMDB Rating",
+        },
+        {
+          "axisType": "y",
+          "field": "__count",
+        },
+      ],
+      "facet": undefined,
+      "fields": [
+        {
+          "field": "bin_maxbins_10_IMDB Rating",
+          "type": "quantitative",
+        },
+        {
+          "field": "__count",
+          "type": "quantitative",
+        },
+      ],
+      "legends": [],
+      "mark": "bar",
+    },
+    {
+      "axes": [
+        {
+          "axisType": "x",
+          "field": "bin_maxbins_10_IMDB Rating",
+        },
+        {
+          "axisType": "y",
+          "field": "bin_maxbins_10_Rotten Tomatoes Rating",
+        },
+      ],
+      "facet": undefined,
+      "fields": [
+        {
+          "field": "bin_maxbins_10_IMDB Rating",
+          "type": "quantitative",
+        },
+        {
+          "field": "bin_maxbins_10_Rotten Tomatoes Rating",
+          "type": "quantitative",
+        },
+        {
+          "field": "__count",
+          "type": "quantitative",
+        },
+      ],
+      "legends": [
+        {
+          "channel": "color",
+          "field": "__count",
+        },
+      ],
+      "mark": "rect",
+    },
+    {
+      "axes": [
+        {
+          "axisType": "y",
+          "field": "bin_maxbins_10_Rotten Tomatoes Rating",
+        },
+        {
+          "axisType": "x",
+          "field": "__count",
+        },
+      ],
+      "facet": undefined,
+      "fields": [
+        {
+          "field": "bin_maxbins_10_Rotten Tomatoes Rating",
+          "type": "quantitative",
+        },
+        {
+          "field": "__count",
+          "type": "quantitative",
+        },
+      ],
+      "legends": [],
+      "mark": "bar",
+    },
+  ],
 }
 `;
 
@@ -798,5 +995,49 @@ exports[`VegaLiteAdapter > structure regression > strip-plot 1`] = `
   ],
   "legends": [],
   "mark": "tick",
+}
+`;
+
+exports[`VegaLiteAdapter > structure regression > waterfall-chart 1`] = `
+{
+  "axes": [
+    {
+      "axisType": "x",
+      "field": "label",
+    },
+    {
+      "axisType": "y",
+      "field": "sum",
+    },
+  ],
+  "facet": undefined,
+  "fields": [
+    {
+      "field": "label",
+      "type": "ordinal",
+    },
+    {
+      "field": "previous_sum",
+      "type": "quantitative",
+    },
+    {
+      "field": "sum",
+      "type": "quantitative",
+    },
+    {
+      "field": "lead",
+      "type": "nominal",
+    },
+    {
+      "field": "center",
+      "type": "quantitative",
+    },
+    {
+      "field": "text_amount",
+      "type": "nominal",
+    },
+  ],
+  "legends": [],
+  "mark": "bar",
 }
 `;

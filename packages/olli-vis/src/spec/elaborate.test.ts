@@ -65,4 +65,23 @@ describe('elaborateSpec', () => {
     expect(result.fields).toEqual(spec.fields);
     expect(result.structure).toEqual(spec.structure);
   });
+
+  it('appends annotations to structure exactly once, even when elaborated twice', () => {
+    const spec: UnitOlliVisSpec = {
+      data: [{ a: 1, b: 2 }],
+      mark: 'bar',
+      fields: [
+        { field: 'a', type: 'ordinal' },
+        { field: 'b', type: 'quantitative' },
+      ],
+      annotations: [{ predicate: { field: 'b', gte: 2 } }],
+    };
+    const once = elaborateSpec(spec) as UnitOlliVisSpec;
+    const twice = elaborateSpec(once) as UnitOlliVisSpec;
+    for (const result of [once, twice]) {
+      const nodes = Array.isArray(result.structure) ? result.structure : [result.structure];
+      const annotationNodes = nodes.filter((n) => n && 'annotations' in n);
+      expect(annotationNodes).toHaveLength(1);
+    }
+  });
 });

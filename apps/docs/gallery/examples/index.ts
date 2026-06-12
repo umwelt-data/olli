@@ -5,10 +5,13 @@ import { aggregateBarChart } from './vega-lite/aggregate-bar-chart.js';
 import { groupedBarChart } from './vega-lite/grouped-bar-chart.js';
 import { stackedBarChart } from './vega-lite/stacked-bar-chart.js';
 import { populationPyramid } from './vega-lite/population-pyramid.js';
+import { waterfallChart } from './vega-lite/waterfall-chart.js';
+import { annotatedBarChart } from './vega-lite/annotated-bar-chart.js';
 import { histogram } from './vega-lite/histogram.js';
 import { scatterplot } from './vega-lite/scatterplot.js';
 import { bubblePlot } from './vega-lite/bubble-plot.js';
 import { stripPlot } from './vega-lite/strip-plot.js';
+import { boxplot } from './vega-lite/boxplot.js';
 import { lineChart } from './vega-lite/line-chart.js';
 import { multiSeriesLine } from './vega-lite/multi-series-line.js';
 import { areaChart } from './vega-lite/area-chart.js';
@@ -19,9 +22,11 @@ import { lasagnaPlot } from './vega-lite/lasagna-plot.js';
 import { facetedChart } from './vega-lite/faceted-chart.js';
 import { layeredChart } from './vega-lite/layered-chart.js';
 import { concatChart } from './vega-lite/concat-chart.js';
+import { marginalHistograms } from './vega-lite/marginal-histograms.js';
 import { pieChart } from './vega-lite/pie-chart.js';
 import { donutChart } from './vega-lite/donut-chart.js';
 import { choroplethMap } from './vega-lite/choropleth-map.js';
+import { dotMap } from './vega-lite/dot-map.js';
 
 /**
  * All gallery examples, in display order.
@@ -33,10 +38,13 @@ export const examples: GalleryExample[] = [
   groupedBarChart,
   stackedBarChart,
   populationPyramid,
+  waterfallChart,
+  annotatedBarChart,
   histogram,
   scatterplot,
   bubblePlot,
   stripPlot,
+  boxplot,
   lineChart,
   multiSeriesLine,
   areaChart,
@@ -47,9 +55,11 @@ export const examples: GalleryExample[] = [
   facetedChart,
   layeredChart,
   concatChart,
+  marginalHistograms,
   pieChart,
   donutChart,
   choroplethMap,
+  dotMap,
   pulley,
 ];
 
