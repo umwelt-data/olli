@@ -1,31 +1,5 @@
 import type { OlliDataset, OlliFieldDef, OlliValue } from '../spec/types.js';
-import {
-  fmtValue as sharedFmtValue,
-  dateToTimeUnit as sharedDateToTimeUnit,
-  isNumeric,
-  minPrecisionForValue,
-} from '@umwelt-data/umwelt-utils/description';
-
-export { isNumeric, minPrecisionForValue };
-
-export function fmtValue(value: OlliValue, fieldDef: OlliFieldDef, precision?: number): string {
-  return sharedFmtValue(value, fieldDef, precision);
-}
-
-export function dateToTimeUnit(date: Date, timeUnit?: string): string {
-  return sharedDateToTimeUnit(date, timeUnit);
-}
-
-export function serializeValue(value: unknown, fieldDef: OlliFieldDef): unknown {
-  if (fieldDef.type === 'temporal') {
-    if (Array.isArray(value)) return value.map((v) => new Date(v as string).getTime());
-    return new Date(value as string).getTime();
-  }
-  if (fieldDef.type === 'quantitative' && typeof value === 'string' && isNumeric(value)) {
-    return Number(value);
-  }
-  return value;
-}
+import { fmtValue, minPrecisionForValue } from '@umwelt-data/umwelt-utils/description';
 
 export function dataPrecision(data: OlliDataset, field: string): number {
   let maxDecimals = 0;

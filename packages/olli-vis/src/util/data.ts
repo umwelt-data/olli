@@ -1,7 +1,7 @@
 import type { FieldPredicate, FieldRangePredicate, LogicalComposition } from 'olli-core';
 import { selectionTest } from 'olli-core';
 import type { OlliDataset, OlliFieldDef, OlliValue } from '../spec/types.js';
-import { dateToTimeUnit, serializeValue } from './values.js';
+import { serializeValue, getDomain as sharedGetDomain } from '@umwelt-data/umwelt-utils/data';
 
 export function getFieldDef(field: string, fields: OlliFieldDef[]): OlliFieldDef {
   return fields.find((f) => f.field === field) ?? { field };
@@ -13,44 +13,7 @@ export function getDomain(
   predicate?: LogicalComposition<FieldPredicate>,
 ): OlliValue[] {
   const dataset = predicate ? selectionTest(data, predicate) : data;
-  const unique = new Set<OlliValue>();
-
-  if (fieldDef.timeUnit) {
-    const seen = new Set<string>();
-    for (const d of dataset) {
-      const v = d[fieldDef.field];
-      if (v instanceof Date) {
-        const key = dateToTimeUnit(v, fieldDef.timeUnit);
-        if (!seen.has(key)) {
-          seen.add(key);
-          unique.add(v);
-        }
-      }
-    }
-  } else {
-    const seenTimes = new Set<number>();
-    for (const d of dataset) {
-      const v = d[fieldDef.field];
-      if (v == null) continue;
-      if (v instanceof Date) {
-        const t = v.getTime();
-        if (!seenTimes.has(t)) {
-          seenTimes.add(t);
-          unique.add(v);
-        }
-      } else {
-        unique.add(v);
-      }
-    }
-  }
-
-  return [...unique]
-    .filter((x) => x != null)
-    .sort((a, b) => {
-      if (a instanceof Date && b instanceof Date) return a.getTime() - b.getTime();
-      if (typeof a === 'string' && typeof b === 'string') return a.localeCompare(b);
-      return (a as number) - (b as number);
-    });
+  return sharedGetDomain(fieldDef, dataset) as OlliValue[];
 }
 
 /**

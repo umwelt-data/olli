@@ -16,7 +16,8 @@ import { isMultiSpec, getMarkType } from '../spec/types.js';
 import { elaborateSpec } from '../spec/elaborate.js';
 import { fieldToPredicates, getFieldDef } from '../util/data.js';
 import { getChartType } from '../util/chartType.js';
-import { fmtValue, pluralize } from '../util/values.js';
+import { fmtValue } from '@umwelt-data/umwelt-utils/description';
+import { pluralize } from '../util/values.js';
 import { predicateToDescription } from './describe.js';
 
 let counter = 0;

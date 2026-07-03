@@ -1,9 +1,4 @@
-export { typeInference } from './types.js';
 export {
-  fmtValue,
-  dateToTimeUnit,
-  serializeValue,
-  isNumeric,
   pluralize,
   ordinalSuffix,
   capitalizeFirst,

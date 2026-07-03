@@ -2,7 +2,7 @@ import { For, Show, createSignal } from 'solid-js';
 import type { DialogContribution, DialogRenderResult, NavigationRuntime, NavNode, FieldPredicate, FieldValue, Selection } from 'olli-core';
 import type { VisPayload, OlliFieldDef } from '../spec/types.js';
 import { getFieldDef, getDomain } from '../util/data.js';
-import { serializeValue } from '../util/values.js';
+import { serializeValue } from '@umwelt-data/umwelt-utils/data';
 
 interface Condition {
   field: string;

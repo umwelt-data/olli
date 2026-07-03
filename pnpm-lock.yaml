@@ -43,8 +43,8 @@ importers:
   apps/docs:
     dependencies:
       '@umwelt-data/umwelt-utils':
-        specifier: ^0.1.5
-        version: 0.1.5
+        specifier: ^0.2.0
+        version: 0.2.0
       bluefish-js:
         specifier: ^0.0.39
         version: 0.0.39
@@ -83,8 +83,8 @@ importers:
   apps/playground:
     dependencies:
       '@umwelt-data/umwelt-utils':
-        specifier: ^0.1.5
-        version: 0.1.5
+        specifier: ^0.2.0
+        version: 0.2.0
       bluefish-js:
         specifier: ^0.0.39
         version: 0.0.39
@@ -117,8 +117,8 @@ importers:
   apps/shared:
     dependencies:
       '@umwelt-data/umwelt-utils':
-        specifier: ^0.1.5
-        version: 0.1.5
+        specifier: ^0.2.0
+        version: 0.2.0
       olli:
         specifier: workspace:*
         version: link:../../packages/olli
@@ -138,8 +138,8 @@ importers:
         specifier: '>=0.6.0'
         version: 0.6.17
       '@umwelt-data/umwelt-utils':
-        specifier: ^0.1.5
-        version: 0.1.5
+        specifier: ^0.2.0
+        version: 0.2.0
       papaparse:
         specifier: ^5.4.0
         version: 5.5.3
@@ -198,27 +198,15 @@ importers:
       '@observablehq/plot':
         specifier: '>=0.6.0'
         version: 0.6.17
-      '@types/papaparse':
-        specifier: ^5.3.0
-        version: 5.5.2
-      '@types/topojson-client':
-        specifier: ^3.1.0
-        version: 3.1.5
       '@umwelt-data/umwelt-utils':
-        specifier: ^0.1.5
-        version: 0.1.5
+        specifier: ^0.2.0
+        version: 0.2.0
       olli-diagram:
         specifier: workspace:*
         version: link:../olli-diagram
       olli-vis:
         specifier: workspace:*
         version: link:../olli-vis
-      papaparse:
-        specifier: ^5.4.0
-        version: 5.5.3
-      topojson-client:
-        specifier: ^3.1.0
-        version: 3.1.0
       vega-expression:
         specifier: ^6.1.0
         version: 6.1.0
@@ -229,8 +217,8 @@ importers:
   packages/olli-core:
     dependencies:
       '@umwelt-data/umwelt-utils':
-        specifier: ^0.1.5
-        version: 0.1.5
+        specifier: ^0.2.0
+        version: 0.2.0
       solid-js:
         specifier: ^1.9.3
         version: 1.9.13
@@ -262,8 +250,8 @@ importers:
   packages/olli-vis:
     dependencies:
       '@umwelt-data/umwelt-utils':
-        specifier: ^0.1.5
-        version: 0.1.5
+        specifier: ^0.2.0
+        version: 0.2.0
       olli-core:
         specifier: workspace:*
         version: link:../olli-core
@@ -1140,8 +1128,8 @@ packages:
   '@types/web-bluetooth@0.0.21':
     resolution: {integrity: sha512-oIQLCGWtcFZy2JW77j9k8nHzAOpqMHLQejDA48XXMWH6tjCQHz5RCFz1bzsmROyL6PUm+LLnUiI4BCn221inxA==}
 
-  '@umwelt-data/umwelt-utils@0.1.5':
-    resolution: {integrity: sha512-GX25tGmzH1qlVsjeHP+OI1ls4b/ecRh4DhX28GwRyY1uX9d33ldCeCj7HnxN83a1ls/BSskqYeJRMdpz6+Nh4w==}
+  '@umwelt-data/umwelt-utils@0.2.0':
+    resolution: {integrity: sha512-M6+w7rrjPhwzbsMK9CKJpPoc1WUi/uND04oigwhu7NQiR1CyltPrF4cBbkK+BNmXl1B8MWqdnKrlrybbxCE2qw==}
 
   '@ungap/structured-clone@1.3.1':
     resolution: {integrity: sha512-mUFwbeTqrVgDQxFveS+df2yfap6iuP20NAKAsBt5jDEoOTDew+zwLAOilHCeQJOVSvmgCX4ogqIrA0mnyr08yQ==}
@@ -2043,6 +2031,9 @@ packages:
 
   papaparse@5.5.3:
     resolution: {integrity: sha512-5QvjGxYVjxO59MGU2lHVYpRWBBtKHnlIAcSe1uNFCkkptUh63NFRj0FJQm7nR67puEruUci/ZkjmEFrjCAyP4A==}
+
+  papaparse@5.5.4:
+    resolution: {integrity: sha512-SwzWD9gl/ElwYLCI0nUja1mFJzjq2D8ziShfNBa7zCHzkOozeOGDwHWQ+tvCzEZcewecWZ5U7kUopDnG+DFYEQ==}
 
   paper@0.12.18:
     resolution: {integrity: sha512-ZSLIEejQTJZuYHhSSqAf4jXOnii0kPhCJGAnYAANtdS72aNwXJ9cP95tZHgq1tnNpvEwgQhggy+4OarviqTCGw==}
@@ -3555,11 +3546,14 @@ snapshots:
 
   '@types/web-bluetooth@0.0.21': {}
 
-  '@umwelt-data/umwelt-utils@0.1.5':
+  '@umwelt-data/umwelt-utils@0.2.0':
     dependencies:
       d3-array: 3.2.4
       d3-scale: 4.0.2
+      papaparse: 5.5.4
+      topojson-client: 3.1.0
       vega-expression: 6.1.0
+      vega-statistics: 2.0.0
 
   '@ungap/structured-clone@1.3.1': {}
 
@@ -4530,6 +4524,8 @@ snapshots:
       regex-recursion: 6.0.2
 
   papaparse@5.5.3: {}
+
+  papaparse@5.5.4: {}
 
   paper@0.12.18: {}
 

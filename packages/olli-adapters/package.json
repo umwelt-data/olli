@@ -16,21 +16,21 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "olli-vis": "workspace:*",
+    "@umwelt-data/umwelt-utils": "^0.2.0",
     "olli-diagram": "workspace:*",
-    "@umwelt-data/umwelt-utils": "^0.1.5",
-    "vega-expression": "^6.1.0",
-    "topojson-client": "^3.1.0",
-    "papaparse": "^5.4.0",
-    "@types/topojson-client": "^3.1.0",
-    "@types/papaparse": "^5.3.0"
+    "olli-vis": "workspace:*",
+    "vega-expression": "^6.1.0"
   },
   "peerDependencies": {
-    "vega-lite": "^6.4.3",
-    "@observablehq/plot": ">=0.6.0"
+    "@observablehq/plot": ">=0.6.0",
+    "vega-lite": "^6.4.3"
   },
   "peerDependenciesMeta": {
-    "vega-lite": { "optional": true },
-    "@observablehq/plot": { "optional": true }
+    "vega-lite": {
+      "optional": true
+    },
+    "@observablehq/plot": {
+      "optional": true
+    }
   }
 }

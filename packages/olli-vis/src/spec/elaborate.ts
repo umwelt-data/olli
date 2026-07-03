@@ -1,6 +1,6 @@
 import type { OlliVisSpec, UnitOlliVisSpec, OlliFieldDef } from './types.js';
 import { isMultiSpec } from './types.js';
-import { typeInference } from '../util/types.js';
+import { typeInference } from '@umwelt-data/umwelt-utils/data';
 import { inferStructure } from './infer.js';
 
 export function elaborateSpec(spec: OlliVisSpec): OlliVisSpec {

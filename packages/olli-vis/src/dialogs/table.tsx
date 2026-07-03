@@ -2,7 +2,7 @@ import { For } from 'solid-js';
 import type { DialogContribution, DialogRenderResult, NavigationRuntime, NavNode } from 'olli-core';
 import { selectionTest } from 'olli-core';
 import type { VisPayload } from '../spec/types.js';
-import { fmtValue } from '../util/values.js';
+import { fmtValue } from '@umwelt-data/umwelt-utils/description';
 import { getFieldDef } from '../util/data.js';
 import { predicateToDescription } from '../lower/describe.js';
 

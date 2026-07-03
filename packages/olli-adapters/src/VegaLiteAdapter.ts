@@ -1,14 +1,12 @@
 import type { UnitOlliVisSpec, OlliVisSpec, OlliDataset, OlliAxis, OlliLegend, OlliMark } from 'olli-vis';
 import { getMarkType } from 'olli-vis/spec/types';
-import { typeInference } from 'olli-vis/util/types';
-import { typeCoerceData } from '@umwelt-data/umwelt-utils/data';
+import { typeInference, typeCoerceData, inferFormatFromUrl, parseDelimited, fetchAndParse } from '@umwelt-data/umwelt-utils/data';
 import { describeField } from '@umwelt-data/umwelt-utils/description';
-import { evaluateVegaData, extractOutputDatasets } from './vegaDataEval.js';
+import { evaluateVegaData, extractOutputDatasets } from '@umwelt-data/umwelt-utils/vega';
 import { filterExprToPredicates } from '@umwelt-data/umwelt-utils/predicate';
 import { computeGuideTicks } from '@umwelt-data/umwelt-utils/vega';
 import type { GuideTicksConfig } from '@umwelt-data/umwelt-utils/vega';
 import type { VisAdapter } from './types.js';
-import { inferFormatFromUrl, parseDelimited } from './utils.js';
 import { enrichWithUSGeo, looksLikeFips, regionForUSState } from '@umwelt-data/umwelt-utils/geo';
 import { compile } from 'vega-lite';
 
@@ -129,17 +127,6 @@ export function VegaLiteAdapterSync(spec: any): OlliVisSpec {
   }
 
   return adaptUnitSpec(spec, data[0]!);
-}
-
-async function fetchAndParse(url: string, format?: any): Promise<any> {
-  const response = await fetch(url);
-  const text = await response.text();
-  const fmt = format?.type || inferFormatFromUrl(url);
-
-  if (fmt === 'topojson' || fmt === 'json') {
-    return JSON.parse(text);
-  }
-  return parseDelimited(text, fmt);
 }
 
 async function resolveData(spec: any): Promise<any> {

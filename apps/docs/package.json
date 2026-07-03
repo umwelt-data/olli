@@ -9,7 +9,7 @@
     "preview": "vitepress preview"
   },
   "dependencies": {
-    "@umwelt-data/umwelt-utils": "^0.1.5",
+    "@umwelt-data/umwelt-utils": "^0.2.0",
     "bluefish-js": "^0.0.39",
     "olli": "workspace:*",
     "olli-adapters": "workspace:*",
