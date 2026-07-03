@@ -124,6 +124,27 @@ describe('getBins', () => {
     ]);
   });
 
+  it('keeps one bin per tick interval when the data domain starts/ends inside the tick range', () => {
+    // stocks.csv price axis: vega renders ticks [0, 200, 400, 600, 800] but the
+    // data spans [5.97, 707]; ticks outside the data domain must still act as
+    // bin boundaries (clipped to the domain), not collapse two tick intervals
+    // into one stretched bin
+    const data: OlliDataset = [{ v: 5.97 }, { v: 350 }, { v: 707 }];
+    const bins = getBins('v', data, fields, [0, 200, 400, 600, 800]);
+    expect(bins).toEqual([
+      [5.97, 200],
+      [200, 400],
+      [400, 600],
+      [600, 707],
+    ]);
+  });
+
+  it('drops tick intervals wholly outside the data domain', () => {
+    const data: OlliDataset = [{ v: 210 }, { v: 350 }];
+    const bins = getBins('v', data, fields, [0, 200, 400, 600, 800]);
+    expect(bins).toEqual([[210, 350]]);
+  });
+
   it('absorbs domain overshoot into last bin instead of creating a degenerate bin', () => {
     const data: OlliDataset = [{ v: 0 }, { v: 50 }, { v: 100.1 }];
     const bins = getBins('v', data, fields, [0, 25, 50, 75, 100]);

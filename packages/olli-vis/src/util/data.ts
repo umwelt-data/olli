@@ -60,17 +60,21 @@ export function getBins(
 
   const domMin = Number(domain[0]);
   const domMax = Number(domain[domain.length - 1]!);
-  tickValues = tickValues.filter((t) => t >= domMin && t <= domMax);
-  if (tickValues.length === 0) return [];
 
+  // bins are the intervals between consecutive ticks, so interior bin
+  // boundaries always line up with the chart's axis ticks; intervals wholly
+  // outside the data domain are dropped, and the outermost bins are
+  // clipped/extended to the data domain so no bin is degenerate
   const bins: [number, number][] = [];
   for (let i = 0; i < tickValues.length - 1; i++) {
-    bins.push([tickValues[i]!, tickValues[i + 1]!]);
+    const start = tickValues[i]!;
+    const end = tickValues[i + 1]!;
+    if (end <= domMin || start >= domMax) continue;
+    bins.push([start, end]);
   }
-  if (bins.length > 0) {
-    if (domMin < bins[0]![0]) bins[0]![0] = domMin;
-    if (domMax > bins[bins.length - 1]![1]) bins[bins.length - 1]![1] = domMax;
-  }
+  if (bins.length === 0) return [];
+  bins[0]![0] = domMin;
+  bins[bins.length - 1]![1] = domMax;
   return bins;
 }
 
