@@ -8,4 +8,4 @@ export {
   wrapForMonospace as fieldName,
   fmtDataValue,
 } from './values.js';
-export { getFieldDef, getDomain, getBins, getBinPredicates, fieldToPredicates } from './data.js';
+export { getFieldDef, getDomain, getBinPredicates, fieldToPredicates } from './data.js';

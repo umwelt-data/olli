@@ -36,4 +36,4 @@ export { isMultiSpec, getMarkType } from './spec/types.js';
 export { elaborateSpec } from './spec/elaborate.js';
 export { inferStructure } from './spec/infer.js';
 export { pluralize, averageValue, dataPrecision, ordinalSuffix, capitalizeFirst, removeFinalPeriod, wrapForMonospace as fieldName } from './util/values.js';
-export { getFieldDef, getDomain, getBins, fieldToPredicates } from './util/data.js';
+export { getFieldDef, getDomain, fieldToPredicates } from './util/data.js';

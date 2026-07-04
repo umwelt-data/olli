@@ -43,8 +43,8 @@ importers:
   apps/docs:
     dependencies:
       '@umwelt-data/umwelt-utils':
-        specifier: ^0.2.1
-        version: 0.2.1
+        specifier: ^0.2.2
+        version: 0.2.2
       bluefish-js:
         specifier: ^0.0.39
         version: 0.0.39
@@ -83,8 +83,8 @@ importers:
   apps/playground:
     dependencies:
       '@umwelt-data/umwelt-utils':
-        specifier: ^0.2.1
-        version: 0.2.1
+        specifier: ^0.2.2
+        version: 0.2.2
       bluefish-js:
         specifier: ^0.0.39
         version: 0.0.39
@@ -117,8 +117,8 @@ importers:
   apps/shared:
     dependencies:
       '@umwelt-data/umwelt-utils':
-        specifier: ^0.2.1
-        version: 0.2.1
+        specifier: ^0.2.2
+        version: 0.2.2
       olli:
         specifier: workspace:*
         version: link:../../packages/olli
@@ -138,8 +138,8 @@ importers:
         specifier: '>=0.6.0'
         version: 0.6.17
       '@umwelt-data/umwelt-utils':
-        specifier: ^0.2.1
-        version: 0.2.1
+        specifier: ^0.2.2
+        version: 0.2.2
       papaparse:
         specifier: ^5.4.0
         version: 5.5.4
@@ -199,8 +199,8 @@ importers:
         specifier: '>=0.6.0'
         version: 0.6.17
       '@umwelt-data/umwelt-utils':
-        specifier: ^0.2.1
-        version: 0.2.1
+        specifier: ^0.2.2
+        version: 0.2.2
       olli-diagram:
         specifier: workspace:*
         version: link:../olli-diagram
@@ -217,8 +217,8 @@ importers:
   packages/olli-core:
     dependencies:
       '@umwelt-data/umwelt-utils':
-        specifier: ^0.2.1
-        version: 0.2.1
+        specifier: ^0.2.2
+        version: 0.2.2
       solid-js:
         specifier: ^1.9.3
         version: 1.9.14
@@ -250,8 +250,8 @@ importers:
   packages/olli-vis:
     dependencies:
       '@umwelt-data/umwelt-utils':
-        specifier: ^0.2.1
-        version: 0.2.1
+        specifier: ^0.2.2
+        version: 0.2.2
       olli-core:
         specifier: workspace:*
         version: link:../olli-core
@@ -1284,8 +1284,8 @@ packages:
   '@types/web-bluetooth@0.0.21':
     resolution: {integrity: sha512-oIQLCGWtcFZy2JW77j9k8nHzAOpqMHLQejDA48XXMWH6tjCQHz5RCFz1bzsmROyL6PUm+LLnUiI4BCn221inxA==}
 
-  '@umwelt-data/umwelt-utils@0.2.1':
-    resolution: {integrity: sha512-Z+yll73oEUAVFO3kGx5hD04uoF0zVYxLGoeutyXjIIP16kmEUVbhHED4KrQYUh3QF8PR4vl5f+dikbgmZc1Pww==}
+  '@umwelt-data/umwelt-utils@0.2.2':
+    resolution: {integrity: sha512-I3CuojJ9SUf30jTG72THC+sTm5DFKVgquDVUER5z4cQrnAXeYFChWC6/8m9Q+dtte8KsLp1xrvDhkdVFjvRs+w==}
 
   '@ungap/structured-clone@1.3.2':
     resolution: {integrity: sha512-5jsZFwgR5rTdKwidH9Qmat75RKwqfpKlWWB1frDkljN127mwqBu8K0PYo7/hFpF03IEJpfVPpCQDY/eDx3iHvA==}
@@ -3783,7 +3783,7 @@ snapshots:
 
   '@types/web-bluetooth@0.0.21': {}
 
-  '@umwelt-data/umwelt-utils@0.2.1':
+  '@umwelt-data/umwelt-utils@0.2.2':
     dependencies:
       d3-array: 3.2.4
       d3-scale: 4.0.2

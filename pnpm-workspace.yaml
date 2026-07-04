@@ -5,5 +5,5 @@ packages:
 allowBuilds:
   esbuild: true
 minimumReleaseAgeExclude:
-  - '@umwelt-data/umwelt-utils@0.2.1'
+  - '@umwelt-data/umwelt-utils@0.2.2'
 

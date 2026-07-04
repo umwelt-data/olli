@@ -614,4 +614,148 @@ describe('VegaLiteAdapter', () => {
       }, 30000);
     }
   });
+
+  // specs shaped like umwelt's compiled output (brush param, color condition
+  // wrappers), covering gallery regressions reported from the umwelt docs
+  describe('umwelt-style specs', () => {
+    const brushColor = (encoding: object = { value: 'navy' }) => ({
+      condition: { param: 'brush', empty: true, ...encoding },
+      value: 'grey',
+    });
+
+    it('connected scatterplot order encoding becomes a navigable guide', () => {
+      // umwelt type-coerces temporal fields to dates before compiling
+      const values = [
+        { year: '2000-01-01', miles: 9000, gas: 1.5 },
+        { year: '2001-01-01', miles: 9500, gas: 1.6 },
+        { year: '2002-01-01', miles: 9800, gas: 1.4 },
+        { year: '2003-01-01', miles: 10000, gas: 1.7 },
+      ];
+      // umwelt renders line units as a layer of line + invisible highlight
+      // circles, so the guide must survive the multi-spec merge path
+      const encoding = {
+        x: { field: 'miles', type: 'quantitative' },
+        y: { field: 'gas', type: 'quantitative' },
+        order: { field: 'year', type: 'temporal', timeUnit: 'year' },
+        color: brushColor(),
+      };
+      const spec = {
+        data: { values },
+        layer: [
+          { params: [{ name: 'brush', select: 'interval' }], mark: 'line', encoding },
+          {
+            mark: 'circle',
+            encoding: {
+              ...encoding,
+              opacity: { condition: { param: 'brush', empty: false, value: 1 }, value: 0 },
+            },
+          },
+        ],
+      };
+      const olliSpec = VegaLiteAdapterSync(spec) as UnitOlliVisSpec;
+      // like axes, the guide references the timeUnit-derived column
+      expect(olliSpec.guides?.map((g) => ({ field: g.field, channel: g.channel }))).toEqual([
+        { field: 'year_year', channel: 'order' },
+      ]);
+      const graph = lowerVisSpec(olliSpec);
+      const guideEdges = [...graph.edges.values()].filter((e) => e.role === 'guide');
+      expect(guideEdges.length).toBe(1);
+      expect(guideEdges[0]!.children.length).toBeGreaterThan(0);
+    });
+
+    it('layered chart keeps each layer\'s own mark', () => {
+      const values = [
+        { date: '2000-01-01', price: 10, symbol: 'A' },
+        { date: '2000-01-01', price: 20, symbol: 'B' },
+        { date: '2001-01-01', price: 30, symbol: 'A' },
+        { date: '2001-01-01', price: 40, symbol: 'B' },
+      ];
+      const spec = {
+        data: { values },
+        layer: [
+          {
+            params: [{ name: 'brush', select: 'interval' }],
+            mark: 'point',
+            encoding: {
+              x: { field: 'date', type: 'temporal', timeUnit: 'year' },
+              y: { field: 'price', type: 'quantitative', scale: { zero: false } },
+              color: brushColor({ field: 'symbol', type: 'nominal' }),
+            },
+          },
+          {
+            // umwelt renders aggregate lines as line + invisible highlight
+            // circles; the overlay must not displace the line as the unit's mark
+            layer: [
+              {
+                mark: 'line',
+                encoding: {
+                  x: { field: 'date', type: 'temporal' },
+                  y: { field: 'price', type: 'quantitative', aggregate: 'mean' },
+                  color: brushColor(),
+                },
+              },
+              {
+                mark: 'circle',
+                encoding: {
+                  x: { field: 'date', type: 'temporal' },
+                  y: { field: 'price', type: 'quantitative', aggregate: 'mean' },
+                  color: brushColor(),
+                  opacity: { condition: { param: 'brush', empty: false, value: 1 }, value: 0 },
+                },
+              },
+            ],
+          },
+        ],
+      };
+      const olliSpec = VegaLiteAdapterSync(spec);
+      expect('operator' in olliSpec && olliSpec.units.map((u) => getMarkType(u.mark))).toEqual([
+        'point',
+        'line',
+      ]);
+    });
+
+    it('bar colored by its own category axis field is not stacked', () => {
+      const values = [
+        { weather: 'sun', temp: 20 },
+        { weather: 'sun', temp: 25 },
+        { weather: 'rain', temp: 10 },
+        { weather: 'fog', temp: 12 },
+      ];
+      const spec = {
+        data: { values },
+        params: [{ name: 'brush', select: 'interval' }],
+        mark: 'bar',
+        encoding: {
+          y: { field: 'weather', type: 'nominal' },
+          x: { field: 'temp', type: 'quantitative', aggregate: 'count' },
+          color: brushColor({ field: 'weather', type: 'nominal' }),
+        },
+      };
+      const olliSpec = VegaLiteAdapterSync(spec) as UnitOlliVisSpec;
+      expect(getMarkType(olliSpec.mark)).toBe('bar');
+      expect(typeof olliSpec.mark === 'object' ? olliSpec.mark.stack : undefined).toBeUndefined();
+      // the count axis is a plain quantitative axis, so it keeps its ticks
+      const xAxis = olliSpec.axes?.find((a) => a.axisType === 'x');
+      expect(xAxis?.ticks?.length ?? 0).toBeGreaterThan(0);
+    });
+
+    it('bar colored by a different field is still stacked', () => {
+      const values = [
+        { weather: 'sun', site: 'a' },
+        { weather: 'sun', site: 'b' },
+        { weather: 'rain', site: 'a' },
+      ];
+      const spec = {
+        data: { values },
+        mark: 'bar',
+        encoding: {
+          y: { field: 'weather', type: 'nominal' },
+          x: { type: 'quantitative', aggregate: 'count' },
+          color: { field: 'site', type: 'nominal' },
+        },
+      };
+      const olliSpec = VegaLiteAdapterSync(spec) as UnitOlliVisSpec;
+      expect(typeof olliSpec.mark === 'object' && olliSpec.mark.stack).toBe('stacked');
+    });
+  });
 });

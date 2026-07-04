@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@umwelt-data/umwelt-utils": "^0.2.1",
+    "@umwelt-data/umwelt-utils": "^0.2.2",
     "olli": "workspace:*",
     "olli-adapters": "workspace:*",
     "vega": ">=6.2.0",

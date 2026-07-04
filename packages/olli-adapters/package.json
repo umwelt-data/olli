@@ -16,7 +16,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@umwelt-data/umwelt-utils": "^0.2.1",
+    "@umwelt-data/umwelt-utils": "^0.2.2",
     "olli-diagram": "workspace:*",
     "olli-vis": "workspace:*",
     "vega-expression": "^6.1.0"

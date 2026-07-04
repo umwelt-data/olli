@@ -22,7 +22,7 @@ export function inferStructure(spec: UnitOlliVisSpec): OlliNode | OlliNode[] {
   }
 
   if (spec.facet) {
-    if (spec.axes?.length || spec.legends?.length) {
+    if (spec.axes?.length || spec.legends?.length || spec.guides?.length) {
       return {
         groupby: spec.facet,
         children: nodesFromGuides(spec.axes, spec.legends, spec.guides),
@@ -59,6 +59,7 @@ export function inferStructure(spec: UnitOlliVisSpec): OlliNode | OlliNode[] {
       return nodesFromGuides(
         spec.axes.filter((a) => a !== quantAxis),
         spec.legends,
+        spec.guides,
       );
     }
     const quantField = (spec.fields ?? []).find((f) => f.type === 'quantitative');
@@ -86,8 +87,8 @@ export function inferStructure(spec: UnitOlliVisSpec): OlliNode | OlliNode[] {
     if (nodes.length) return nodes;
   }
 
-  if (spec.axes?.length || spec.legends?.length) {
-    return nodesFromGuides(spec.axes, spec.legends);
+  if (spec.axes?.length || spec.legends?.length || spec.guides?.length) {
+    return nodesFromGuides(spec.axes, spec.legends, spec.guides);
   }
 
   return (spec.fields ?? []).map((f) => ({ groupby: f.field, children: [] }));

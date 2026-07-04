@@ -307,15 +307,16 @@ function adaptRepeatLayerUnit(
 
     const viewOlliSpec = adaptUnitSpec({ mark: view.mark, encoding, description: innerSpec.description }, dataset);
     if (!unit) {
-      unit = { description: innerSpec.description, data: dataset, fields: [], axes: [], legends: [] };
+      unit = { description: innerSpec.description, data: dataset, fields: [], axes: [], legends: [], guides: [] };
     } else if (dataset.length > unit.data.length) {
       unit.data = dataset;
     }
     unit.fields!.push(...(viewOlliSpec.fields ?? []));
     unit.axes!.push(...(viewOlliSpec.axes ?? []));
     unit.legends!.push(...(viewOlliSpec.legends ?? []));
+    unit.guides!.push(...(viewOlliSpec.guides ?? []));
     if (viewOlliSpec.mark !== undefined
-      && (unit.mark === undefined || markPrecedence(viewOlliSpec.mark) >= markPrecedence(unit.mark))) {
+      && (unit.mark === undefined || markPrecedence(viewOlliSpec.mark) > markPrecedence(unit.mark))) {
       unit.mark = viewOlliSpec.mark;
     }
     if (viewOlliSpec.facet && !unit.facet) unit.facet = viewOlliSpec.facet;
@@ -325,6 +326,7 @@ function adaptRepeatLayerUnit(
     unit.fields = unit.fields!.filter((f, i, self) => self.findIndex((f2) => f2.field === f.field) === i);
     unit.axes = unit.axes!.filter((f, i, self) => self.findIndex((f2) => f2.field === f.field) === i);
     unit.legends = unit.legends!.filter((f, i, self) => self.findIndex((f2) => f2.field === f.field) === i);
+    unit.guides = unit.guides!.filter((g, i, self) => self.findIndex((g2) => g2.field === g.field) === i);
     coerceData(unit);
   }
   return unit;
@@ -390,6 +392,22 @@ function asArrayDomain(domain: unknown): any {
 // (e.g. color: {value: 'red'})
 function isFieldDef(enc: any): boolean {
   return !!enc && typeof enc === 'object' && !!(enc.field || enc.condition?.field || enc.aggregate || enc.bin || enc.timeUnit);
+}
+
+// color/detail drives stacking only when it partitions marks into multiple
+// segments; coloring by the categorical positional field itself yields one
+// segment per bar (a plain bar chart, e.g. y=weather, x=count, color=weather)
+function hasStackingColorOrDetail(encoding: any): boolean {
+  const stackEnc = [encoding.color, encoding.detail].find(isFieldDef);
+  if (!stackEnc) return false;
+  const stackField = stackEnc.field ?? stackEnc.condition?.field;
+  if (!stackField) return true;
+  for (const ch of ['x', 'y'] as const) {
+    const posEnc = encoding[ch];
+    if (!posEnc || posEnc.aggregate || posEnc.type === 'quantitative') continue;
+    if ((posEnc.field ?? posEnc.condition?.field) === stackField) return false;
+  }
+  return true;
 }
 
 // annotation marks (labels, threshold rules) should not displace a chart's
@@ -464,7 +482,7 @@ function adaptUnitSpec(spec: any, data: OlliDataset): UnitOlliVisSpec {
         const isStackedCumulativeAxis = encoding.aggregate
           && encoding.stack !== null && encoding.stack !== false
           && ['area', 'bar'].includes(getMarkType(mark) ?? '')
-          && spec.encoding && (isFieldDef(spec.encoding.color) || isFieldDef(spec.encoding.detail));
+          && spec.encoding && hasStackingColorOrDetail(spec.encoding);
         const tickConfig: GuideTicksConfig = {
           field: fieldDef.field,
           type: fieldDef.type,
@@ -525,7 +543,7 @@ function adaptUnitSpec(spec: any, data: OlliDataset): UnitOlliVisSpec {
 
   const mt = getMarkType(mark);
   if (mt && ['bar', 'area'].includes(mt) && spec.encoding) {
-    const hasColorOrDetail = isFieldDef(spec.encoding.color) || isFieldDef(spec.encoding.detail);
+    const hasColorOrDetail = hasStackingColorOrDetail(spec.encoding);
     const hasOffset = 'xOffset' in spec.encoding || 'yOffset' in spec.encoding;
     let stack: 'stacked' | 'grouped' | undefined;
     if (mt === 'bar' && hasOffset) {
@@ -694,6 +712,7 @@ function adaptMultiSpec(
       fields: [],
       axes: [],
       legends: [],
+      guides: [],
     };
     units.push(unit);
     unitScopes.set(unit, scope);
@@ -794,6 +813,7 @@ function adaptMultiSpec(
     let vFields = viewOlliSpec.fields ?? [];
     let vAxes = viewOlliSpec.axes ?? [];
     let vLegends = viewOlliSpec.legends ?? [];
+    let vGuides = viewOlliSpec.guides ?? [];
     if (unitSpec.data !== dataset) {
       const cols = Object.keys(unitSpec.data[0] ?? {});
       // fields may use vega-lite path syntax (markers[0], a.b); match the root
@@ -801,6 +821,7 @@ function adaptMultiSpec(
       vFields = vFields.filter((f) => hasCol(f.field));
       vAxes = vAxes.filter((a) => hasCol(a.field));
       vLegends = vLegends.filter((l) => hasCol(l.field));
+      vGuides = vGuides.filter((g) => hasCol(g.field));
     }
     const rangeEnds: Partial<Record<'x' | 'y', string>> = {};
     for (const ch of ['x', 'y'] as const) {
@@ -810,8 +831,12 @@ function adaptMultiSpec(
     unitSpec.fields!.push(...vFields);
     mergeAxes(unitSpec, vAxes, viewPrec, scope, rangeEnds);
     unitSpec.legends!.push(...vLegends);
+    unitSpec.guides!.push(...vGuides);
+    // ties keep the first view's mark: later same-precedence layers are
+    // overlays (e.g. an invisible highlight circle over a line), not the
+    // chart's primary mark
     if (viewOlliSpec.mark !== undefined
-      && (unitSpec.mark === undefined || viewPrec >= markPrecedence(unitSpec.mark))) {
+      && (unitSpec.mark === undefined || viewPrec > markPrecedence(unitSpec.mark))) {
       unitSpec.mark = viewOlliSpec.mark;
     }
 
@@ -835,6 +860,7 @@ function adaptMultiSpec(
     s.fields = s.fields!.filter((f, i, self) => self.findIndex((f2) => f2.field === f.field) === i);
     s.axes = s.axes!.filter((f, i, self) => self.findIndex((f2) => f2.field === f.field) === i);
     s.legends = s.legends!.filter((f, i, self) => self.findIndex((f2) => f2.field === f.field) === i);
+    s.guides = s.guides!.filter((g, i, self) => self.findIndex((g2) => g2.field === g.field) === i);
     coerceData(s);
   }
 

@@ -2,7 +2,8 @@ import type { DescriptionToken, JoinHint, TokenContext } from 'olli-core';
 import { selectionTest } from 'olli-core';
 import type { VisPayload, OlliNodeType, UnitOlliVisSpec, OlliValue, OlliFieldDef } from '../spec/types.js';
 import { getMarkType } from '../spec/types.js';
-import { getFieldDef, getDomain, getBins } from '../util/data.js';
+import { getBins } from '@umwelt-data/umwelt-utils/data';
+import { getFieldDef, getDomain } from '../util/data.js';
 import { getChartType } from '../util/chartType.js';
 import { fmtDataValue, wrapForMonospace, pluralize, averageValue, quantileValue, ordinalSuffix, dataPrecision } from '../util/values.js';
 import { predicateToDescription } from '../lower/describe.js';
@@ -184,7 +185,7 @@ export function visDataToken(): DescriptionToken<VisPayload> {
         const data = spec.selection ? selectionTest(spec.data, spec.selection) : spec.data;
         if (fd.type === 'quantitative' || fd.type === 'temporal') {
           const axis = spec.axes?.find((a) => a.field === p.groupby);
-          const bins = getBins(p.groupby, data, spec.fields ?? [], axis?.ticks);
+          const bins = getBins(fd, data, axis?.ticks);
           if (bins.length > 0) {
             const first = fmtDataValue(bins[0]![0]!, fd);
             const last = fmtDataValue(bins[bins.length - 1]![1]!, fd);
