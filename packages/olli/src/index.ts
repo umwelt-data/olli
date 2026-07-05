@@ -15,7 +15,7 @@ export type {
 } from 'olli-core';
 
 // Re-export vis spec types
-export { isMultiSpec, getMarkType } from 'olli-vis';
+export { isMultiSpec, getMarkType, inferStructure } from 'olli-vis';
 export type {
   OlliVisSpec,
   UnitOlliVisSpec,

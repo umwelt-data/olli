@@ -108,6 +108,7 @@ export type MultiSpecOperator = 'layer' | 'concat';
 export interface MultiOlliVisSpec {
   operator: MultiSpecOperator;
   units: UnitOlliVisSpec[];
+  title?: string;
 }
 
 export type OlliVisSpec = UnitOlliVisSpec | MultiOlliVisSpec;

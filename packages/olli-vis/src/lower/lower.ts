@@ -55,7 +55,7 @@ export function lowerVisSpec(rawSpec: OlliVisSpec): Hypergraph<VisPayload> {
       });
     }
 
-    const label = spec.units[0]?.description || spec.units[0]?.title || 'Chart';
+    const label = spec.title || spec.units[0]?.description || spec.units[0]?.title || 'Chart';
     edges.push({
       id: rootId,
       displayName: label,
