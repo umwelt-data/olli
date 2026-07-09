@@ -487,7 +487,6 @@ function adaptUnitSpec(spec: any, data: OlliDataset): UnitOlliVisSpec {
           field: fieldDef.field,
           type: fieldDef.type,
           bin: !!encoding.bin,
-          timeUnit: encoding.timeUnit,
           scaleZero: encoding.scale?.zero,
           scaleDomain: asArrayDomain(encoding.scale?.domain),
           axisSize: channel === 'x'
@@ -518,7 +517,6 @@ function adaptUnitSpec(spec: any, data: OlliDataset): UnitOlliVisSpec {
             field: fieldDef.field,
             type: fieldDef.type,
             bin: !!encoding.bin,
-            timeUnit: encoding.timeUnit,
             scaleZero: encoding.scale?.zero ?? false,
             scaleDomain: asArrayDomain(encoding.scale?.domain),
             tickCount: encoding.legend?.tickCount,
