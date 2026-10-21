@@ -18,7 +18,7 @@
     "vega-lite": "^6.4.3"
   },
   "devDependencies": {
-    "vite": "^8.0.16",
+    "vite": "^8.1.6",
     "vite-plugin-solid": "^2.11.0"
   }
 }
